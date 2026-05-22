@@ -48,9 +48,10 @@
         .btn-recargar { background: var(--cyan); color: #000; }
         .input-qtd { width: 70px; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 16px; }
 
+        /* CHAT VERTICAL NO CANTO DIREITO SÓ COM NOME */
         .naboa-section { background: #111; border: 1px solid #333; border-radius: 12px; padding: 12px; height: 280px; display: flex; flex-direction: column; box-sizing: border-box; }
         .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 6px; }
-        .naboa-msg { font-size: 12px; line-height: 1.4; background: #161616; padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--orange); animation: fadeInMsg 0.25s ease; display: flex; flex-direction: column; gap: 2px; }
+        .naboa-msg { font-size: 13px; line-height: 1.4; background: #161616; padding: 10px 12px; border-radius: 6px; border-left: 3px solid var(--orange); animation: fadeInMsg 0.25s ease; display: flex; align-items: center; justify-content: space-between; }
         @keyframes fadeInMsg { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
         .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 300px; overflow-y:auto; width: 100%; box-sizing: border-box; }
@@ -115,7 +116,6 @@
                 </div>
                 
                 <div style="position: relative; background: #000; border-radius: 15px; padding: 10px; border: 1px solid #222;">
-                    <!-- ELEMENTOS CAPAZES DE CARREGAR A CONFIGURAÇÃO DO ADMIN -->
                     <div style="padding: 10px; text-align: center;">
                         <img id="img-premio" src="" style="width:100%; max-height:180px; object-fit:contain; display:none; margin-bottom:15px; border-radius:5px; border: 1px solid #333;">
                     </div>
@@ -129,6 +129,7 @@
             </div>
             
             <div class="col-right">
+                <!-- BANCA COMERCIAL -->
                 <div class="banca-section">
                     <div class="banca-status">
                         <span id="label-banca" style="font-size:11px; color:#aaa; font-weight:bold; text-transform:uppercase;">PRÓXIMA RODADA EM:</span>
@@ -152,6 +153,7 @@
                     </div>
                 </div>
 
+                <!-- CHAT DA RODADA FILTRADO EM 100% PARA PRIVACIDADE -->
                 <div class="naboa-section">
                     <h4 style="color:var(--orange); font-size:11px; margin:0 0 10px 0; font-weight: bold; text-transform:uppercase; letter-spacing:0.5px; text-align: left;">📢 CHAT DA RODADA (TÁ NA BOA)</h4>
                     <div class="naboa-chat-box" id="lista-na-boa">
@@ -159,6 +161,7 @@
                     </div>
                 </div>
 
+                <!-- LISTA DE PARTICIPANTES COM AS MINI CARTELAS -->
                 <div class="participants-section">
                     <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 10px 0; font-weight: bold;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
                     <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
@@ -201,13 +204,10 @@
         document.getElementById('painel-aba-credito').style.display = aba === 'credito' ? 'flex' : 'none';
     };
 
-    // ESCUTADOR ORIGINAL DA ROTA DE BANNER CONFIGURADA NO ADMIN2.HTML[cite: 1]
     onValue(ref(db, 'jogo/config'), (snap) => {
         const c = snap.val(); 
         if(c) {
-            if (c.texto_premio) {
-                document.getElementById('txt-premio').innerText = c.texto_premio;
-            }
+            if (c.texto_premio) document.getElementById('txt-premio').innerText = c.texto_premio;
             const img = document.getElementById('img-premio'); 
             if(c.url_imagem && c.url_imagem.trim() !== "") { 
                 img.src = c.url_imagem; 
@@ -231,7 +231,6 @@
         const templatesNomes = ["1ª LINHA", "2ª LINHA", "CARTELA CHEIA"];
         document.getElementById('badge-fase-jogo').innerText = `FASE: ${templatesNomes[faseAtualDoJogo - 1]}`;
         
-        // Mantém o texto customizado do admin no cabeçalho caso esteja na espera
         if (dados.estado !== "espera") {
             document.getElementById('fase-rodada-txt').innerText = `BUSCANDO GANHADOR DA ${templatesNomes[faseAtualDoJogo - 1]}`;
         } else {
@@ -394,10 +393,10 @@
                             let faltamBolas = calcularFaltantesPorFase(c, bolasGlobal, faseAtualDoJogo);
                             if (faltamBolas === 1) {
                                 temAlguemNaBoa = true;
+                                // REMOVIDO TOTALMENTE QUALQUER EXIBIÇÃO DE CONTATO / WHATSAPP[cite: 2]
                                 painelNaBoa.innerHTML += `
                                     <div class="naboa-msg">
-                                        <span>⚡ <strong>${d.nome || 'Jogador'}</strong> tá na boa!</span>
-                                        <span style="color:#666; font-size:10px; margin-top: 2px;">Contato: ${d.whatsapp || 'Whats'}</span>
+                                        <span>⚡ <strong>${d.nome || 'Jogador'}</strong> está na boa!</span>
                                     </div>`;
                             }
                         }
