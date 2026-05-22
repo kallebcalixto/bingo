@@ -4,36 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SHOW DE PRÊMIOS - AUTOMÁTICO PROFISSIONAL</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
-            --bg: #0a0a0f; 
+            --bg: #06060c; 
             --orange: #ff6b00; 
-            --orange-glow: rgba(255, 107, 0, 0.4);
+            --orange-glow: rgba(255, 107, 0, 0.45);
             --green: #00e676; 
             --cyan: #00f0ff; 
-            --cyan-glow: rgba(0, 240, 255, 0.4);
+            --cyan-glow: rgba(0, 240, 255, 0.5);
             --danger: #ff3d00; 
-            --dark-card: #14141f; 
-            --glass: rgba(20, 20, 31, 0.7);
-            --border: rgba(255, 255, 255, 0.08);
+            --dark-card: rgba(15, 15, 27, 0.85); 
+            --glass: rgba(18, 18, 32, 0.65);
+            --border: rgba(255, 255, 255, 0.07);
+            --neon-border: rgba(0, 240, 255, 0.15);
         }
         
         body { 
-            background: radial-gradient(circle at 50% 0%, #1a1a2e 0%, var(--bg) 70%); 
+            background: radial-gradient(circle at 50% 0%, #171730 0%, var(--bg) 75%); 
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
             color: #fff; 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
             padding: 0; 
             overflow-x: hidden; 
             overflow-y: auto; 
+            transition: background 1s ease-in-out;
+        }
+
+        /* FILTRO DE ESCURECIMENTO PARA O BACKGROUND JPEG DO ADMIN */
+        body.has-bg::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(6, 6, 12, 0.75);
+            z-index: -1;
+            pointer-events: none;
         }
         
         .audio-control { 
-            background: rgba(10, 10, 15, 0.85); 
-            backdrop-filter: blur(12px);
-            padding: 15px 25px; 
+            background: rgba(8, 8, 14, 0.75); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 16px 28px; 
             position: sticky; 
             top: 0; 
             z-index: 1000; 
@@ -41,172 +57,188 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
         
         #btn-audio { 
-            background: linear-gradient(135deg, var(--orange), #ff9e00); 
+            background: linear-gradient(135deg, var(--orange), #ff9100); 
             color: #fff; 
             border: none; 
-            padding: 10px 28px; 
-            border-radius: 30px; 
+            padding: 11px 32px; 
+            border-radius: 50px; 
             font-weight: 800; 
             text-transform: uppercase; 
-            font-size: 12px; 
+            font-size: 11px; 
             cursor: pointer; 
-            transition: all 0.3s ease; 
-            box-shadow: 0 4px 15px var(--orange-glow);
-            letter-spacing: 1px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            box-shadow: 0 0 20px var(--orange-glow);
+            letter-spacing: 1.5px;
         }
-        #btn-audio:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,0,0.6); }
-        #btn-audio.active { background: linear-gradient(135deg, #00c853, var(--green)); box-shadow: 0 4px 15px rgba(0,230,118,0.4); }
+        #btn-audio:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 0 30px rgba(255,107,0,0.7); }
+        #btn-audio.active { background: linear-gradient(135deg, #00c853, var(--green)); box-shadow: 0 0 20px rgba(0,230,118,0.5); }
         
-        .container { display: flex; flex-direction: column; gap: 20px; padding: 20px; box-sizing: border-box; max-width: 1440px; margin: 0 auto; }
-        .game-layout { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+        .container { display: flex; flex-direction: column; gap: 24px; padding: 24px; box-sizing: border-box; max-width: 1480px; margin: 0 auto; }
+        .game-layout { display: flex; flex-direction: column; gap: 24px; width: 100%; }
         
+        /* GRADE DE NÚMEROS ESTILO CRISTAL COLOIDAL */
         .painel-geral { 
             background: var(--glass); 
-            backdrop-filter: blur(10px);
-            border-radius: 16px; 
-            padding: 18px; 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 24px; 
+            padding: 22px; 
             display: grid; 
             grid-template-columns: repeat(10, 1fr); 
             border: 1px solid var(--border); 
-            gap: 8px; 
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            gap: 10px; 
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1);
         }
         
         .num-geral { 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 50%; 
             aspect-ratio: 1/1; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 15px; 
+            font-size: 16px; 
             font-weight: 700; 
-            color: rgba(255, 255, 255, 0.2); 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: rgba(255, 255, 255, 0.15); 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         
         .num-geral.active { 
-            background: radial-gradient(circle at 30% 30%, #fff 0%, var(--cyan) 60%, #008899 100%); 
-            color: #000; 
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--cyan) 55%, #00667a 100%); 
+            color: #020205; 
             font-weight: 900;
-            transform: scale(1.08) translateZ(10px);
-            box-shadow: 0 0 15px var(--cyan), inset -2px -2px 6px rgba(0,0,0,0.4); 
-            border: 1px solid #fff; 
-            text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+            transform: scale(1.12) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 240, 255, 0.6), inset -3px -3px 7px rgba(0,0,0,0.5); 
+            border: 1px solid #ffffff; 
+            text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+            z-index: 5;
         }
         
-        /* CONTAINER DA BOLA ATUALIZADO COM MARGENS CORRETAS */
-        .ball-container { padding: 15px 0 25px 0; text-align: center; perspective: 1000px; }
+        /* BOLA 3D DE ELITE COM IMPACT SHAKE */
+        .ball-container { padding: 10px 0 25px 0; text-align: center; perspective: 1200px; }
         .ball-display { 
-            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f0f0f0 20%, #b0b0b0 50%, #555555 80%, #222222 100%); 
-            width: 150px; 
-            height: 150px; 
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f5f5f7 15%, #cccccc 45%, #444446 80%, #1a1a1c 100%); 
+            width: 160px; 
+            height: 160px; 
             border-radius: 50%; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             margin: 0 auto; 
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), inset -10px -10px 30px rgba(0,0,0,0.8), inset 10px 10px 20px rgba(255,255,255,0.9); 
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.85), inset -12px -12px 35px rgba(0,0,0,0.85), inset 12px 12px 25px rgba(255,255,255,0.95); 
             position: relative;
             transform-style: preserve-3d;
-            animation: floatBall 4s ease-in-out infinite;
+            animation: floatBall 4.5s ease-in-out infinite;
+        }
+        .ball-display.bump {
+            animation: ballImpact 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
         }
         @keyframes floatBall {
-            0%, 100% { transform: translateY(0) rotateX(5deg); }
-            50% { transform: translateY(-8px) rotateX(-5deg); }
+            0%, 100% { transform: translateY(0) rotateY(0deg); }
+            50% { transform: translateY(-10px) rotateY(4deg); }
+        }
+        @keyframes ballImpact {
+            10%, 90% { transform: scale(1.08) translate3d(-1px, 0, 0); }
+            20%, 80% { transform: scale(1.08) translate3d(2px, -2px, 0); }
+            30%, 50%, 70% { transform: scale(0.95) translate3d(-4px, 4px, 0); box-shadow: 0 0 40px var(--cyan-glow); }
+            40%, 60% { transform: scale(1.05) translate3d(4px, -2px, 0); }
         }
         
         #bola-num { 
-            font-size: 70px; 
+            font-size: 76px; 
             font-weight: 900; 
-            color: #111; 
-            font-family: 'Poppins', sans-serif;
-            text-shadow: 1px 2px 3px rgba(255,255,255,0.8), 0 0 0 #000;
+            color: #0d0d13; 
+            text-shadow: 1px 2px 2px rgba(255,255,255,0.9);
             z-index: 2;
         }
         
         .marked { 
-            background: linear-gradient(135deg, #00e676, #00c853) !important; 
+            background: linear-gradient(135deg, #00f576, #00a843) !important; 
             color: #fff !important; 
-            box-shadow: 0 0 12px rgba(0,230,118,0.5); 
+            box-shadow: 0 0 15px rgba(0,245,118,0.6) !important; 
         }
         
-        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,8,0.95); backdrop-filter: blur(15px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .cadastro-box { background: var(--dark-card); padding: 35px; border-radius: 24px; border: 1px solid rgba(255, 107, 0, 0.2); max-width: 420px; width: 85%; text-align: left; box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 40px var(--orange-glow); }
-        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--orange); font-weight: 900; text-align: center; font-size: 24px; letter-spacing: 0.5px; }
-        .cadastro-box input { width: 100%; padding: 14px; margin: 8px 0 20px 0; background: #07070a; border: 1px solid var(--border); color: #fff; border-radius: 12px; box-sizing: border-box; font-size: 14px; font-family: inherit; transition: all 0.3s; }
-        .cadastro-box input:focus { border-color: var(--orange); outline: none; box-shadow: 0 0 10px var(--orange-glow); }
-        .btn-salvar-cad { width: 100%; background: linear-gradient(135deg, var(--green), #00c853); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,230,118,0.3); }
+        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3,3,6,0.97); backdrop-filter: blur(25px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .cadastro-box { background: #0f0f18; padding: 40px; border-radius: 28px; border: 1px solid rgba(255, 107, 0, 0.25); max-width: 440px; width: 85%; text-shadow: 0 0 30px rgba(0,0,0,0.5); box-shadow: 0 30px 70px rgba(0,0,0,0.8), 0 0 50px var(--orange-glow); }
+        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--orange); font-weight: 900; text-align: center; font-size: 26px; letter-spacing: 0.5px; }
+        .cadastro-box input { width: 100%; padding: 15px; margin: 8px 0 22px 0; background: #050508; border: 1px solid var(--border); color: #fff; border-radius: 14px; box-sizing: border-box; font-size: 15px; font-family: inherit; transition: all 0.3s; }
+        .cadastro-box input:focus { border-color: var(--orange); outline: none; box-shadow: 0 0 12px var(--orange-glow); }
+        .btn-salvar-cad { width: 100%; background: linear-gradient(135deg, var(--green), #00b04a); color: #fff; border: none; padding: 15px; border-radius: 14px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 5px 20px rgba(0,230,118,0.4); }
 
-        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(5,5,8,0.96); backdrop-filter: blur(10px); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(3,3,6,0.97); backdrop-filter: blur(15px); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         
-        .banca-section { background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .banca-status { background: #07070a; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid var(--border); }
-        .timer-destaque { font-size: 32px; font-weight: 900; color: var(--cyan); margin-top: 5px; text-shadow: 0 0 15px var(--cyan-glow); font-variant-numeric: tabular-nums; }
+        /* BANCA DE APOSTAS COLOIDAL */
+        .banca-section { background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 24px; padding: 22px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .banca-status { background: #06060a; padding: 16px; border-radius: 16px; text-align: center; border: 1px solid var(--border); }
+        .timer-destaque { font-size: 36px; font-weight: 900; color: var(--cyan); margin-top: 5px; text-shadow: 0 0 20px var(--cyan-glow); font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
         
-        .banca-abas { display: flex; gap: 8px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; }
-        .aba-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #7f7f9c; cursor: pointer; border-radius: 8px; font-weight: 700; font-size: 12px; text-transform: uppercase; transition: all 0.3s; font-family: inherit; }
-        .aba-btn.active { background: var(--dark-card); color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid var(--border); }
+        .banca-abas { display: flex; gap: 10px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 14px; }
+        .aba-btn { flex: 1; padding: 11px; background: transparent; border: none; color: #72728f; cursor: pointer; border-radius: 10px; font-weight: 700; font-size: 12px; text-transform: uppercase; transition: all 0.3s; font-family: inherit; }
+        .aba-btn.active { background: #131322; color: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.4); border: 1px solid var(--border); }
         
-        .banca-controles { display: flex; gap: 10px; align-items: center; }
-        .btn-comprar, .btn-recargar { color: #fff; border: none; padding: 14px 24px; border-radius: 12px; font-weight: 800; cursor: pointer; flex: 1; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s; }
-        .btn-comprar { background: linear-gradient(135deg, var(--green), #00c853); box-shadow: 0 4px 15px rgba(0,230,118,0.2); }
-        .btn-comprar:disabled { background: #222230; color: #555566; cursor: not-allowed; box-shadow: none; border: 1px solid rgba(255,255,255,0.02); }
-        .btn-recargar { background: linear-gradient(135deg, var(--cyan), #00b8d4); color: #000; box-shadow: 0 4px 15px var(--cyan-glow); }
-        .input-qtd { width: 85px; background: #07070a; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 18px; font-family: inherit; }
+        .banca-controles { display: flex; gap: 12px; align-items: center; }
+        .btn-comprar, .btn-recargar { color: #fff; border: none; padding: 15px 26px; border-radius: 14px; font-weight: 800; cursor: pointer; flex: 1; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s; }
+        .btn-comprar { background: linear-gradient(135deg, var(--green), #00b04a); box-shadow: 0 5px 20px rgba(0,230,118,0.25); }
+        .btn-comprar:disabled { background: #191926; color: #4b4b5c; cursor: not-allowed; box-shadow: none; border: 1px solid rgba(255,255,255,0.01); }
+        .btn-recargar { background: linear-gradient(135deg, var(--cyan), #00a4bd); color: #030308; box-shadow: 0 5px 20px var(--cyan-glow); font-weight: 900; }
+        .input-qtd { width: 90px; background: #06060a; border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 19px; font-family: inherit; }
 
-        .naboa-section { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 20px; padding: 18px; height: 280px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth; }
+        /* CHAT DA RODADA PREMIUM */
+        .naboa-section { background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 24px; padding: 20px; height: 300px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 10px; }
         .naboa-chat-box::-webkit-scrollbar { width: 4px; }
-        .naboa-chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .naboa-chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
         
         .naboa-msg { 
             font-size: 13px; 
-            background: rgba(255, 107, 0, 0.04); 
-            padding: 12px 16px; 
-            border-radius: 14px; 
-            border: 1px solid rgba(255, 107, 0, 0.15);
-            border-left: 4px solid var(--orange);
-            animation: slideInMsg 0.3s cubic-bezier(0.19, 1, 0.22, 1) both; 
+            background: linear-gradient(90deg, rgba(255, 107, 0, 0.06) 0%, rgba(15, 15, 25, 0.2) 100%); 
+            padding: 14px 18px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 107, 0, 0.18);
+            border-left: 5px solid var(--orange);
+            animation: slideInMsg 0.35s cubic-bezier(0.075, 0.82, 0.165, 1) both; 
             display: flex; 
             align-items: center; 
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
         }
-        @keyframes slideInMsg { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
 
-        .participants-section { background: rgba(5,5,8,0.4); padding: 18px; border-radius: 20px; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        /* CARDS DOS PARTICIPANTES 3D REFLEXIVO */
+        .participants-section { background: rgba(4,4,8,0.3); backdrop-filter: blur(10px); padding: 20px; border-radius: 24px; border: 1px solid var(--border); max-height: 320px; overflow-y: auto; width: 100%; box-sizing: border-box; }
         .participants-section::-webkit-scrollbar { width: 4px; }
-        .participants-section::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .participants-section::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.04); border-radius: 10px; }
         
-        .fase-badge { background: rgba(255, 107, 0, 0.1); padding: 6px 16px; border-radius: 30px; font-size: 11px; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.2); color: #ff9100; letter-spacing: 0.5px; }
+        .fase-badge { background: rgba(255, 107, 0, 0.12); padding: 7px 20px; border-radius: 50px; font-size: 11px; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.25); color: #ff9100; letter-spacing: 0.8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 
         .mini-card-item {
-            background: #11111a; 
-            padding: 8px; 
-            width: 82px; 
-            border-radius: 10px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            transition: transform 0.2s;
+            background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(5px);
+            padding: 10px; 
+            width: 86px; 
+            border-radius: 14px; 
+            border: 1px solid rgba(255,255,255,0.04); 
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transform-style: preserve-3d;
         }
         .mini-card-item:hover {
-            transform: scale(1.04);
-            border-color: rgba(0, 240, 255, 0.2);
+            transform: translateY(-4px) scale(1.05) rotateX(4deg);
+            border-color: rgba(0, 240, 255, 0.3);
+            box-shadow: 0 8px 20px rgba(0,240,255,0.15);
+            background: rgba(255,255,255,0.04);
         }
 
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
-            .col-left { flex: 1.4; display: flex; flex-direction: column; gap: 20px; }
-            .col-right { flex: 1; display: flex; flex-direction: column; gap: 20px; }
-            .num-geral { font-size: 17px; }
-            .naboa-section { height: 320px; }
-            .participants-section { max-height: 400px; }
+            .col-left { flex: 1.4; display: flex; flex-direction: column; gap: 24px; }
+            .col-right { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+            .num-geral { font-size: 18px; }
+            .naboa-section { height: 350px; }
+            .participants-section { max-height: 420px; }
         }
     </style>
 </head>
@@ -215,10 +247,10 @@
 <div id="cadastro-overlay">
     <div class="cadastro-box">
         <h2>DADOS DE PREMIAÇÃO PIX</h2>
-        <p style="font-size: 12px; color: #7f7f9c; margin: 0 0 20px 0; text-align: center; line-height: 1.5;">Insira seus dados corretamente para que o system possa transferir seus prêmios de forma automática.</p>
-        <label style="font-size: 11px; font-weight: bold; color: #7f7f9c; letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
+        <p style="font-size: 12px; color: #72728f; margin: 0 0 20px 0; text-align: center; line-height: 1.6;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
+        <label style="font-size: 11px; font-weight: bold; color: #72728f; letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
         <input type="text" id="cad-whatsapp" placeholder="(41) 99999-9999">
-        <label style="font-size: 11px; font-weight: bold; color: #7f7f9c; letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
+        <label style="font-size: 11px; font-weight: bold; color: #72728f; letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
         <input type="text" id="cad-cpf" placeholder="000.000.000-00">
         <button class="btn-salvar-cad" onclick="salvarCadastroPix()">Liberar Painel de Jogo</button>
     </div>
@@ -227,21 +259,21 @@
 <div class="audio-control">
     <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
     <div style="display: flex; align-items: center; gap: 15px;">
-        <div id="user-credits-display" style="font-size: 14px; font-weight: 800; color: var(--green); display: none; background: rgba(0,230,118,0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(0,230,118,0.15);">CRÉDITOS: R$ 0,00</div>
+        <div id="user-credits-display" style="font-size: 14px; font-weight: 800; color: var(--green); display: none; background: rgba(0,230,118,0.06); padding: 7px 16px; border-radius: 50px; border: 1px solid rgba(0,230,118,0.15);">CRÉDITOS: R$ 0,00</div>
         <div id="auth-status-area">
-            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: #fff; color: #000; border: none; padding: 10px 18px; border-radius: 30px; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 12px rgba(255,255,255,0.15);">
+            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: #fff; color: #000; border: none; padding: 11px 22px; border-radius: 50px; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 15px rgba(255,255,255,0.15); transition: 0.3s;">
                 <svg width="14" height="14" viewBox="0 0 18 18" style="fill: #000;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.30c1.54 1.41 3.57 2.3 6 2.3 3.54 0 6.57-2.55 8.05-5.7l-3-2.28c-.71 2.14-2.7 3.73-5.05 3.73z"/></svg>
                 Entrar com Google
             </button>
-            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 16px; border-radius: 30px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; display: none;">Sair</button>
+            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 18px; border-radius: 50px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; display: none; transition: 0.3s;">Sair</button>
         </div>
     </div>
 </div>
 
 <div id="winner-overlay">
-    <div style="background:#11111a; color:#fff; padding:45px; border-radius:32px; border:2px solid var(--orange); max-width: 500px; width: 85%; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 50px var(--orange-glow);">
-        <h1 style="font-size: 42px; margin:0; font-weight: 900; background: linear-gradient(135deg, #fff, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="win-title-fase">BINGO!</h1>
-        <h2 id="winner-name" style="font-size: 28px; color:#fff; margin: 15px 0 0 0; font-weight: 600; letter-spacing: 0.5px;">---</h2>
+    <div style="background:#0b0b12; color:#fff; padding:50px; border-radius:36px; border:2px solid var(--orange); max-width: 520px; width: 85%; box-shadow: 0 35px 80px rgba(0,0,0,0.9), 0 0 60px var(--orange-glow);">
+        <h1 style="font-size: 46px; margin:0; font-weight: 900; background: linear-gradient(135deg, #fff, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="win-title-fase">BINGO!</h1>
+        <h2 id="winner-name" style="font-size: 30px; color:#fff; margin: 18px 0 0 0; font-weight: 600; letter-spacing: 0.5px;">---</h2>
     </div>
 </div>
 
@@ -249,30 +281,26 @@
     <div id="game-section">
         <div class="game-layout">
             
-            <!-- COLUNA DA ESQUERDA: JOGO COM NOVA FILA DE DISPOSIÇÃO -->
             <div class="col-left">
-                <div style="background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                <div style="background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; padding: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
                     <div style="text-align: left;">
-                        <h4 id="txt-premio" style="color:var(--orange); margin:0; font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PREMIAÇÃO EM ANDAMENTO</h4>
-                        <div id="fase-rodada-txt" style="font-size: 12px; color: #7f7f9c; margin-top: 2px; font-weight: 600;">AGUARDANDO BANCA</div>
+                        <h4 id="txt-premio" style="color:var(--orange); margin:0; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PREMIAÇÃO EM ANDAMENTO</h4>
+                        <div id="fase-rodada-txt" style="font-size: 12px; color: #72728f; margin-top: 2px; font-weight: 600;">AGUARDANDO BANCA</div>
                     </div>
                     <span class="fase-badge" id="badge-fase-jogo">FASE: 1ª LINHA</span>
                 </div>
                 
-                <div style="position: relative; background: rgba(5,5,8,0.5); border-radius: 24px; padding: 15px; border: 1px solid var(--border);">
-                    <!-- 1º: IMAGEM DO ADM -->
+                <div style="position: relative; background: rgba(4,4,8,0.4); backdrop-filter: blur(10px); border-radius: 28px; padding: 18px; border: 1px solid var(--border);">
                     <div style="padding: 5px; text-align: center;">
-                        <img id="img-premio" src="" style="width:100%; max-height:180px; object-fit:contain; display:none; margin-bottom:20px; border-radius:12px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+                        <img id="img-premio" src="" style="width:100%; max-height:190px; object-fit:contain; display:none; margin-bottom:20px; border-radius:16px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                     </div>
                     
-                    <!-- 2º: BOLA PRINCIPAL EM 3D ADICIONADA LOGO ACIMA DA GRADE GERAL -->
                     <div class="ball-container">
-                        <div class="ball-display">
+                        <div class="ball-display" id="bola-display-3d">
                             <div id="bola-num">--</div>
                         </div>
                     </div>
 
-                    <!-- 3º: MATRIZ DE 90 NÚMEROS -->
                     <div id="tabela-90" class="painel-geral"></div>
                 </div>
             </div>
@@ -280,7 +308,7 @@
             <div class="col-right">
                 <div class="banca-section">
                     <div class="banca-status">
-                        <span id="label-banca" style="font-size:11px; color:#7f7f9c; font-weight:800; text-transform:uppercase; letter-spacing: 0.5px;">PRÓXIMA RODADA EM:</span>
+                        <span id="label-banca" style="font-size:11px; color:#72728f; font-weight:800; text-transform:uppercase; letter-spacing: 0.5px;">PRÓXIMA RODADA EM:</span>
                         <div id="cronometro-banca" class="timer-destaque">04:00</div>
                         <div id="acumulado-banca" style="font-size:13px; margin-top:6px; color:var(--green); font-weight:800; letter-spacing: 0.2px;">PREMIAÇÃO ESTIMADA: R$ 0,00</div>
                     </div>
@@ -310,7 +338,7 @@
 
                 <div class="participants-section">
                     <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 12px 0; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
-                    <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
+                    <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;"></div>
                 </div>
             </div>
 
@@ -350,6 +378,7 @@
         document.getElementById('painel-aba-credito').style.display = aba === 'credito' ? 'flex' : 'none';
     };
 
+    // ESCUTADOR EXPANDIDO PARA ADIÇÃO E RENDERIZAÇÃO DO WALLPAPER VINDO DO ADMIN[cite: 1]
     onValue(ref(db, 'jogo/config'), (snap) => {
         const c = snap.val(); 
         if(c) {
@@ -360,6 +389,15 @@
                 img.style.display = 'block'; 
             } else {
                 img.style.display = 'none';
+            }
+
+            // Sincronização e transição suave do Fundo JPEG Dinâmico[cite: 1]
+            if(c.url_fundo && c.url_fundo.trim() !== "") {
+                document.body.style.backgroundImage = `url('${c.url_fundo}')`;
+                document.body.classList.add('has-bg');
+            } else {
+                document.body.style.backgroundImage = "";
+                document.body.classList.remove('has-bg');
             }
         }
     });
@@ -383,12 +421,12 @@
             document.getElementById('fase-rodada-txt').innerText = "ACEITANDO BILHETES";
         }
 
-        const minutes = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
+        const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
         const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
         
         if (dados.estado === "espera") {
             document.getElementById('label-banca').innerText = "PRÓXIMA RODADA EM:";
-            document.getElementById('cronometro-banca').innerText = `${minutes}:${segundos}`;
+            document.getElementById('cronometro-banca').innerText = `${minutos}:${segundos}`;
             document.getElementById('cronometro-banca').style.color = "var(--cyan)";
             document.getElementById('btn-compre-acao').disabled = false;
         } else {
@@ -417,6 +455,14 @@
     onValue(ref(db, 'jogo/bolas_sorteadas'), (snap) => {
         const novas = snap.val() || []; const ultima = novas[novas.length-1];
         if(novas.length > bolasGlobal.length && audioAtivo && ultima) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance("Número " + ultima)); }
+        
+        // Efeito de Impacto visual na bola principal ao atualizar
+        if(novas.length !== bolasGlobal.length && novas.length > 0) {
+            const elBall = document.getElementById('bola-display-3d');
+            elBall.classList.add('bump');
+            setTimeout(() => elBall.classList.remove('bump'), 400);
+        }
+
         document.getElementById('bola-num').innerText = novas.length === 0 ? "--" : (ultima || "--");
         bolasGlobal = novas;
         document.querySelectorAll('.num-geral').forEach(el => el.classList.remove('active'));
@@ -527,10 +573,10 @@
                 if(d.cartelas) {
                     count++;
                     d.cartelas.forEach((c, idx) => {
-                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#07070a; font-size:9px; padding:3px 0; text-align:center; font-weight:800; border-radius:4px; border:1px solid rgba(255,255,255,0.02);">${n}</div>`).join('');
+                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#050509; font-size:9px; padding:3px 0; text-align:center; font-weight:800; border-radius:4px; border:1px solid rgba(255,255,255,0.02);">${n}</div>`).join('');
                         
                         div.innerHTML += `
-                            <div class="mini-card-item" style="border:1px solid ${idx+1 === rodadaAtiva ? 'rgba(0, 240, 255, 0.4)' : 'rgba(255,255,255,0.05)'}; opacity:${idx+1 > rodadaAtiva ? '0.25' : '1'}">
+                            <div class="mini-card-item" style="border:1px solid ${idx+1 === rodadaAtiva ? 'rgba(0, 240, 255, 0.35)' : 'rgba(255,255,255,0.04)'}; opacity:${idx+1 > rodadaAtiva ? '0.2' : '1'}">
                                 <span style="font-size:8px; color:var(--cyan); display:block; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:600; margin-bottom:4px;">${d.nome || 'User'} (#${idx+1})</span>
                                 <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:2px;">${ns}</div>
                             </div>`;
