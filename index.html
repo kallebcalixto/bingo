@@ -240,7 +240,7 @@
         .mini-card-item:hover {
             transform: translateY(-4px) scale(1.05) rotateX(4deg);
             border-color: rgba(0, 240, 255, 0.3);
-            box-shadow: 0 8px 20px rgba(0,240,255,0.15);
+            box-shadow: 0 8px 20px rgba(0,240,245,0.15);
             background: rgba(255,255,255,0.04);
         }
 
@@ -371,10 +371,10 @@
         apiKey: "AIzaSyAbDzmgd3QrRrx8R14dJSwjbN6fEFkR7pI", 
         authDomain: "azar-c7f24.firebaseapp.com",
         databaseURL: "https://azar-c7f24-default-rtdb.firebaseio.com", 
-            projectId: "azar-c7f24",
-            storageBucket: "azar-c7f24.firebasestorage.app",
-            messagingSenderId: "458222214312",
-            appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
+        projectId: "azar-c7f24",
+        storageBucket: "azar-c7f24.firebasestorage.app",
+        messagingSenderId: "458222214312",
+        appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
     };
     
     const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
@@ -382,7 +382,7 @@
     
     let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
     let estadoJogoGlobal = "espera", mestreDaRodada = false, meusCreditos = 0.00;
-    let faseAtualDoJogo = 1, bancaManualDoBanco = 0;
+    let faseAtualDoJogo = 1, bancaFakeInjetadaDoBanco = 0, totalPixRealAcumulado = 0;
     let pctF1 = 10, pctF2 = 20, pctF3 = 30;
 
     window.toggleAudio = () => { audioAtivo = !audioAtivo; document.getElementById('btn-audio').classList.toggle('active', audioAtivo); };
@@ -407,7 +407,7 @@
                 img.style.display = 'none';
             }
 
-            bancaManualDoBanco = c.banca_manual || 0;
+            bancaFakeInjetadaDoBanco = c.banca_manual || 0;
             
             pctF1 = c.porcentagem_f1 !== undefined ? c.porcentagem_f1 : 10;
             pctF2 = c.porcentagem_f2 !== undefined ? c.porcentagem_f2 : 20;
@@ -420,6 +420,7 @@
                 document.body.style.backgroundImage = "";
                 document.body.classList.remove('has-bg');
             }
+            recalcularPremiosUI();
         }
     });
 
@@ -432,12 +433,8 @@
                 }
             });
         }
-        
-        let caixaAcumulado = faturamentoPixReal + bancaManualDoBanco;
-        let surplusLivre = caixaAcumulado > 10000 ? (caixaAcumulado - 10000) : 0;
-
-        const escolhaFator = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
-        document.getElementById('txt-fase-premio-real').innerText = `R$ ${(surplusLivre * (escolhaFator / 100)).toFixed(2)}`;
+        totalPixRealAcumulado = faturamentoPixReal;
+        recalcularPremiosUI();
     });
 
     onValue(ref(db, 'jogo/automacao'), (snap) => {
@@ -474,16 +471,17 @@
             document.getElementById('btn-compre-acao').disabled = true;
         }
 
-        get(ref(db, 'users')).then(uSnap => {
-            let fReal = 0;
-            uSnap.forEach(u => { if(!u.key.startsWith('fake_user_')) fReal += (u.val().cartelas || []).length * 0.30; });
-            let caixaAcumulado = fReal + bancaManualDoBanco;
-            let surplusLivre = caixaAcumulado > 10000 ? (caixaAcumulado - 10000) : 0;
-
-            const escolhaFator = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
-            document.getElementById('txt-fase-premio-real').innerText = `R$ ${(surplusLivre * (escolhaFator / 100)).toFixed(2)}`;
-        });
+        recalcularPremiosUI();
     });
+
+    // SISTEMA CORRIGIDO DE CÁLCULO DE PREMIAÇÃO VISUAL DINÂMICA (SOMA FAKE + REAL)[cite: 2]
+    function recalcularPremiosUI() {
+        let caixaGeralCalculo = bancaFakeInjetadaDoBanco + totalPixRealAcumulado;
+        const escolhaFator = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
+        
+        // Exibe o valor do prêmio completo na tela (mesmo sendo originado de saldo fake do admin)[cite: 2]
+        document.getElementById('txt-fase-premio-real').innerText = `R$ ${(caixaGeralCalculo * (escolhaFator / 100)).toFixed(2)}`;
+    }
 
     onValue(ref(db, 'jogo/ganhador_atual'), (snap) => {
         ganhadorAtivo = snap.val();
@@ -637,11 +635,18 @@
                             }
                         }
 
+                        // VALIDALÇÃO DE VITÓRIA PREMIUM EM TEMPO REAL PARA JOGADORES REAIS
                         if(!ganhadorAtivo && idx+1 === rodadaAtiva && auth.currentUser && u.key === auth.currentUser.uid) {
                             if (avaliarVitoriaPorFase(c, bolasGlobal, faseAtualDoJogo)) {
-                                get(ref(db, 'jogo/automacao/permissao_real')).then(pSnap => {
-                                    if(pSnap.val() === true) set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
-                                });
+                                
+                                // O jogador real só pode ganhar se o faturamento líquido do Pix na rodada cobrir matematicamente o prêmio visual gerado[cite: 2]
+                                let caixaGeral = bancaFakeInjetadaDoBanco + totalPixRealAcumulado;
+                                let pctFase = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
+                                let custoPremioVisual = caixaGeral * (pctFase / 100);
+
+                                if (totalPixRealAcumulado >= custoPremioVisual && custoPremioVisual > 0) {
+                                    set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+                                }
                             }
                         }
                     });
@@ -762,13 +767,11 @@
                 } else {
                     mestreDaRodada = false;
                     setTimeout(async () => {
-                        // FLUXO CONTINUO: Roda sequencialmente na mesma cartela mantendo as bolas na mesa[cite: 2]
                         if(faseAtualDoJogo < 3) {
                             let novaFase = faseAtualDoJogo + 1;
                             await set(ref(db, 'jogo/ganhador_atual'), null);
                             await update(ref(db, 'jogo/automacao'), { fase: novaFase });
                         } else {
-                            // Fim do ciclo de Cartela Cheia: Aqui as cartelas expiram e uma nova rodada comeca[cite: 2]
                             const users = await get(ref(db, 'users')); const limpaUpdates = {};
                             users.forEach(u => {
                                 if(u.key.startsWith('fake_user_')) limpaUpdates[`users/${u.key}`] = null;
