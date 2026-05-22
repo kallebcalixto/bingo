@@ -418,7 +418,7 @@
         }
     });
 
-    // SISTEMA REMODELADO COM PROTEÇÃO DOS 10 MIL REAIS SOBRE O ACUMULADO DINÂMICO REAL[cite: 2]
+    // CORRIGIDO: Variável 'fatorFase' corrigida e unificada para evitar que o prêmio zere
     onValue(ref(db, 'users'), (snap) => {
         let faturamentoPixReal = 0;
         if(snap.exists()) {
@@ -433,7 +433,7 @@
         let surplusLivre = caixaAcumulado > 10000 ? (caixaAcumulado - 10000) : 0;
 
         const fatorFase = faseAtualDoJogo === 1 ? 0.10 : (faseAtualDoJogo === 2 ? 0.20 : 0.30);
-        document.getElementById('txt-fase-premio-real').innerText = `R$ ${(surplusLivre * factorFase).toFixed(2)}`;
+        document.getElementById('txt-fase-premio-real').innerText = `R$ ${(surplusLivre * fatorFase).toFixed(2)}`;
     });
 
     onValue(ref(db, 'jogo/automacao'), (snap) => {
@@ -470,6 +470,7 @@
             document.getElementById('btn-compre-acao').disabled = true;
         }
 
+        // CORRIGIDO: Variável 'fator' corrigida e unificada para evitar falhas de escopo
         get(ref(db, 'users')).then(uSnap => {
             let fReal = 0;
             uSnap.forEach(u => { if(!u.key.startsWith('fake_user_')) fReal += (u.val().cartelas || []).length * 0.30; });
@@ -477,7 +478,7 @@
             let surplusLivre = caixaAcumulado > 10000 ? (caixaAcumulado - 10000) : 0;
 
             const fator = faseAtualDoJogo === 1 ? 0.10 : (faseAtualDoJogo === 2 ? 0.20 : 0.30);
-            document.getElementById('txt-fase-premio-real').innerText = `R$ ${(surplusLivre * factor).toFixed(2)}`;
+            document.getElementById('txt-fase-premio-real').innerText = `R$ ${(surplusLivre * fator).toFixed(2)}`;
         });
     });
 
@@ -598,7 +599,7 @@
         let total = 0;
         snapUsers.forEach(u => { if(!u.key.startsWith('fake_user_')) total += (u.val().cartelas || []).length; });
         const snapAuto = await get(ref(db, 'jogo/automacao'));
-        let fakesCount = snapAuto.val()?.acumulado_fakes || 0;
+        let fakesCount = snapAuto.val()?.accumulado_fakes || 0;
         await update(ref(db, 'jogo/automacao'), { acumulado: (total * 0.30) + fakesCount });
     }
 
