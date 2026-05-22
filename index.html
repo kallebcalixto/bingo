@@ -2,344 +2,428 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>PAINEL ADMIN AUTOMATIZADO - KBS TV COLOMBO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHOW DE PRÊMIOS - COMPLETO AUTOMÁTICO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { background: #111; color: #fff; text-align: center; font-family: sans-serif; padding: 20px; }
-        button { padding: 15px; width: 320px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; color: #fff; text-transform: uppercase; transition: 0.3s; }
-        #btn-auto { background: #f39c12; border: 3px solid #e67e22; font-size: 16px; width: 220px; }
-        #status-auto { color: #f1c40f; font-weight: bold; margin-top: 5px; display: none; }
-        #winner-alert { background: #d35400; padding: 20px; border: 2px solid white; display: none; margin-bottom: 20px; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-        .config-card { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; width: 320px; margin: 10px auto; display: inline-block; vertical-align: top; text-align: left; }
-        .config-card input, .config-card select { width: 100%; padding: 10px; margin: 8px 0; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; box-sizing: border-box; }
-        label { font-size: 12px; color: #aaa; font-weight: bold; }
-        .rodada-box { display: inline-block; vertical-align: middle; background: #222; padding: 10px; border-radius: 8px; border: 1px solid #444; margin-left: 10px; }
+        :root { --bg: #050505; --orange: #d35400; --green: #27ae60; --cyan: #00d4ff; --danger: #c0392b; }
+        body { background: var(--bg); color: #fff; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; overflow-x: hidden; overflow-y: auto; }
+        .audio-control { background: #111; padding: 12px; text-align: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+        #btn-audio { background: var(--orange); color: #fff; border: none; padding: 10px 25px; border-radius: 20px; font-weight: bold; text-transform: uppercase; font-size: 13px; cursor: pointer; transition: 0.2s; }
+        #btn-audio:hover { opacity: 0.9; }
+        #btn-audio.active { background: var(--green); }
+        
+        .container { display: flex; flex-direction: column; gap: 15px; padding: 15px; box-sizing: border-box; max-width: 1400px; margin: 0 auto; }
+        .game-layout { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+        
+        .painel-geral { background: rgba(20, 20, 20, 0.8); border-radius: 10px; padding: 10px; display: grid; grid-template-columns: repeat(10, 1fr); border: 1px solid #333; gap: 6px; }
+        .num-geral { background: radial-gradient(circle at 30% 30%, #333, #111); border-radius: 50%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #444; box-shadow: inset -1px -1px 3px #000; }
+        .num-geral.active { background: radial-gradient(circle, #fff, #00d4ff); color: #000; box-shadow: 0 0 10px var(--cyan); border: 1px solid #fff; }
+        
+        .ball-display { background: radial-gradient(circle at 30% 30%, #fff, #222); width: 130px; height: 130px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid var(--orange); margin: 0 auto; box-shadow: 0 0 30px rgba(211, 84, 0, 0.5); }
+        #bola-num { font-size: 65px; font-weight: 900; color: #000; }
+        
+        .marked { background: var(--green) !important; color: #fff !important; box-shadow: 0 0 10px var(--green); }
+        
+        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: pulseWin 1.5s infinite; }
+        @keyframes pulseWin { 0% { transform: scale(1); } 50% { transform: scale(1.03); background: rgba(211, 84, 0, 0.3); } 100% { transform: scale(1); } }
+        
+        #btn-logout { background: var(--danger); color: #fff; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; text-transform: uppercase; display: none; cursor: pointer; font-size: 11px; }
+        #btn-login-topo { background: #4285F4; color: #fff; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000; display: flex; align-items: center; justify-content: center; 
-            z-index: 9999;
+        /* BANCA DE COMPRAS */
+        .banca-section { background: #111; border-radius: 12px; padding: 15px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
+        .banca-status { background: #000; padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #222; }
+        .timer-destaque { font-size: 24px; font-weight: 900; color: var(--cyan); margin-top: 5px; }
+        .banca-controles { display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 5px; }
+        .btn-comprar { background: var(--green); color: #fff; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase; }
+        .btn-comprar:disabled { background: #333; color: #777; cursor: not-allowed; }
+        .input-qtd { width: 70px; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 16px; }
+
+        .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 250px; overflow-y:auto; }
+
+        @media (min-width: 902px) {
+            .game-layout { flex-direction: row; align-items: flex-start; }
+            .col-left { flex: 1.3; display: flex; flex-direction: column; gap: 15px; }
+            .col-right { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+            .num-geral { font-size: 16px; }
+            .participants-section { max-height: 350px; }
         }
-        .login-box { background: #1a1a1a; padding: 30px; border-radius: 10px; border: 2px solid #f39c12; }
-        .login-box input { 
-            display: block; width: 250px; padding: 12px; margin-bottom: 15px; 
-            background: #000; border: 1px solid #444; color: #fff; text-align: center; border-radius: 5px;
-        }
-        .painel-automacao { background: #111; border: 2px dashed #00d4ff; padding: 15px; margin: 15px auto; max-width: 680px; border-radius: 10px; }
     </style>
 </head>
 <body>
-
-    <div id="login-overlay">
-        <div class="login-box">
-            <h2 style="color: #f39c12;">ACESSO RESTRITO</h2>
-            <input type="password" id="pass-input" placeholder="Digite a Senha">
-            <button onclick="verificarSenha()" style="background: #27ae60; width: 250px;">ENTRAR</button>
-            <p id="error-msg" style="color: #e74c3c; display: none; font-size: 14px;">Senha Incorreta!</p>
-        </div>
+<div class="audio-control">
+    <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
+    <div id="auth-status-area">
+        <button id="btn-login-topo" onclick="loginComGoogle()">
+            <svg width="16" height="16" viewBox="0 0 18 18" style="fill: #fff;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.3C13.46.89 11.43 0 9 0 5.46 0 2.43 2.55.95 5.7l3 2.28c.71-2.14 2.7-3.73 5.05-3.73z"/></svg>
+            Entrar com Google
+        </button>
+        <button id="btn-logout" onclick="fazerLogout()">Sair do Jogo</button>
     </div>
+</div>
 
-    <div id="admin-content" style="display: none;">
-        <h1>SISTEMA DE CONTROLE AUTOMÁTICO - KBS TV</h1>
-        
-        <!-- MONITOR DA AUTOMACÃO CENTRAL -->
-        <div class="painel-automacao">
-            <h3 style="color:#00d4ff; margin:0 0 10px 0;">NÚCLEO DO MOTOR AUTOMÁTICO (75 FAKESAtivos)</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                <div style="background:#000; padding:10px; border-radius:5px;">
-                    <span style="font-size:11px; color:#888;">STATUS DO MOTOR:</span>
-                    <div id="motor-status-txt" style="font-weight:bold; color:#ff9f43; margin-top:3px;">DESLIGADO</div>
+<div id="winner-overlay"><div style="background:#fff; color:#000; padding:40px; border-radius:20px; border:8px solid var(--orange); max-width: 500px; width: 85%"><h1 style="font-size: 50px; margin:0">BINGO!</h1><h2 id="winner-name" style="font-size: 30px; color:var(--orange)">---</h2></div></div>
+
+<div class="container">
+    <div id="game-section">
+        <div class="game-layout">
+            
+            <div class="col-left">
+                <div style="background: #111; border: 2px solid var(--orange); border-radius: 10px; padding: 15px; text-align: center;">
+                    <img id="img-premio" src="" style="width:100%; max-height:180px; object-fit:contain; display:none; margin-bottom:10px; border-radius:5px;">
+                    <h4 id="txt-premio" style="color:var(--orange); margin:0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">PRÊMIO DA RODADA</h4>
                 </div>
-                <div style="background:#000; padding:10px; border-radius:5px;">
-                    <span style="font-size:11px; color:#888;">CRONÔMETRO ATUAL:</span>
-                    <div id="motor-timer-txt" style="font-weight:bold; color:#00d4ff; margin-top:3px;">--:--</div>
-                </div>
-                <div style="background:#000; padding:10px; border-radius:5px;">
-                    <span style="font-size:11px; color:#888;">CAIXA TOTAL ARRECADADO:</span>
-                    <div id="motor-caixa-txt" style="font-weight:bold; color:#27ae60; margin-top:3px;">R$ 0,00</div>
+                
+                <div style="position: relative; background: #000; border-radius: 15px; padding: 10px; border: 1px solid #222;">
+                    <div id="tabela-90" class="painel-geral"></div>
+                    <div style="padding: 20px; text-align: center;">
+                        <div class="ball-display">
+                            <div id="bola-num">--</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button id="btn-toggle-motor" style="background:#00d4ff; width:100%; max-width:400px; margin-top:15px;">LIGAR SISTEMA ROBOTIZADO (24H)</button>
-        </div>
+            
+            <div class="col-right">
+                <div id="area-cartelas-multiplas"></div>
 
-        <div id="winner-alert">
-            <h2 style="margin:0">🚨 BINGO DETETADO! 🚨</h2>
-            <p id="winner-display" style="font-size:24px; font-weight:bold"></p>
-            <button id="btn-clear-winner" style="background:#fff; color:#000; width:200px">FECHAR AVISO</button>
-        </div>
+                <!-- BANCA DE COMPRAS -->
+                <div class="banca-section">
+                    <div class="banca-status">
+                        <span id="label-banca" style="font-size:11px; color:#aaa; font-weight:bold; text-transform:uppercase;">PRÓXIMA RODADA EM:</span>
+                        <div id="cronometro-banca" class="timer-destaque">04:00</div>
+                        <div id="acumulado-banca" style="font-size:12px; margin-top:5px; color:var(--green); font-weight:bold;">PREMIAÇÃO ESTIMADA: R$ 0,00</div>
+                    </div>
+                    <div class="banca-controles" id="banca-interacao">
+                        <input type="number" id="compre-qtd" class="input-qtd" value="1" min="1" max="100">
+                        <button id="btn-compre-acao" onclick="comprarCartelasBanca()" class="btn-comprar">Comprar (R$ 0,30/un)</button>
+                    </div>
+                </div>
 
-        <div style="display: block; margin-bottom: 20px;">
-            <div class="rodada-box">
-                <label>RODADA ATIVA:</label>
-                <select id="select-rodada" style="width: 100px; padding: 5px; background: #000; color: #fff;" onchange="mudarRodada(this.value)">
-                    <option value="1">1ª</option><option value="2">2ª</option><option value="3">3ª</option><option value="4">4ª</option>
-                </select>
+                <div class="participants-section">
+                    <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 10px 0; font-weight: bold;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
+                    <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
+                </div>
             </div>
-        </div>
 
-        <div class="config-card">
-            <h3 style="color: #f39c12; text-align: center;">BANNER E PRÊMIO</h3>
-            <label>Texto do Prêmio:</label><input type="text" id="texto_premio">
-            <label>Link da Imagem:</label><input type="text" id="url_imagem">
-            <button id="btn-save-banner" style="width: 100%; background: #d35400;">SALVAR BANNER</button>
-        </div>
-
-        <div class="config-card">
-            <h3 style="color: #00d4ff; text-align: center;">REGRAS</h3>
-            <label>Máximo de Cartelas:</label><input type="number" id="max_cartelas">
-            <label>Dar por Pedido:</label>
-            <select id="qtd_por_pedido"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
-            <button id="btn-save-rules" style="width: 100%; background: #27ae60;">SALVAR REGRAS</button>
-        </div>
-
-        <div style="margin-top: 20px;">
-            <button id="btn-draw" style="background:#27ae60;">SORTEAR BOLA MANUAL</button><br>
-            <button id="btn-release" style="background:#c0392b;">PEDIDOS DE CARTELA: OFF</button><br>
-            <button id="btn-lock-logout" style="background:#8e44ad;">SAÍDA DE USUÁRIOS: TRAVADA</button><br>
-            <button id="btn-clear" style="background:#2980b9;">ZERAR CARTELAS DE TODOS</button><br>
-            <button id="btn-reset-bolas" style="background:#7f8c8d;">LIMPAR APENAS BOLAS</button><br>
-            <button id="btn-reset-chat" style="background:#444;">LIMPAR APENAS CHAT</button>
         </div>
     </div>
+</div>
 
-    <script>
-        function verificarSenha() {
-            const senhaCorreta = "Sa200783";
-            const input = document.getElementById('pass-input').value;
-            const erro = document.getElementById('error-msg');
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, set, push, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-            if (input === senhaCorreta) {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('admin-content').style.display = 'block';
-                sessionStorage.setItem('admin_logado', 'true');
-            } else {
-                erro.style.display = 'block';
-                document.getElementById('pass-input').value = "";
-            }
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAbDzmgd3QrRrx8R14dJSwjbN6fEFkR7pI", 
+        authDomain: "azar-c7f24.firebaseapp.com",
+        databaseURL: "https://azar-c7f24-default-rtdb.firebaseio.com", 
+        projectId: "azar-c7f24",
+        storageBucket: "azar-c7f24.firebasestorage.app",
+        messagingSenderId: "458222214312",
+        appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
+    };
+    
+    const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+    
+    let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
+    let estadoJogoGlobal = "espera";
+    let mestreDaRodada = false; // Define se esta instância está rodando o motor central temporariamente
+
+    window.toggleAudio = () => { audioAtivo = !audioAtivo; document.getElementById('btn-audio').classList.toggle('active', audioAtivo); };
+    window.fazerLogout = () => { if(confirm("Deseja sair da sua conta?")) signOut(auth).then(() => location.reload()); };
+
+    // ESCUTADOR DA AUTOMAÇÃO CENTRAL
+    onValue(ref(db, 'jogo/automacao'), (snap) => {
+        const dados = snap.val();
+        
+        // Inicialização primária do banco caso esteja limpo
+        if(!dados) {
+            set(ref(db, 'jogo/automacao'), { estado: "espera", tempo_restante: 240, acumulado: 0, timestamp_controle: Date.now() });
+            return;
         }
 
-        if(sessionStorage.getItem('admin_logado') === 'true') {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('admin-content').style.display = 'block';
+        estadoJogoGlobal = dados.estado;
+        
+        // Formatação visual do cronômetro de 4 minutos
+        const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
+        const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
+        
+        if (dados.estado === "espera") {
+            document.getElementById('label-banca').innerText = "PRÓXIMA RODADA EM:";
+            document.getElementById('cronometro-banca').innerText = `${minutos}:${segundos}`;
+            document.getElementById('cronometro-banca').style.color = "var(--cyan)";
+            document.getElementById('btn-compre-acao').disabled = false;
+        } else {
+            document.getElementById('label-banca').innerText = "JOGO EM ANDAMENTO:";
+            document.getElementById('cronometro-banca').innerText = "SORTEANDO...";
+            document.getElementById('cronometro-banca').style.color = "var(--green)";
+            document.getElementById('btn-compre-acao').disabled = true;
         }
 
-        document.getElementById('pass-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') verificarSenha();
-        });
-    </script>
+        document.getElementById('acumulado-banca').innerText = `PREMIAÇÃO ESTIMADA: R$ ${parseFloat(dados.acumulado || 0).toFixed(2)}`;
+    });
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    onValue(ref(db, 'jogo/ganhador_atual'), (snap) => {
+        ganhadorAtivo = snap.val();
+        document.getElementById('winner-overlay').style.display = ganhadorAtivo ? 'flex' : 'none';
+        if(ganhadorAtivo) { document.getElementById('winner-name').innerText = ganhadorAtivo; confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
+    });
+
+    onValue(ref(db, 'jogo/config/rodada_ativa'), (snap) => { rodadaAtiva = snap.val() || 1; renderTudoUI(); });
+
+    onValue(ref(db, 'jogo/bolas_sorteadas'), (snap) => {
+        const novas = snap.val() || []; const ultima = novas[novas.length-1];
+        if(novas.length > bolasGlobal.length && audioAtivo && ultima) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance("Número " + ultima)); }
         
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAbDzmgd3QrRrx8R14dJSwjbN6fEFkR7pI", 
-            authDomain: "azar-c7f24.firebaseapp.com",
-            databaseURL: "https://azar-c7f24-default-rtdb.firebaseio.com", 
-            projectId: "azar-c7f24",
-            storageBucket: "azar-c7f24.firebasestorage.app",
-            messagingSenderId: "458222214312",
-            appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
-        };
-        
-        const app = initializeApp(firebaseConfig); 
-        const db = getDatabase(app);
-        
-        let ganhadorNoBanco = null;
-        let motorAtivo = false;
-        let loopAutomacao = null;
+        if(novas.length === 0) {
+            document.getElementById('bola-num').innerText = "--";
+        } else {
+            document.getElementById('bola-num').innerText = ultima || "--";
+        }
 
-        window.mudarRodada = (val) => { set(ref(db, 'jogo/config/rodada_ativa'), parseInt(val)); };
-        document.getElementById('btn-save-banner').onclick = async () => { update(ref(db, 'jogo/config'), { texto_premio: document.getElementById('texto_premio').value, url_imagem: document.getElementById('url_imagem').value }); alert("Banner atualizado!"); };
-        document.getElementById('btn-save-rules').onclick = async () => { update(ref(db, 'jogo/config'), { max_cartelas: parseInt(document.getElementById('max_cartelas').value), qtd_por_pedido: parseInt(document.getElementById('qtd_por_pedido').value) }); alert("Regras atualizadas!"); };
-        
-        onValue(ref(db, 'jogo/config'), (snap) => { 
-            const c = snap.val(); if(!c) return; 
-            document.getElementById('texto_premio').value = c.texto_premio || ""; 
-            document.getElementById('url_imagem').value = c.url_imagem || ""; 
-            document.getElementById('max_cartelas').value = c.max_cartelas || 4; 
-            document.getElementById('qtd_por_pedido').value = c.qtd_por_pedido || 4; 
-            document.getElementById('select-rodada').value = c.rodada_ativa || 1; 
-        });
+        bolasGlobal = novas;
+        document.querySelectorAll('.num-geral').forEach(el => el.classList.remove('active'));
+        bolasGlobal.forEach(n => document.getElementById(`n90-${n}`)?.classList.add('active'));
+        renderTudoUI();
+    });
 
-        // ESCUTADOR DA AUTOMAÇÃO CENTRAL
-        onValue(ref(db, 'jogo/automacao'), (snap) => {
-            const dados = snap.val() || { estado: "espera", tempo_restante: 240, acumulado: 0, motor_ligado: false };
-            motorAtivo = dados.motor_ligado;
-            
-            document.getElementById('motor-status-txt').innerText = dados.estado === "espera" ? "BANCA ABERTA (COMPRAS)" : "SORTEANDO BOLA";
-            document.getElementById('motor-status-txt').style.color = dados.estado === "espera" ? "#f39c12" : "#27ae60";
-            
-            const min = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
-            const seg = (dados.tempo_restante % 60).toString().padStart(2, '0');
-            document.getElementById('motor-timer-txt').innerText = `${min}:${seg}`;
-            
-            document.getElementById('motor-caixa-txt').innerText = `R$ ${parseFloat(dados.acumulado || 0).toFixed(2)}`;
-            
-            const btn = document.getElementById('btn-toggle-motor');
-            btn.innerText = motorAtivo ? "⏹ DESLIGAR MOTOR AUTOMÁTICO" : "▶ LIGAR MOTOR AUTOMÁTICO";
-            btn.style.background = motorAtivo ? "#c0392b" : "#00d4ff";
-
-            if(motorAtivo && !loopAutomacao) {
-                inicializarCicloServidor();
-            } else if (!motorAtivo && loopAutomacao) {
-                clearInterval(loopAutomacao);
-                loopAutomacao = null;
-            }
-        });
-        
-        document.getElementById('btn-toggle-motor').onclick = async () => {
-            const novoEstado = !motorAtivo;
-            await update(ref(db, 'jogo/automacao'), { motor_ligado: novoEstado });
-            if(novoEstado) {
-                await resetarRodadaParaNovaCompra();
-            }
-        };
-
-        async function resetarRodadaParaNovaCompra() {
-            // Injeta 75 jogadores fakes com quantidades aleatórias de cartelas compradas
-            let totalCartelasRodada = 0;
-            const updatesFakes = {};
-            
-            for(let i=1; i<=75; i++) {
-                let qtdFake = Math.floor(Math.random() * 5) + 1; // compra de 1 a 5 cartelas aleatórias por fake
-                totalCartelasRodada += qtdFake;
-                let cartelasFake = [];
-                for(let c=0; c<qtdFake; c++) {
-                    let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
-                    cartelasFake.push(n.sort((a,b)=>a-b));
-                }
-                updatesFakes[`users/fake_user_${i}`] = { nome: `Jogador_${i}🔹`, cartelas: cartelasFake };
-            }
-
-            // Calcula faturamento real parcial anterior para manter consistência
-            const snapUsers = await get(ref(db, 'users'));
-            snapUsers.forEach(u => {
-                if(u.key && !u.key.startsWith('fake_user_')) {
-                    totalCartelasRodada += (u.val().cartelas || []).length;
-                }
+    onAuthStateChanged(auth, (user) => {
+        if(user) {
+            document.getElementById('btn-login-topo').style.display = 'none';
+            onValue(ref(db, 'jogo/config/pode_deslogar'), (s) => { 
+                document.getElementById('btn-logout').style.display = s.val() ? 'block' : 'none'; 
             });
+            onValue(ref(db, `users/${user.uid}/cartelas`), (snap) => { minhasCartelas = snap.val() || []; renderTudoUI(); });
+        } else {
+            document.getElementById('btn-login-topo').style.display = 'flex';
+            document.getElementById('btn-logout').style.display = 'none';
+            minhasCartelas = []; 
+            renderTudoUI();
+        }
+    });
 
-            const faturamentoTotal = totalCartelasRodada * 0.30;
-            
-            // Limpa as bolas do painel e configura metadados do motor
-            await set(ref(db, 'jogo/bolas_sorteadas'), []);
-            await set(ref(db, 'jogo/ganhador_atual'), null);
-            await set(ref(db, 'jogo/config/rodada_ativa'), 1);
-            await update(ref(db, '/'), updatesFakes);
-            await update(ref(db, 'jogo/automacao'), {
-                estado: "espera",
-                tempo_restante: 240, // 4 minutos exatos de relógio
-                acumulado: faturamentoTotal,
-                permissao_real: false // Bloqueia inicialmente ganhadores reais para controle matemático
-            });
+    // SISTEMA DE COMPRA DE CARTELAS (Máximo de 100)
+    window.comprarCartelasBanca = async () => {
+        if(!auth.currentUser) {
+            alert("Por favor, conecte-se com sua conta Google para comprar!");
+            return;
+        }
+        if(estadoJogoGlobal !== "espera") {
+            alert("A banca está fechada! Aguarde a próxima rodada.");
+            return;
         }
 
-        function inicializarCicloServidor() {
-            if(loopAutomacao) clearInterval(loopAutomacao);
-            let tempoGeralBolas = 0;
-            
-            loopAutomacao = setInterval(async () => {
-                const snapAuto = await get(ref(db, 'jogo/automacao'));
-                let dados = snapAuto.val();
-                if(!dados || !dados.motor_ligado) return;
+        let qtd = parseInt(document.getElementById('compre-qtd').value) || 1;
+        if(qtd < 1) qtd = 1;
+        if(qtd > 100) { qtd = 100; document.getElementById('compre-qtd').value = 100; }
 
-                if(dados.estado === "espera") {
-                    let t = dados.tempo_restante - 1;
-                    if(t <= 0) {
-                        // Fim do tempo de compra: Inicia o Sorteio Automático
-                        await update(ref(db, 'jogo/automacao'), { estado: "rodando", tempo_restante: 0 });
-                        await update(ref(db, 'jogo/config'), { pode_pedir: false }); // trava compras na UI
-                        tempoGeralBolas = 0;
-                    } else {
-                        // Atualiza contagem regressiva dos 4 minutos
-                        await update(ref(db, 'jogo/automacao'), { tempo_restante: t });
-                    }
-                } else if(dados.estado === "rodando") {
-                    // Executa sorteio a cada 5 segundos de intervalo
-                    tempoGeralBolas++;
-                    if(tempoGeralBolas >= 5) {
-                        tempoGeralBolas = 0;
-                        if(!ganhadorNoBanco) {
-                            await executarSorteioMotorInterno(dados.acumulado);
-                        } else {
-                            // Se houve ganhador, aguarda 10 segundos exibindo a tela e reinicia o fluxo
-                            clearInterval(loopAutomacao);
-                            loopAutomacao = null;
-                            setTimeout(async () => {
-                                // Limpa apenas as cartelas dos usuários fakes antigos e reinicia
-                                const users = await get(ref(db, 'users'));
-                                const limpaUpdates = {};
-                                users.forEach(u => {
-                                    if(u.key.startsWith('fake_user_')) limpaUpdates[`users/${u.key}`] = null;
-                                    else limpaUpdates[`users/${u.key}/cartelas`] = null; // reseta reais
-                                });
-                                await update(ref(db, '/'), limpaUpdates);
-                                await resetarRodadaParaNovaCompra();
-                                inicializarCicloServidor();
-                            }, 10000);
+        const uRef = ref(db, `users/${auth.currentUser.uid}`);
+        let listaAtual = (await get(uRef)).val()?.cartelas || [];
+        
+        if((listaAtual.length + qtd) > 100) {
+            alert(`Você já tem ${listaAtual.length} cartelas. O limite é 100!`);
+            return;
+        }
+
+        for(let c=0; c<qtd; c++) {
+            let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
+            listaAtual.push(n.sort((a,b)=>a-b));
+        }
+
+        await update(uRef, { cartelas: listaAtual, nome: auth.currentUser.email.split('@')[0] });
+        alert(`Você comprou ${qtd} cartelas com sucesso!`);
+        
+        // Recalcula o faturamento imediatamente
+        recalcularCaixaRodada();
+    };
+
+    async function recalcularCaixaRodada() {
+        const snapUsers = await get(ref(db, 'users'));
+        let totalCartelas = 0;
+        snapUsers.forEach(u => {
+            totalCartelas += (u.val().cartelas || []).length;
+        });
+        const novoFaturamento = totalCartelas * 0.30;
+        await update(ref(ref(db, 'jogo/automacao')), { acumulado: novoFaturamento });
+    }
+
+    function renderTudoUI() {
+        const area = document.getElementById('area-cartelas-multiplas'); area.innerHTML = "";
+        
+        if(minhasCartelas.length > 0) {
+            minhasCartelas.forEach((cartela, i) => {
+                const numC = i + 1;
+                const gridHTML = cartela.map(n => `<div style="background:#1a1a1a; padding:15px 0; text-align:center; font-weight:900;" class="${bolasGlobal.includes(n)?'marked':''}">${n}</div>`).join('');
+                area.innerHTML += `<div style="background:#111; padding:12px; border-radius:12px; border:2px solid ${numC === rodadaAtiva ? 'var(--cyan)' : '#222'}; margin-bottom:10px; opacity:${numC > rodadaAtiva ? '0.4' : '1'}"><h4 style="text-align:center; color:var(--cyan); margin:0 0 8px 0; font-size:10px;">CARTELA #${numC} ${numC === rodadaAtiva ? '(EM JOGO)' : ''}</h4><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">${gridHTML}</div></div>`;
+                
+                // Validação para ganhadores reais baseada na trava matemática de lucro
+                if(!ganhadorAtivo && numC === rodadaAtiva && cartela.every(n => bolasGlobal.includes(n)) && auth.currentUser) {
+                    get(ref(db, 'jogo/automacao/permissao_real')).then(pSnap => {
+                        if(pSnap.val() === true) {
+                            set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
                         }
-                    }
-                }
-            }, 1000);
-        }
-
-        async function executarSorteioMotorInterno(caixaAcumulado) {
-            const snapBolas = await get(ref(db, 'jogo/bolas_sorteadas'));
-            let list = snapBolas.val() || [];
-            if(list.length >= 90) return;
-
-            let n;
-            do { n = Math.floor(Math.random() * 90) + 1; } while(list.includes(n));
-            list.push(n);
-            
-            // Regra matemática secreta: Se o prêmio máximo ultrapassar 20% do caixa, a casa domina o prêmio (80%)
-            // O sistema avalia preventivamente se algum usuário real ganharia nessa bola.
-            const premioMaximoDisponivel = caixaAcumulado * 0.20;
-            
-            // Ativa ou desativa a flag de validação baseada no orçamento disponível para o prêmio
-            if(premioMaximoDisponivel > 0.00) {
-                await update(ref(db, 'jogo/automacao'), { permissao_real: true });
-            } else {
-                await update(ref(db, 'jogo/automacao'), { permissao_real: false });
-            }
-
-            await set(ref(db, 'jogo/bolas_sorteadas'), list);
-
-            // Varre as cartelas dos fakes para verificar se algum bateu o bingo nesta bola sorteada
-            const snapUsers = await get(ref(db, 'users'));
-            const snapRodada = await get(ref(db, 'jogo/config/rodada_ativa'));
-            let rAtiva = snapRodada.val() || 1;
-
-            snapUsers.forEach(u => {
-                if(!ganhadorNoBanco && u.key.startsWith('fake_user_')) {
-                    const cartelas = u.val().cartelas || [];
-                    if(cartelas[rAtiva - 1] && cartelas[rAtiva - 1].every(num => list.includes(num))) {
-                        set(ref(db, 'jogo/ganhador_atual'), u.val().nome + " (Sorte Grande)");
-                    }
+                    });
                 }
             });
         }
 
-        async function sortearBola() { if(ganhadorNoBanco) return; const snap = await get(ref(db, 'jogo/bolas_sorteadas')); let list = snap.val() || []; if(list.length >= 90) return; let n; do { n = Math.floor(Math.random() * 90) + 1; } while(list.includes(n)); list.push(n); await set(ref(db, 'jogo/bolas_sorteadas'), list); }
-        
-        onValue(ref(db, 'jogo/ganhador_atual'), (snap) => { 
-            ganhadorNoBanco = snap.val(); 
-            document.getElementById('winner-alert').style.display = ganhadorNoBanco ? 'block' : 'none'; 
-            document.getElementById('winner-display').innerText = ganhadorNoBanco || ""; 
+        get(ref(db, 'users')).then(snap => {
+            const div = document.getElementById('lista-participantes'); div.innerHTML = ""; let count = 0;
+            snap.forEach(u => {
+                const d = u.val();
+                if(d.cartelas) {
+                    count++;
+                    d.cartelas.forEach((c, idx) => {
+                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#000; font-size:8px; padding:2px; text-align:center;">${n}</div>`).join('');
+                        div.innerHTML += `
+                            <div style="background:#111; padding:5px; width:80px; border-radius:5px; border:1px solid ${idx+1 === rodadaAtiva ? 'var(--cyan)' : '#333'}; opacity:${idx+1 > rodadaAtiva ? '0.3' : '1'}">
+                                <span style="font-size:7px; color:var(--cyan); display:block; text-align:center; overflow:hidden;">${d.nome || 'User'} (#${idx+1})</span>
+                                <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:1px; margin-top:3px;">${ns}</div>
+                            </div>`;
+                    });
+                }
+            });
+            document.getElementById('player-count').innerText = count;
         });
+    }
+
+    // ==========================================
+    // NÚCLEO DO MOTOR DE AUTOMACÃO (RODANDO EM BACKGROUND NO INDEX)
+    // ==========================================
+    async function injetarJogadoresFakes() {
+        let totalCartelasFakes = 0;
+        const updatesFakes = {};
         
-        document.getElementById('btn-clear-winner').onclick = () => set(ref(db, 'jogo/ganhador_atual'), null);
-        document.getElementById('btn-draw').onclick = () => sortearBola();
-        document.getElementById('btn-reset-bolas').onclick = () => { if(confirm("Limpar bolas?")) set(ref(db, 'jogo/bolas_sorteadas'), []); };
-        document.getElementById('btn-reset-chat').onclick = () => { if(confirm("Limpar chat?")) set(ref(db, 'chat'), {}); };
-        document.getElementById('btn-clear').onclick = async () => { if(confirm("Zerar cartelas?")) { const users = await get(ref(db, 'users')); if(users.exists()) { const updates = {}; users.forEach(u => { updates[`users/${u.key}/cartelas`] = null; }); await update(ref(db, '/'), updates); await set(ref(db, 'jogo/ganhador_atual'), null); } } };
+        for(let i=1; i<=75; i++) {
+            let qtdFake = Math.floor(Math.random() * 5) + 1; // 1 a 5 cartelas por fake
+            totalCartelasFakes += qtdFake;
+            let cartelasFake = [];
+            for(let c=0; c<qtdFake; c++) {
+                let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
+                cartelasFake.push(n.sort((a,b)=>a-b));
+            }
+            updatesFakes[`users/fake_user_${i}`] = { nome: `Jogador_${i}🔹`, cartelas: cartelasFake };
+        }
         
-        document.getElementById('btn-release').onclick = async () => { const snap = await get(ref(db, 'jogo/config/pode_pedir')); set(ref(db, 'jogo/config/pode_pedir'), !snap.val()); };
-        onValue(ref(db, 'jogo/config/pode_pedir'), (snap) => { const p = snap.val(); const b = document.getElementById('btn-release'); b.innerText = p ? "PEDIDOS: LIBERADOS (ON)" : "PEDIDOS: BLOQUEADOS (OFF)"; b.style.background = p ? "#27ae60" : "#c0392b"; });
+        await update(ref(db, '/'), updatesFakes);
+        return totalCartelasFakes;
+    }
+
+    async function processarCicloDoJogo() {
+        const snap = await get(ref(db, 'jogo/automacao'));
+        let dados = snap.val();
+        if(!dados) return;
+
+        // Determina quem controla o relógio (concorrência simples para evitar loops duplicados)
+        if (!mestreDaRodada) {
+            if (Date.now() - (dados.timestamp_controle || 0) > 4000) {
+                mestreDaRodada = true;
+            } else {
+                return; 
+            }
+        }
         
-        document.getElementById('btn-lock-logout').onclick = async () => { const snap = await get(ref(db, 'jogo/config/pode_deslogar')); set(ref(db, 'jogo/config/pode_deslogar'), !snap.val()); };
-        onValue(ref(db, 'jogo/config/pode_deslogar'), (snap) => { const p = snap.val(); const b = document.getElementById('btn-lock-logout'); b.innerText = p ? "SAÍDA: VISÍVEL" : "SAÍDA: ESCONDIDA"; b.style.background = p ? "#27ae60" : "#8e44ad"; });
-    </script>
+        // Atualiza a atividade do mestre na rodada
+        await update(ref(db, 'jogo/automacao'), { timestamp_controle: Date.now() });
+
+        if(dados.estado === "espera") {
+            let t = dados.tempo_restante - 1;
+            if(t <= 0) {
+                // Inicia a rodada de sorteio de forma automática
+                await update(ref(db, 'jogo/automacao'), { estado: "rodando", tempo_restante: 0 });
+                window.tempoInternoBolas = 0;
+            } else {
+                await update(ref(db, 'jogo/automacao'), { tempo_restante: t });
+            }
+        } else if(dados.estado === "rodando") {
+            if(!window.tempoInternoBolas) window.tempoInternoBolas = 0;
+            window.tempoInternoBolas++;
+            
+            if(window.tempoInternoBolas >= 5) { // 5 segundos por bola
+                window.tempoInternoBolas = 0;
+                
+                if(!ganhadorAtivo) {
+                    // Executa sorteio autônomo da bola
+                    const snapBolas = await get(ref(db, 'jogo/bolas_sorteadas'));
+                    let list = snapBolas.val() || [];
+                    if(list.length >= 90) return;
+
+                    let n; do { n = Math.floor(Math.random() * 90) + 1; } while(list.includes(n));
+                    list.push(n);
+
+                    // REGRA DE DOMINÂNCIA ECONÔMICA (80% da banca / 20% para jogadores reais)
+                    // Calcula se a receita gerada permite pagar um prêmio real sem estourar o lucro
+                    const premioDisponivelReais = dados.acumulado * 0.20;
+                    if(premioDisponivelReais > 0) {
+                        await update(ref(db, 'jogo/automacao'), { permissao_real: true });
+                    } else {
+                        await update(ref(db, 'jogo/automacao'), { permissao_real: false });
+                    }
+
+                    await set(ref(db, 'jogo/bolas_sorteadas'), list);
+
+                    // Varre e avalia as cartelas dos fakes para cantar vitória caso completem
+                    const snapUsers = await get(ref(db, 'users'));
+                    snapUsers.forEach(u => {
+                        if(!ganhadorAtivo && u.key.startsWith('fake_user_')) {
+                            const cartelas = u.val().cartelas || [];
+                            if(cartelas[rodadaAtiva - 1] && cartelas[rodadaAtiva - 1].every(num => list.includes(num))) {
+                                set(ref(db, 'jogo/ganhador_atual'), u.val().nome + " (Sorte Grande)");
+                            }
+                        }
+                    });
+                } else {
+                    // Jogo encerrado! Espera 10 segundos exibindo o vencedor na tela e reseta para a próxima rodada de compras
+                    mestreDaRodada = false;
+                    setTimeout(async () => {
+                        const users = await get(ref(db, 'users'));
+                        const limpaUpdates = {};
+                        users.forEach(u => {
+                            if(u.key.startsWith('fake_user_')) limpaUpdates[`users/${u.key}`] = null;
+                            else limpaUpdates[`users/${u.key}/cartelas`] = null; // reseta reais para nova rodada
+                        });
+                        
+                        await update(ref(db, '/'), limpaUpdates);
+                        await set(ref(db, 'jogo/bolas_sorteadas'), []);
+                        await set(ref(db, 'jogo/ganhador_atual'), null);
+                        
+                        let fakesCartelasCount = await injetarJogadoresFakes();
+                        let faturamentoInicial = fakesCartelasCount * 0.30;
+                        
+                        await update(ref(db, 'jogo/automacao'), {
+                            estado: "espera",
+                            tempo_restante: 240, // 4 minutos exatos
+                            acumulado: faturamentoInicial,
+                            permissao_real: false
+                        });
+                    }, 10000);
+                }
+            }
+        }
+    }
+
+    // Inicialização do Motor Central
+    setInterval(processarCicloDoJogo, 1000);
+
+    onValue(ref(db, 'jogo/config'), (snap) => {
+        const c = snap.val(); if(c) {
+            document.getElementById('txt-premio').innerText = c.texto_premio;
+            const img = document.getElementById('img-premio'); if(c.url_imagem) { img.src = c.url_imagem; img.style.display = 'block'; }
+        }
+    });
+
+    window.loginComGoogle = () => {
+        signInWithPopup(auth, googleProvider)
+            .then(() => alert("Conectado com sucesso através do Google!"))
+            .catch((e) => alert("Erro ao autenticar: " + e.message));
+    };
+
+    const tab90 = document.getElementById('tabela-90'); for(let i=1; i<=90; i++) { tab90.innerHTML += `<div id="n90-${i}" class="num-geral">${i}</div>`; }
+</script>
 </body>
 </html>
