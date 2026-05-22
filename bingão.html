@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHOW DE PRÊMIOS - FULL DESKTOP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --bg: #050505; --orange: #d35400; --green: #27ae60; --cyan: #00d4ff; --danger: #c0392b; }
+        body { background: var(--bg); color: #fff; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; overflow-x: hidden; overflow-y: auto; }
+        .audio-control { background: #111; padding: 12px; text-align: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+        #btn-audio { background: var(--orange); color: #fff; border: none; padding: 10px 25px; border-radius: 20px; font-weight: bold; text-transform: uppercase; font-size: 13px; cursor: pointer; transition: 0.2s; }
+        #btn-audio:hover { opacity: 0.9; }
+        #btn-audio.active { background: var(--green); }
+        
+        .container { display: flex; flex-direction: column; gap: 15px; padding: 15px; box-sizing: border-box; max-width: 1400px; margin: 0 auto; }
+        .game-layout { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+        
+        .painel-geral { background: rgba(20, 20, 20, 0.8); border-radius: 10px; padding: 10px; display: grid; grid-template-columns: repeat(10, 1fr); border: 1px solid #333; gap: 6px; }
+        .num-geral { background: radial-gradient(circle at 30% 30%, #333, #111); border-radius: 50%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #444; box-shadow: inset -1px -1px 3px #000; }
+        .num-geral.active { background: radial-gradient(circle, #fff, #00d4ff); color: #000; box-shadow: 0 0 10px var(--cyan); border: 1px solid #fff; }
+        
+        .ball-display { background: radial-gradient(circle at 30% 30%, #fff, #222); width: 130px; height: 130px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid var(--orange); margin: 0 auto; box-shadow: 0 0 30px rgba(211, 84, 0, 0.5); }
+        #bola-num { font-size: 65px; font-weight: 900; color: #000; }
+        
+        .marked { background: var(--green) !important; color: #fff !important; box-shadow: 0 0 10px var(--green); }
+        
+        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: pulseWin 1.5s infinite; }
+        @keyframes pulseWin { 0% { transform: scale(1); } 50% { transform: scale(1.03); background: rgba(211, 84, 0, 0.3); } 100% { transform: scale(1); } }
+        
+        #btn-logout { background: var(--danger); color: #fff; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; text-transform: uppercase; display: none; cursor: pointer; font-size: 11px; }
+        #btn-login-topo { background: #4285F4; color: #fff; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        .chat-section { background:#111; border-radius:12px; padding:12px; border:1px solid #333; height: 250px; display:flex; flex-direction:column; }
+        .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 300px; overflow-y:auto; }
+
+        .google-btn-chat { width: 100%; padding: 14px; background: #fff; color: #757575; border: 1px solid #ddd; border-radius: 5px; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background-color 0.2s; }
+        .google-btn-chat:hover { background-color: #f7f7f7; }
+
+        @media (min-width: 902px) {
+            .game-layout { flex-direction: row; align-items: flex-start; }
+            .col-left { flex: 1.3; display: flex; flex-direction: column; gap: 15px; }
+            .col-right { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+            .num-geral { font-size: 16px; }
+            .chat-section { height: 320px; }
+            .participants-section { max-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+<div class="audio-control">
+    <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
+    <div id="auth-status-area">
+        <button id="btn-login-topo" onclick="loginComGoogle()">
+            <svg width="16" height="16" viewBox="0 0 18 18" style="fill: #fff;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.3C13.46.89 11.43 0 9 0 5.46 0 2.43 2.55.95 5.7l3 2.28c.71-2.14 2.7-3.73 5.05-3.73z"/></svg>
+            Entrar com Google
+        </button>
+        <button id="btn-logout" onclick="fazerLogout()">Sair do Jogo</button>
+    </div>
+</div>
+
+<div id="winner-overlay"><div style="background:#fff; color:#000; padding:40px; border-radius:20px; border:8px solid var(--orange); max-width: 500px; width: 85%"><h1 style="font-size: 50px; margin:0">BINGO!</h1><h2 id="winner-name" style="font-size: 30px; color:var(--orange)">---</h2></div></div>
+
+<div class="container">
+    <div id="game-section">
+        <div class="game-layout">
+            
+            <div class="col-left">
+                <div style="background: #111; border: 2px solid var(--orange); border-radius: 10px; padding: 15px; text-align: center;">
+                    <img id="img-premio" src="" style="width:100%; max-height:180px; object-fit:contain; display:none; margin-bottom:10px; border-radius:5px;">
+                    <h4 id="txt-premio" style="color:var(--orange); margin:0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">PRÊMIO DA RODADA</h4>
+                </div>
+                
+                <div style="position: relative; background: #000; border-radius: 15px; padding: 10px; border: 1px solid #222;">
+                    <div id="tabela-90" class="painel-geral"></div>
+                    <div style="padding: 20px; text-align: center;">
+                        <div class="ball-display">
+                            <div id="bola-num">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-right">
+                <div id="area-cartelas-multiplas"></div>
+
+                <div class="participants-section">
+                    <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 10px 0; font-weight: bold;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
+                    <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
+                </div>
+
+                <div class="chat-section">
+                    <div id="chat-box" style="flex:1; overflow-y:auto; font-size:13px; padding-right: 5px;"></div>
+                    <div id="chat-controls" style="gap:5px; margin-top:8px;"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, set, push, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Configurações atualizadas para o novo projeto: azar-c7f24
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAbDzmgd3QrRrx8R14dJSwjbN6fEFkR7pI", 
+        authDomain: "azar-c7f24.firebaseapp.com",
+        databaseURL: "https://azar-c7f24-default-rtdb.firebaseio.com", 
+        projectId: "azar-c7f24",
+        storageBucket: "azar-c7f24.firebasestorage.app",
+        messagingSenderId: "458222214312",
+        appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
+    };
+    
+    const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+    
+    let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
+
+    window.toggleAudio = () => { audioAtivo = !audioAtivo; document.getElementById('btn-audio').classList.toggle('active', audioAtivo); };
+    window.fazerLogout = () => { if(confirm("Deseja sair da sua conta?")) signOut(auth).then(() => location.reload()); };
+
+    onValue(ref(db, 'jogo/ganhador_atual'), (snap) => {
+        ganhadorAtivo = snap.val();
+        document.getElementById('winner-overlay').style.display = ganhadorAtivo ? 'flex' : 'none';
+        if(ganhadorAtivo) { document.getElementById('winner-name').innerText = ganhadorAtivo; confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
+    });
+
+    onValue(ref(db, 'jogo/config/rodada_ativa'), (snap) => { rodadaAtiva = snap.val() || 1; renderTudoUI(); });
+
+    onValue(ref(db, 'jogo/bolas_sorteadas'), (snap) => {
+        const novas = snap.val() || []; const ultima = novas[novas.length-1];
+        if(novas.length > bolasGlobal.length && audioAtivo && ultima) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance("Número " + ultima)); }
+        bolasGlobal = novas; document.getElementById('bola-num').innerText = ultima || "--";
+        document.querySelectorAll('.num-geral').forEach(el => el.classList.remove('active'));
+        bolasGlobal.forEach(n => document.getElementById(`n90-${n}`)?.classList.add('active'));
+        renderTudoUI();
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        const ctrlChat = document.getElementById('chat-controls');
+        if(user) {
+            document.getElementById('btn-login-topo').style.display = 'none';
+            
+            onValue(ref(db, 'jogo/config/pode_deslogar'), (s) => { 
+                document.getElementById('btn-logout').style.display = s.val() ? 'block' : 'none'; 
+            });
+            
+            ctrlChat.style.display = 'flex';
+            ctrlChat.innerHTML = `
+                <input type="text" id="chat-input" placeholder="Mensagem..." style="flex:1; background:#000; border:1px solid #444; color:#fff; padding:10px; border-radius:5px; font-size: 13px;">
+                <button onclick="enviarMensagem()" style="background:var(--green); color:#fff; border:none; padding:0 15px; border-radius:5px; font-weight: bold; cursor: pointer;">OK</button>
+            `;
+            
+            onValue(ref(db, `users/${user.uid}/cartelas`), (snap) => { minhasCartelas = snap.val() || []; renderTudoUI(); });
+        } else {
+            document.getElementById('btn-login-topo').style.display = 'flex';
+            document.getElementById('btn-logout').style.display = 'none';
+            minhasCartelas = []; 
+            renderTudoUI();
+            
+            ctrlChat.style.display = 'block';
+            ctrlChat.innerHTML = `
+                <button class="google-btn-chat" onclick="loginComGoogle()">
+                    <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z" fill="#4285F4"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z" fill="#34A853"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z" fill="#FBBC05"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.3C13.46.89 11.43 0 9 0 5.46 0 2.43 2.55.95 5.7l3 2.28c.71-2.14 2.7-3.73 5.05-3.73z" fill="#EA4335"/></svg>
+                    CONECTAR COM O GOOGLE PARA ENTRAR NO CHAT
+                </button>
+            `;
+        }
+    });
+
+    function renderTudoUI() {
+        const area = document.getElementById('area-cartelas-multiplas'); area.innerHTML = "";
+        
+        if(minhasCartelas.length > 0) {
+            minhasCartelas.forEach((cartela, i) => {
+                const numC = i + 1;
+                const gridHTML = cartela.map(n => `<div style="background:#1a1a1a; padding:15px 0; text-align:center; font-weight:900;" class="${bolasGlobal.includes(n)?'marked':''}">${n}</div>`).join('');
+                area.innerHTML += `<div style="background:#111; padding:12px; border-radius:12px; border:2px solid ${numC === rodadaAtiva ? 'var(--cyan)' : '#222'}; margin-bottom:10px; opacity:${numC > rodadaAtiva ? '0.4' : '1'}"><h4 style="text-align:center; color:var(--cyan); margin:0 0 8px 0; font-size:10px;">CARTELA #${numC} ${numC === rodadaAtiva ? '(EM JOGO)' : ''}</h4><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">${gridHTML}</div></div>`;
+                if(!ganhadorAtivo && numC === rodadaAtiva && cartela.every(n => bolasGlobal.includes(n)) && auth.currentUser) set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+            });
+        }
+
+        get(ref(db, 'users')).then(snap => {
+            const div = document.getElementById('lista-participantes'); div.innerHTML = ""; let count = 0;
+            snap.forEach(u => {
+                const d = u.val();
+                if(d.cartelas) {
+                    count++;
+                    d.cartelas.forEach((c, idx) => {
+                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#000; font-size:8px; padding:2px; text-align:center;">${n}</div>`).join('');
+                        div.innerHTML += `
+                            <div style="background:#111; padding:5px; width:80px; border-radius:5px; border:1px solid ${idx+1 === rodadaAtiva ? 'var(--cyan)' : '#333'}; opacity:${idx+1 > rodadaAtiva ? '0.3' : '1'}">
+                                <span style="font-size:7px; color:var(--cyan); display:block; text-align:center; overflow:hidden;">${d.nome || 'User'} (#${idx+1})</span>
+                                <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:1px; margin-top:3px;">${ns}</div>
+                            </div>`;
+                    });
+                }
+            });
+            document.getElementById('player-count').innerText = count;
+        });
+    }
+
+    window.enviarMensagem = async () => {
+        if(!auth.currentUser) return;
+        const txt = document.getElementById('chat-input').value.trim(); if(!txt) return;
+        await push(ref(db, 'chat'), { user: auth.currentUser.email.split('@')[0], msg: txt });
+        if(txt.toLowerCase() === "quero uma cartela") {
+            const config = (await get(ref(db, 'jogo/config'))).val();
+            if(config?.pode_pedir) {
+                const uRef = ref(db, `users/${auth.currentUser.uid}`);
+                let lista = (await get(uRef)).val()?.cartelas || [];
+                if(lista.length === 0) {
+                    for(let i=0; i<4; i++) {
+                        let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
+                        lista.push(n.sort((a,b)=>a-b));
+                    }
+                    await update(uRef, { cartelas: lista, nome: auth.currentUser.email.split('@')[0] });
+                }
+            }
+        }
+        document.getElementById('chat-input').value = "";
+    };
+
+    onValue(ref(db, 'chat'), (snap) => {
+        const box = document.getElementById('chat-box'); box.innerHTML = "";
+        snap.forEach(c => { box.innerHTML += `<div style="margin-bottom: 4px;"><span style="color:var(--cyan); font-weight:bold;">${c.val().user}:</span> ${c.val().msg}</div>`; });
+        box.scrollTop = box.scrollHeight;
+    });
+
+    onValue(ref(db, 'jogo/config'), (snap) => {
+        const c = snap.val(); if(c) {
+            document.getElementById('txt-premio').innerText = c.texto_premio;
+            const img = document.getElementById('img-premio'); if(c.url_imagem) { img.src = c.url_imagem; img.style.display = 'block'; }
+        }
+    });
+
+    window.loginComGoogle = () => {
+        signInWithPopup(auth, googleProvider)
+            .then((result) => {
+                alert("Conectado com sucesso através do Google!");
+            })
+            .catch((e) => {
+                alert("Erro ao autenticar: " + e.message);
+            });
+    };
+
+    const tab90 = document.getElementById('tabela-90'); for(let i=1; i<=90; i++) { tab90.innerHTML += `<div id="n90-${i}" class="num-geral">${i}</div>`; }
+</script>
+</body>
+</html>
