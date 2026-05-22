@@ -48,7 +48,7 @@
         .btn-recargar { background: var(--cyan); color: #000; }
         .input-qtd { width: 70px; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 16px; }
 
-        /* PAINEL TÁ NA BOA ESTILO CHAT VERTICAL */
+        /* PAINEL TÁ NA BOA ESTILO CHAT VERTICAL NO CANTO DIREITO */
         .naboa-section { background: #111; border: 1px solid #333; border-radius: 12px; padding: 12px; height: 280px; display: flex; flex-direction: column; box-sizing: border-box; }
         .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 6px; }
         .naboa-msg { font-size: 12px; line-height: 1.4; background: #161616; padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--orange); animation: fadeInMsg 0.25s ease; display: flex; flex-direction: column; gap: 2px; }
@@ -106,7 +106,6 @@
     <div id="game-section">
         <div class="game-layout">
             
-            <!-- COLUNA DA ESQUERDA: JOGO E MATRIZ GERAL -->
             <div class="col-left">
                 <div style="background: #111; border: 2px solid var(--orange); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="text-align: left;">
@@ -126,7 +125,6 @@
                 </div>
             </div>
             
-            <!-- COLUNA DA DIREITA: FINANÇAS, CHAT DE EVENTOS DA RODADA E PARTICIPANTES -->
             <div class="col-right">
                 <!-- BANCA COMERCIAL -->
                 <div class="banca-section">
@@ -428,7 +426,7 @@
     }
 
     // ==========================================
-    // BANCO DE PREFIXOS DE EMAILS REAIS PARA OS FAKES
+    // LISTA DE 75 NOMES FICTÍCIOS NO PADRÃO EMAIL GOOGLE
     // ==========================================
     async function injetarJogadoresFakes() {
         const prefixosEmailsFakes = [
