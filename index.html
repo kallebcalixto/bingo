@@ -14,7 +14,7 @@
         #btn-audio { background: var(--orange); color: #fff; border: none; padding: 10px 25px; border-radius: 20px; font-weight: bold; text-transform: uppercase; font-size: 13px; cursor: pointer; transition: 0.2s; }
         #btn-audio.active { background: var(--green); }
         
-        .container { display: flex; flex-direction: column; gap: 15px; padding: 15px; box-sizing: border-box; max-width: 1400px; margin: 0 auto; }
+        .container { display: flex; flex-direction: column; gap: 15px; padding: 15px; box-sizing: border-box; max-width: 1440px; margin: 0 auto; }
         .game-layout { display: flex; flex-direction: column; gap: 15px; width: 100%; }
         
         .painel-geral { background: rgba(20, 20, 20, 0.8); border-radius: 10px; padding: 10px; display: grid; grid-template-columns: repeat(10, 1fr); border: 1px solid #333; gap: 6px; }
@@ -48,21 +48,22 @@
         .btn-recargar { background: var(--cyan); color: #000; }
         .input-qtd { width: 70px; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 16px; }
 
-        /* REESTRUTURAÇÃO DO FEED TÁ NA BOA (ESTILO CHAT VERTICAL) */
-        .naboa-section { background: #111; border: 1px solid #333; border-radius: 12px; padding: 12px; height: 180px; display: flex; flex-direction: column; }
+        /* PAINEL TÁ NA BOA ESTILO CHAT VERTICAL */
+        .naboa-section { background: #111; border: 1px solid #333; border-radius: 12px; padding: 12px; height: 280px; display: flex; flex-direction: column; box-sizing: border-box; }
         .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 6px; }
-        .naboa-msg { font-size: 13px; line-height: 1.4; background: #161616; padding: 6px 10px; border-radius: 6px; border-left: 3px solid var(--orange); animation: fadeInMsg 0.3s ease; }
-        @keyframes fadeInMsg { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .naboa-msg { font-size: 12px; line-height: 1.4; background: #161616; padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--orange); animation: fadeInMsg 0.25s ease; display: flex; flex-direction: column; gap: 2px; }
+        @keyframes fadeInMsg { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-        .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 250px; overflow-y:auto; }
+        .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 300px; overflow-y:auto; width: 100%; box-sizing: border-box; }
         .fase-badge { background: #222; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; border: 1px solid #444; color: #ff9f43; }
 
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
-            .col-left { flex: 1.3; display: flex; flex-direction: column; gap: 15px; }
+            .col-left { flex: 1.4; display: flex; flex-direction: column; gap: 15px; }
             .col-right { flex: 1; display: flex; flex-direction: column; gap: 15px; }
             .num-geral { font-size: 16px; }
-            .participants-section { max-height: 300px; }
+            .naboa-section { height: 320px; }
+            .participants-section { max-height: 380px; }
         }
     </style>
 </head>
@@ -86,7 +87,7 @@
         <div id="user-credits-display" style="font-size: 13px; font-weight: bold; color: var(--green); display: none;">CRÉDITOS: R$ 0,00</div>
         <div id="auth-status-area">
             <button id="btn-login-topo" onclick="loginComGoogle()">
-                <svg width="16" height="16" viewBox="0 0 18 18" style="fill: #fff;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.3C13.46.89 11.43 0 9 0 5.46 0 2.43 2.55.95 5.7l3 2.28c.71-2.14 2.7-3.73 5.05-3.73z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 18 18" style="fill: #fff;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.30c1.54 1.41 3.57 2.3 6 2.3 3.54 0 6.57-2.55 8.05-5.7l-3-2.28c-.71 2.14-2.7 3.73-5.05 3.73z"/></svg>
                 Entrar com Google
             </button>
             <button id="btn-logout" onclick="fazerLogout()">Sair</button>
@@ -105,6 +106,7 @@
     <div id="game-section">
         <div class="game-layout">
             
+            <!-- COLUNA DA ESQUERDA: JOGO E MATRIZ GERAL -->
             <div class="col-left">
                 <div style="background: #111; border: 2px solid var(--orange); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="text-align: left;">
@@ -124,6 +126,7 @@
                 </div>
             </div>
             
+            <!-- COLUNA DA DIREITA: FINANÇAS, CHAT DE EVENTOS DA RODADA E PARTICIPANTES -->
             <div class="col-right">
                 <!-- BANCA COMERCIAL -->
                 <div class="banca-section">
@@ -149,15 +152,15 @@
                     </div>
                 </div>
 
-                <!-- NOVO FEED VERTICAL ESTILO CHAT: QUEM ESTÁ NA BOA -->
+                <!-- PAINEL VERTICAL ESTILO CHAT: QUEM ESTÁ NA BOA -->
                 <div class="naboa-section">
-                    <h4 style="color:var(--orange); font-size:11px; margin:0 0 8px 0; font-weight: bold; text-transform:uppercase; letter-spacing:0.5px; text-align: left;">📢 EVENTOS DA RODADA (TÁ NA BOA)</h4>
+                    <h4 style="color:var(--orange); font-size:11px; margin:0 0 10px 0; font-weight: bold; text-transform:uppercase; letter-spacing:0.5px; text-align: left;">📢 CHAT DA RODADA (TÁ NA BOA)</h4>
                     <div class="naboa-chat-box" id="lista-na-boa">
-                        <div style="text-align:center; color:#555; font-size:12px; padding-top:40px;">Aguardando início do sorteio...</div>
+                        <div style="text-align:center; color:#555; font-size:12px; padding-top:60px;">Aguardando início do sorteio...</div>
                     </div>
                 </div>
 
-                <!-- LISTA DE PARTICIPANTES (MINICARTELAS ABAIXO DO FEED) -->
+                <!-- LISTA DE PARTICIPANTES COM AS MINI CARTELAS -->
                 <div class="participants-section">
                     <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 10px 0; font-weight: bold;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
                     <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
@@ -370,10 +373,10 @@
                             let faltamBolas = calcularFaltantesPorFase(c, bolasGlobal, faseAtualDoJogo);
                             if (faltamBolas === 1) {
                                 temAlguemNaBoa = true;
-                                // Injeção estilo balão de chat vertical
                                 painelNaBoa.innerHTML += `
                                     <div class="naboa-msg">
-                                        ⚡ <strong>${d.nome || 'Jogador'}</strong> tá na boa! <span style="color:#aaa; font-size:11px; float:right;">${d.whatsapp || 'Whats'}</span>
+                                        <span>⚡ <strong>${d.nome || 'Jogador'}</strong> tá na boa!</span>
+                                        <span style="color:#666; font-size:10px; margin-top: 2px;">Contato: ${d.whatsapp || 'Whats'}</span>
                                     </div>`;
                             }
                         }
@@ -390,9 +393,8 @@
             });
             
             if (!temAlguemNaBoa) {
-                painelNaBoa.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; padding-top:40px;">Nenhum jogador na boa no momento...</div>`;
+                painelNaBoa.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; padding-top:60px;">Nenhum jogador na boa no momento...</div>`;
             } else {
-                // Auto scroll do feed estilo chat para ver sempre a última mensagem
                 painelNaBoa.scrollTop = painelNaBoa.scrollHeight;
             }
             document.getElementById('player-count').innerText = count;
@@ -426,7 +428,7 @@
     }
 
     // ==========================================
-    // BANCO DE PREFIXOS DE EMAILS PARA OS 75 FAKES (CREDIBILIDADE MÁXIMA)
+    // BANCO DE PREFIXOS DE EMAILS REAIS PARA OS FAKES
     // ==========================================
     async function injetarJogadoresFakes() {
         const prefixosEmailsFakes = [
@@ -455,7 +457,6 @@
                 cartelasFake.push(n.sort((a,b)=>a-b));
             }
             
-            // Atribui e-mails randômicos limpos e formatações de celulares paranaenses realistas (DDD 41)
             let emailFake = prefixosEmailsFakes[i] || `user.automato${i}`;
             let celFake = `(41) 99${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9000+1000)}`;
             updatesFakes[`users/fake_user_${i}`] = { nome: `${emailFake}🔹`, cartelas: cartelasFake, whatsapp: celFake, cpf: "Automático" };
