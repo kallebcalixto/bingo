@@ -30,7 +30,6 @@
             overflow-y: auto; 
         }
         
-        /* HEADER ESTILIZADO */
         .audio-control { 
             background: rgba(10, 10, 15, 0.85); 
             backdrop-filter: blur(12px);
@@ -65,7 +64,6 @@
         .container { display: flex; flex-direction: column; gap: 20px; padding: 20px; box-sizing: border-box; max-width: 1440px; margin: 0 auto; }
         .game-layout { display: flex; flex-direction: column; gap: 20px; width: 100%; }
         
-        /* PAINEL DE NÚMEROS GLASSMORPHISM */
         .painel-geral { 
             background: var(--glass); 
             backdrop-filter: blur(10px);
@@ -103,8 +101,8 @@
             text-shadow: 0 1px 2px rgba(255,255,255,0.6);
         }
         
-        /* BOLA 3D HIPER REALISTA */
-        .ball-container { padding: 25px; text-align: center; perspective: 1000px; }
+        /* CONTAINER DA BOLA ATUALIZADO COM MARGENS CORRETAS */
+        .ball-container { padding: 15px 0 25px 0; text-align: center; perspective: 1000px; }
         .ball-display { 
             background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f0f0f0 20%, #b0b0b0 50%, #555555 80%, #222222 100%); 
             width: 150px; 
@@ -139,7 +137,6 @@
             box-shadow: 0 0 12px rgba(0,230,118,0.5); 
         }
         
-        /* BLOQUEIOS E MENUS */
         #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,8,0.95); backdrop-filter: blur(15px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .cadastro-box { background: var(--dark-card); padding: 35px; border-radius: 24px; border: 1px solid rgba(255, 107, 0, 0.2); max-width: 420px; width: 85%; text-align: left; box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 40px var(--orange-glow); }
         .cadastro-box h2 { margin: 0 0 15px 0; color: var(--orange); font-weight: 900; text-align: center; font-size: 24px; letter-spacing: 0.5px; }
@@ -149,7 +146,6 @@
 
         #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(5,5,8,0.96); backdrop-filter: blur(10px); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         
-        /* BANCA DE CRÉDITOS */
         .banca-section { background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .banca-status { background: #07070a; padding: 15px; border-radius: 14px; text-align: center; border: 1px solid var(--border); }
         .timer-destaque { font-size: 32px; font-weight: 900; color: var(--cyan); margin-top: 5px; text-shadow: 0 0 15px var(--cyan-glow); font-variant-numeric: tabular-nums; }
@@ -165,7 +161,6 @@
         .btn-recargar { background: linear-gradient(135deg, var(--cyan), #00b8d4); color: #000; box-shadow: 0 4px 15px var(--cyan-glow); }
         .input-qtd { width: 85px; background: #07070a; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 18px; font-family: inherit; }
 
-        /* NOVO DESIGN DO CHAT VERTICAL */
         .naboa-section { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 20px; padding: 18px; height: 280px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth; }
         .naboa-chat-box::-webkit-scrollbar { width: 4px; }
@@ -176,7 +171,6 @@
             background: rgba(255, 107, 0, 0.04); 
             padding: 12px 16px; 
             border-radius: 14px; 
-            border-left: 4px solid var(--orange); 
             border: 1px solid rgba(255, 107, 0, 0.15);
             border-left: 4px solid var(--orange);
             animation: slideInMsg 0.3s cubic-bezier(0.19, 1, 0.22, 1) both; 
@@ -187,14 +181,12 @@
         }
         @keyframes slideInMsg { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* LISTA PARTICIPANTES DE MINICARTELAS */
         .participants-section { background: rgba(5,5,8,0.4); padding: 18px; border-radius: 20px; border: 1px solid var(--border); max-height: 300px; overflow-y: auto; width: 100%; box-sizing: border-box; }
         .participants-section::-webkit-scrollbar { width: 4px; }
         .participants-section::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
         
         .fase-badge { background: rgba(255, 107, 0, 0.1); padding: 6px 16px; border-radius: 30px; font-size: 11px; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.2); color: #ff9100; letter-spacing: 0.5px; }
 
-        /* DESIGN MINI CARTELA 3D CONTIDO */
         .mini-card-item {
             background: #11111a; 
             padding: 8px; 
@@ -223,7 +215,7 @@
 <div id="cadastro-overlay">
     <div class="cadastro-box">
         <h2>DADOS DE PREMIAÇÃO PIX</h2>
-        <p style="font-size: 12px; color: #7f7f9c; margin: 0 0 20px 0; text-align: center; line-height: 1.5;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
+        <p style="font-size: 12px; color: #7f7f9c; margin: 0 0 20px 0; text-align: center; line-height: 1.5;">Insira seus dados corretamente para que o system possa transferir seus prêmios de forma automática.</p>
         <label style="font-size: 11px; font-weight: bold; color: #7f7f9c; letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
         <input type="text" id="cad-whatsapp" placeholder="(41) 99999-9999">
         <label style="font-size: 11px; font-weight: bold; color: #7f7f9c; letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
@@ -257,6 +249,7 @@
     <div id="game-section">
         <div class="game-layout">
             
+            <!-- COLUNA DA ESQUERDA: JOGO COM NOVA FILA DE DISPOSIÇÃO -->
             <div class="col-left">
                 <div style="background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
                     <div style="text-align: left;">
@@ -267,15 +260,20 @@
                 </div>
                 
                 <div style="position: relative; background: rgba(5,5,8,0.5); border-radius: 24px; padding: 15px; border: 1px solid var(--border);">
+                    <!-- 1º: IMAGEM DO ADM -->
                     <div style="padding: 5px; text-align: center;">
                         <img id="img-premio" src="" style="width:100%; max-height:180px; object-fit:contain; display:none; margin-bottom:20px; border-radius:12px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
                     </div>
-                    <div id="tabela-90" class="painel-geral"></div>
+                    
+                    <!-- 2º: BOLA PRINCIPAL EM 3D ADICIONADA LOGO ACIMA DA GRADE GERAL -->
                     <div class="ball-container">
                         <div class="ball-display">
                             <div id="bola-num">--</div>
                         </div>
                     </div>
+
+                    <!-- 3º: MATRIZ DE 90 NÚMEROS -->
+                    <div id="tabela-90" class="painel-geral"></div>
                 </div>
             </div>
             
@@ -385,12 +383,12 @@
             document.getElementById('fase-rodada-txt').innerText = "ACEITANDO BILHETES";
         }
 
-        const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
+        const minutes = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
         const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
         
         if (dados.estado === "espera") {
             document.getElementById('label-banca').innerText = "PRÓXIMA RODADA EM:";
-            document.getElementById('cronometro-banca').innerText = `${minutos}:${segundos}`;
+            document.getElementById('cronometro-banca').innerText = `${minutes}:${segundos}`;
             document.getElementById('cronometro-banca').style.color = "var(--cyan)";
             document.getElementById('btn-compre-acao').disabled = false;
         } else {
