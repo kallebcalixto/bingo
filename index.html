@@ -371,10 +371,10 @@
         apiKey: "AIzaSyAbDzmgd3QrRrx8R14dJSwjbN6fEFkR7pI", 
         authDomain: "azar-c7f24.firebaseapp.com",
         databaseURL: "https://azar-c7f24-default-rtdb.firebaseio.com", 
-        projectId: "azar-c7f24",
-        storageBucket: "azar-c7f24.firebasestorage.app",
-        messagingSenderId: "458222214312",
-        appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
+            projectId: "azar-c7f24",
+            storageBucket: "azar-c7f24.firebasestorage.app",
+            messagingSenderId: "458222214312",
+            appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
     };
     
     const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
@@ -409,7 +409,6 @@
 
             bancaManualDoBanco = c.banca_manual || 0;
             
-            // Sincroniza dinamicamente as porcentagens configuradas pelo admin[cite: 2]
             pctF1 = c.porcentagem_f1 !== undefined ? c.porcentagem_f1 : 10;
             pctF2 = c.porcentagem_f2 !== undefined ? c.porcentagem_f2 : 20;
             pctF3 = c.porcentagem_f3 !== undefined ? c.porcentagem_f3 : 30;
@@ -437,7 +436,6 @@
         let caixaAcumulado = faturamentoPixReal + bancaManualDoBanco;
         let surplusLivre = caixaAcumulado > 10000 ? (caixaAcumulado - 10000) : 0;
 
-        // Multiplica a taxa da fase correspondente baseada nos inputs do admin[cite: 2]
         const escolhaFator = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
         document.getElementById('txt-fase-premio-real').innerText = `R$ ${(surplusLivre * (escolhaFator / 100)).toFixed(2)}`;
     });
@@ -764,11 +762,13 @@
                 } else {
                     mestreDaRodada = false;
                     setTimeout(async () => {
+                        // FLUXO CONTINUO: Roda sequencialmente na mesma cartela mantendo as bolas na mesa[cite: 2]
                         if(faseAtualDoJogo < 3) {
                             let novaFase = faseAtualDoJogo + 1;
                             await set(ref(db, 'jogo/ganhador_atual'), null);
                             await update(ref(db, 'jogo/automacao'), { fase: novaFase });
                         } else {
+                            // Fim do ciclo de Cartela Cheia: Aqui as cartelas expiram e uma nova rodada comeca[cite: 2]
                             const users = await get(ref(db, 'users')); const limpaUpdates = {};
                             users.forEach(u => {
                                 if(u.key.startsWith('fake_user_')) limpaUpdates[`users/${u.key}`] = null;
