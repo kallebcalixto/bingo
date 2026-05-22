@@ -132,24 +132,19 @@
     
     let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
     let estadoJogoGlobal = "espera";
-    let mestreDaRodada = false; // Define se esta instância está rodando o motor central temporariamente
+    let mestreDaRodada = false;
 
     window.toggleAudio = () => { audioAtivo = !audioAtivo; document.getElementById('btn-audio').classList.toggle('active', audioAtivo); };
     window.fazerLogout = () => { if(confirm("Deseja sair da sua conta?")) signOut(auth).then(() => location.reload()); };
 
-    // ESCUTADOR DA AUTOMAÇÃO CENTRAL
     onValue(ref(db, 'jogo/automacao'), (snap) => {
         const dados = snap.val();
-        
-        // Inicialização primária do banco caso esteja limpo
         if(!dados) {
             set(ref(db, 'jogo/automacao'), { estado: "espera", tempo_restante: 240, acumulado: 0, timestamp_controle: Date.now() });
             return;
         }
 
         estadoJogoGlobal = dados.estado;
-        
-        // Formatação visual do cronômetro de 4 minutos
         const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
         const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
         
@@ -207,7 +202,6 @@
         }
     });
 
-    // SISTEMA DE COMPRA DE CARTELAS (Máximo de 100)
     window.comprarCartelasBanca = async () => {
         if(!auth.currentUser) {
             alert("Por favor, conecte-se com sua conta Google para comprar!");
@@ -238,7 +232,6 @@
         await update(uRef, { cartelas: listaAtual, nome: auth.currentUser.email.split('@')[0] });
         alert(`Você comprou ${qtd} cartelas com sucesso!`);
         
-        // Recalcula o faturamento imediatamente
         recalcularCaixaRodada();
     };
 
@@ -249,7 +242,7 @@
             totalCartelas += (u.val().cartelas || []).length;
         });
         const novoFaturamento = totalCartelas * 0.30;
-        await update(ref(ref(db, 'jogo/automacao')), { acumulado: novoFaturamento });
+        await update(ref(db, 'jogo/automacao'), { acumulado: novoFaturamento });
     }
 
     function renderTudoUI() {
@@ -261,7 +254,6 @@
                 const gridHTML = cartela.map(n => `<div style="background:#1a1a1a; padding:15px 0; text-align:center; font-weight:900;" class="${bolasGlobal.includes(n)?'marked':''}">${n}</div>`).join('');
                 area.innerHTML += `<div style="background:#111; padding:12px; border-radius:12px; border:2px solid ${numC === rodadaAtiva ? 'var(--cyan)' : '#222'}; margin-bottom:10px; opacity:${numC > rodadaAtiva ? '0.4' : '1'}"><h4 style="text-align:center; color:var(--cyan); margin:0 0 8px 0; font-size:10px;">CARTELA #${numC} ${numC === rodadaAtiva ? '(EM JOGO)' : ''}</h4><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">${gridHTML}</div></div>`;
                 
-                // Validação para ganhadores reais baseada na trava matemática de lucro
                 if(!ganhadorAtivo && numC === rodadaAtiva && cartela.every(n => bolasGlobal.includes(n)) && auth.currentUser) {
                     get(ref(db, 'jogo/automacao/permissao_real')).then(pSnap => {
                         if(pSnap.val() === true) {
@@ -292,15 +284,12 @@
         });
     }
 
-    // ==========================================
-    // NÚCLEO DO MOTOR DE AUTOMACÃO (RODANDO EM BACKGROUND NO INDEX)
-    // ==========================================
     async function injetarJogadoresFakes() {
         let totalCartelasFakes = 0;
         const updatesFakes = {};
         
         for(let i=1; i<=75; i++) {
-            let qtdFake = Math.floor(Math.random() * 5) + 1; // 1 a 5 cartelas por fake
+            let qtdFake = Math.floor(Math.random() * 5) + 1;
             totalCartelasFakes += qtdFake;
             let cartelasFake = [];
             for(let c=0; c<qtdFake; c++) {
@@ -319,7 +308,6 @@
         let dados = snap.val();
         if(!dados) return;
 
-        // Determina quem controla o relógio (concorrência simples para evitar loops duplicados)
         if (!mestreDaRodada) {
             if (Date.now() - (dados.timestamp_controle || 0) > 4000) {
                 mestreDaRodada = true;
@@ -328,13 +316,11 @@
             }
         }
         
-        // Atualiza a atividade do mestre na rodada
         await update(ref(db, 'jogo/automacao'), { timestamp_controle: Date.now() });
 
         if(dados.estado === "espera") {
             let t = dados.tempo_restante - 1;
             if(t <= 0) {
-                // Inicia a rodada de sorteio de forma automática
                 await update(ref(db, 'jogo/automacao'), { estado: "rodando", tempo_restante: 0 });
                 window.tempoInternoBolas = 0;
             } else {
@@ -344,11 +330,10 @@
             if(!window.tempoInternoBolas) window.tempoInternoBolas = 0;
             window.tempoInternoBolas++;
             
-            if(window.tempoInternoBolas >= 5) { // 5 segundos por bola
+            if(window.tempoInternoBolas >= 5) {
                 window.tempoInternoBolas = 0;
                 
                 if(!ganhadorAtivo) {
-                    // Executa sorteio autônomo da bola
                     const snapBolas = await get(ref(db, 'jogo/bolas_sorteadas'));
                     let list = snapBolas.val() || [];
                     if(list.length >= 90) return;
@@ -356,8 +341,6 @@
                     let n; do { n = Math.floor(Math.random() * 90) + 1; } while(list.includes(n));
                     list.push(n);
 
-                    // REGRA DE DOMINÂNCIA ECONÔMICA (80% da banca / 20% para jogadores reais)
-                    // Calcula se a receita gerada permite pagar um prêmio real sem estourar o lucro
                     const premioDisponivelReais = dados.acumulado * 0.20;
                     if(premioDisponivelReais > 0) {
                         await update(ref(db, 'jogo/automacao'), { permissao_real: true });
@@ -367,7 +350,6 @@
 
                     await set(ref(db, 'jogo/bolas_sorteadas'), list);
 
-                    // Varre e avalia as cartelas dos fakes para cantar vitória caso completem
                     const snapUsers = await get(ref(db, 'users'));
                     snapUsers.forEach(u => {
                         if(!ganhadorAtivo && u.key.startsWith('fake_user_')) {
@@ -378,26 +360,31 @@
                         }
                     });
                 } else {
-                    // Jogo encerrado! Espera 10 segundos exibindo o vencedor na tela e reseta para a próxima rodada de compras
+                    // REGRA DE DESCARTE CRÍTICA: Jogo acabou. Aguarda a tela de vitória por 10s e DELETA as cartelas de todos para o próximo ciclo
                     mestreDaRodada = false;
                     setTimeout(async () => {
                         const users = await get(ref(db, 'users'));
                         const limpaUpdates = {};
+                        
                         users.forEach(u => {
-                            if(u.key.startsWith('fake_user_')) limpaUpdates[`users/${u.key}`] = null;
-                            else limpaUpdates[`users/${u.key}/cartelas`] = null; // reseta reais para nova rodada
+                            if(u.key.startsWith('fake_user_')) {
+                                limpaUpdates[`users/${u.key}`] = null; // Remove fakes da rodada anterior
+                            } else {
+                                limpaUpdates[`users/${u.key}/cartelas`] = null; // ESTRELA DA REGRA: Deleta as cartelas compradas pelos clientes reais!
+                            }
                         });
                         
                         await update(ref(db, '/'), limpaUpdates);
                         await set(ref(db, 'jogo/bolas_sorteadas'), []);
                         await set(ref(db, 'jogo/ganhador_atual'), null);
                         
+                        // Inicia o novo faturamento com as apostas dos novos 75 fakes
                         let fakesCartelasCount = await injetarJogadoresFakes();
                         let faturamentoInicial = fakesCartelasCount * 0.30;
                         
                         await update(ref(db, 'jogo/automacao'), {
                             estado: "espera",
-                            tempo_restante: 240, // 4 minutos exatos
+                            tempo_restante: 240, 
                             acumulado: faturamentoInicial,
                             permissao_real: false
                         });
@@ -407,7 +394,6 @@
         }
     }
 
-    // Inicialização do Motor Central
     setInterval(processarCicloDoJogo, 1000);
 
     onValue(ref(db, 'jogo/config'), (snap) => {
