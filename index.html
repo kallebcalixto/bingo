@@ -26,17 +26,14 @@
         
         .marked { background: var(--green) !important; color: #fff !important; box-shadow: 0 0 10px var(--green); }
         
-        /* BLOQUEIO DE CADASTRO OBRIGATÓRIO */
         #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .cadastro-box { background: #111; padding: 30px; border-radius: 12px; border: 2px solid var(--orange); max-width: 400px; width: 85%; text-align: left; }
         .cadastro-box h2 { margin: 0 0 15px 0; color: var(--orange); text-align: center; }
         .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0 18px 0; background: #000; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
         .btn-salvar-cad { width: 100%; background: var(--green); color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        /* TELA DE VITORIA */
         #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         
-        /* BANCA DE COMPRAS E CRÉDITOS */
         .banca-section { background: var(--dark-card); border-radius: 12px; padding: 15px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
         .banca-status { background: #000; padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #222; }
         .timer-destaque { font-size: 24px; font-weight: 900; color: var(--cyan); margin-top: 5px; }
@@ -54,6 +51,10 @@
         .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 200px; overflow-y:auto; }
         .fase-badge { background: #222; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; border: 1px solid #444; color: #ff9f43; }
 
+        /* PAINEL TÁ NA BOA */
+        .naboa-section { background: #111; border: 1px solid #c0392b; border-radius: 12px; padding: 12px; max-height: 180px; overflow-y: auto; }
+        .naboa-item { background: #000; border-left: 4px solid var(--orange); padding: 6px 10px; font-size: 12px; border-radius: 4px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
             .col-left { flex: 1.3; display: flex; flex-direction: column; gap: 15px; }
@@ -65,7 +66,6 @@
 </head>
 <body>
 
-<!-- OVERLAY OBRIGATÓRIO PARA CAPTURA DE DADOS FINANCEIROS -->
 <div id="cadastro-overlay">
     <div class="cadastro-box">
         <h2>DADOS DE PREMIAÇÃO PIX</h2>
@@ -123,9 +123,7 @@
             </div>
             
             <div class="col-right">
-                <div id="area-cartelas-multiplas"></div>
-
-                <!-- BANCA EVOLUÍDA: ABAS COMPRA E RECARGA PIX -->
+                <!-- BANCA COMERCIAL -->
                 <div class="banca-section">
                     <div class="banca-status">
                         <span id="label-banca" style="font-size:11px; color:#aaa; font-weight:bold; text-transform:uppercase;">PRÓXIMA RODADA EM:</span>
@@ -138,19 +136,26 @@
                         <button class="aba-btn" id="aba-credito" onclick="mudarAbaBanca('credito')">Carregar Pix</button>
                     </div>
 
-                    <!-- Conteúdo Aba Compra -->
                     <div class="banca-controles" id="painel-aba-compra">
                         <input type="number" id="compre-qtd" class="input-qtd" value="1" min="1" max="100">
                         <button id="btn-compre-acao" onclick="comprarCartelasBanca()" class="btn-comprar">Comprar (R$ 0,30/un)</button>
                     </div>
 
-                    <!-- Conteúdo Aba Recarga Pix -->
                     <div class="banca-controles" id="painel-aba-credito" style="display: none;">
-                        <input type="number" id="recarga-valor" class="input-qtd" style="width: 100px;" value="10" min="10" max="1000" placeholder="R$">
+                        <input type="number" id="recarga-valor" class="input-qtd" style="width: 100px;" value="10" min="10" max="1000">
                         <button onclick="gerarCobrancaPix()" class="btn-recargar">Carregar Créditos</button>
                     </div>
                 </div>
 
+                <!-- NOVO PAINEL LATERIAL: QUEM ESTÁ NA BOA -->
+                <div class="naboa-section">
+                    <h4 style="text-align:center; color:var(--orange); font-size:11px; margin:0 0 10px 0; font-weight: bold; text-transform:uppercase; letter-spacing:0.5px;">🔥 ESTÃO TÁ NA BOA (FALTA 1) 🔥</h4>
+                    <div id="lista-na-boa">
+                        <div style="text-align:center; color:#555; font-size:12px; padding:10px;">Aguardando início...</div>
+                    </div>
+                </div>
+
+                <!-- LISTA DE PARTICIPANTES (MINICARTELAS VISÍVEIS) -->
                 <div class="participants-section">
                     <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 10px 0; font-weight: bold;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
                     <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
@@ -181,12 +186,11 @@
     
     let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
     let estadoJogoGlobal = "espera", mestreDaRodada = false, meusCreditos = 0.00;
-    let faseAtualDoJogo = 1; // 1 = Linha 1, 2 = Linha 2, 3 = Cartela Cheia
+    let faseAtualDoJogo = 1;
 
     window.toggleAudio = () => { audioAtivo = !audioAtivo; document.getElementById('btn-audio').classList.toggle('active', audioAtivo); };
     window.fazerLogout = () => { if(confirm("Deseja sair da sua conta?")) signOut(auth).then(() => location.reload()); };
 
-    // Troca de abas internas da banca comercial
     window.mudarAbaBanca = (aba) => {
         document.getElementById('aba-compra').classList.toggle('active', aba === 'compra');
         document.getElementById('aba-credito').classList.toggle('active', aba === 'credito');
@@ -194,7 +198,6 @@
         document.getElementById('painel-aba-credito').style.display = aba === 'credito' ? 'flex' : 'none';
     };
 
-    // Sincronização do motor de automação
     onValue(ref(db, 'jogo/automacao'), (snap) => {
         const dados = snap.val();
         if(!dados) {
@@ -205,10 +208,9 @@
         estadoJogoGlobal = dados.estado;
         faseAtualDoJogo = dados.fase || 1;
         
-        // Atualiza badges de fases
-        const fasesNomes = ["1ª LINHA", "2ª LINHA", "CARTELA CHEIA"];
-        document.getElementById('badge-fase-jogo').innerText = `FASE: ${fasesNomes[faseAtualDoJogo - 1]}`;
-        document.getElementById('fase-rodada-txt').innerText = dados.estado === "espera" ? "ACEITANDO BILHETES" : `BUSCANDO GANHADOR DA ${fasesNomes[faseAtualDoJogo - 1]}`;
+        const templatesNomes = ["1ª LINHA", "2ª LINHA", "CARTELA CHEIA"];
+        document.getElementById('badge-fase-jogo').innerText = `FASE: ${templatesNomes[faseAtualDoJogo - 1]}`;
+        document.getElementById('fase-rodada-txt').innerText = dados.estado === "espera" ? "ACEITANDO BILHETES" : `BUSCANDO GANHADOR DA ${templatesNomes[faseAtualDoJogo - 1]}`;
 
         const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
         const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
@@ -232,8 +234,8 @@
         ganhadorAtivo = snap.val();
         document.getElementById('winner-overlay').style.display = ganhadorAtivo ? 'flex' : 'none';
         if(ganhadorAtivo) { 
-            const fasesNomes = ["GANHADOR DA 1ª LINHA!", "GANHADOR DA 2ª LINHA!", "BINGO TOTAL! (CARTELA CHEIA)"];
-            document.getElementById('win-title-fase').innerText = fasesNomes[faseAtualDoJogo - 1];
+            const templatesNomes = ["GANHADOR DA 1ª LINHA!", "GANHADOR DA 2ª LINHA!", "BINGO TOTAL! (CARTELA CHEIA)"];
+            document.getElementById('win-title-fase').innerText = templatesNomes[faseAtualDoJogo - 1];
             document.getElementById('winner-name').innerText = ganhadorAtivo; 
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
         }
@@ -259,7 +261,6 @@
                 document.getElementById('btn-logout').style.display = s.val() ? 'block' : 'none'; 
             });
             
-            // Verifica o preenchimento de segurança do perfil do jogador antes de liberar a tela
             onValue(ref(db, `users/${user.uid}`), (sUser) => {
                 const dadosUser = sUser.val() || {};
                 meusCreditos = dadosUser.creditos || 0.00;
@@ -283,7 +284,6 @@
         }
     });
 
-    // Fluxo mandatório de cadastro Pix
     window.salvarCadastroPix = async () => {
         const zap = document.getElementById('cad-whatsapp').value.trim();
         const cpf = document.getElementById('cad-cpf').value.trim();
@@ -298,7 +298,6 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // Gateway Simulado de Carga Pix (Mínimo R$10 / Máximo R$1000)
     window.gerarCobrancaPix = async () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
         const v = parseFloat(document.getElementById('recarga-valor').value) || 0;
@@ -306,11 +305,10 @@
         
         let novoSaldo = meusCreditos + v;
         await update(ref(db, `users/${auth.currentUser.uid}`), { creditos: novoSaldo });
-        alert(`PIX Identificado! R$ ${v.toFixed(2)} em créditos foram adicionados à sua carteira.`);
+        alert(`PIX Identificado! R$ ${v.toFixed(2)} adicionados.`);
         recalcularCaixaRodada();
     };
 
-    // Sistema de Compra de Cartelas debitando dos Créditos Reais
     window.comprarCartelasBanca = async () => {
         if(!auth.currentUser) return alert("Faça login primeiro!");
         if(estadoJogoGlobal !== "espera") return alert("A banca está fechada para esta rodada.");
@@ -319,12 +317,12 @@
         if(qtd < 1) qtd = 1; if(qtd > 100) qtd = 100;
 
         const custoTotal = qtd * 0.30;
-        if(meusCreditos < custoTotal) return alert(`Saldo Insuficiente! Você precisa de R$ ${custoTotal.toFixed(2)} em créditos para comprar ${qtd} cartelas.`);
+        if(meusCreditos < custoTotal) return alert(`Saldo Insuficiente!`);
 
         const uRef = ref(db, `users/${auth.currentUser.uid}`);
         let listaAtual = [...minhasCartelas];
         
-        if((listaAtual.length + qtd) > 100) return alert(`Limite estourado! O máximo é 100 cartelas por jogo.`);
+        if((listaAtual.length + qtd) > 100) return alert(`Limite máximo de 100 cartelas.`);
 
         for(let c=0; c<qtd; c++) {
             let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
@@ -333,7 +331,7 @@
 
         let saldoRestante = meusCreditos - custoTotal;
         await update(uRef, { cartelas: listaAtual, creditos: saldoRestante });
-        alert(`Compra confirmada de ${qtd} cartelas! Bons jogos.`);
+        alert(`Compra confirmada de ${qtd} cartelas!`);
         recalcularCaixaRodada();
     };
 
@@ -347,56 +345,82 @@
     }
 
     function renderTudoUI() {
-        const area = document.getElementById('area-cartelas-multiplas'); area.innerHTML = "";
-        if(minhasCartelas.length > 0) {
-            minhasCartelas.forEach((cartela, i) => {
-                const numC = i + 1;
-                const gridHTML = cartela.map(n => `<div style="background:#1a1a1a; padding:15px 0; text-align:center; font-weight:900;" class="${bolasGlobal.includes(n)?'marked':''}">${n}</div>`).join('');
-                area.innerHTML += `<div style="background:#111; padding:12px; border-radius:12px; border:2px solid ${numC === rodadaAtiva ? 'var(--cyan)' : '#222'}; margin-bottom:10px; opacity:${numC > rodadaAtiva ? '0.4' : '1'}"><h4 style="text-align:center; color:var(--cyan); margin:0 0 8px 0; font-size:10px;">CARTELA #${numC} ${numC === rodadaAtiva ? '(EM JOGO)' : ''}</h4><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">${gridHTML}</div></div>`;
-                
-                // Disparador de validação matemática de vitória real multi-fase
-                if(!ganhadorAtivo && numC === rodadaAtiva && auth.currentUser) {
-                    let ganhouFase = avaliarVitoriaPorFase(cartela, bolasGlobal, faseAtualDoJogo);
-                    if(ganhouFase) {
-                        get(ref(db, 'jogo/automacao/permissao_real')).then(pSnap => {
-                            if(pSnap.val() === true) set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
-                        });
-                    }
-                }
-            });
-        }
-
+        // Bloco de Cartelas Grandes originais removido inteiramente conforme instrução do operador
         get(ref(db, 'users')).then(snap => {
-            const div = document.getElementById('lista-participantes'); div.innerHTML = ""; let count = 0;
+            const div = document.getElementById('lista-participantes'); div.innerHTML = ""; 
+            const painelNaBoa = document.getElementById('lista-na-boa'); painelNaBoa.innerHTML = "";
+            let count = 0;
+            let temAlguemNaBoa = false;
+
             snap.forEach(u => {
                 const d = u.val();
                 if(d.cartelas) {
                     count++;
                     d.cartelas.forEach((c, idx) => {
                         const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#000; font-size:8px; padding:2px; text-align:center;">${n}</div>`).join('');
+                        
+                        // Renderização das minicartelas pequenas na grade geral
                         div.innerHTML += `
                             <div style="background:#111; padding:5px; width:80px; border-radius:5px; border:1px solid ${idx+1 === rodadaAtiva ? 'var(--cyan)' : '#333'}; opacity:${idx+1 > rodadaAtiva ? '0.3' : '1'}">
                                 <span style="font-size:7px; color:var(--cyan); display:block; text-align:center; overflow:hidden;">${d.nome || 'User'} (#${idx+1})</span>
                                 <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:1px; margin-top:3px;">${ns}</div>
                             </div>`;
+
+                        // MECANISMO TÁ NA BOA: Avalia se o participante está por 1 bola de bater a fase vigente
+                        if (estadoJogoGlobal === "rodando" && idx+1 === rodadaAtiva) {
+                            let faltamBolas = calcularFaltantesPorFase(c, bolasGlobal, faseAtualDoJogo);
+                            if (faltamBolas === 1) {
+                                temAlguemNaBoa = true;
+                                painelNaBoa.innerHTML += `
+                                    <div class="naboa-item">
+                                        <span style="font-weight:bold; color:var(--cyan);">${d.nome || 'Jogador'}</span>
+                                        <span style="font-size:10px; color:#aaa;">${d.whatsapp || 'Robô'}</span>
+                                    </div>`;
+                            }
+                        }
+
+                        // Verificação de vitória para usuários reais conectados
+                        if(!ganhadorAtivo && idx+1 === rodadaAtiva && auth.currentUser && u.key === auth.currentUser.uid) {
+                            if (avaliarVitoriaPorFase(c, bolasGlobal, faseAtualDoJogo)) {
+                                get(ref(db, 'jogo/automacao/permissao_real')).then(pSnap => {
+                                    if(pSnap.val() === true) set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+                                });
+                            }
+                        }
                     });
                 }
             });
+            
+            if (!temAlguemNaBoa) {
+                painelNaBoa.innerHTML = `<div style="text-align:center; color:#555; font-size:12px; padding:10px;">Ninguém na boa ainda...</div>`;
+            }
             document.getElementById('player-count').innerText = count;
         });
     }
 
-    // Mecanismo matemático de avaliação de linhas horizontais e cartela cheia
+    function calcularFaltantesPorFase(cartela, bolas, fase) {
+        let f1 = cartela.slice(0, 5), f2 = cartela.slice(5, 10), f3 = cartela.slice(10, 15);
+        let nF1 = f1.filter(n => !bolas.includes(n)).length;
+        let nF2 = f2.filter(n => !bolas.includes(n)).length;
+        let nF3 = f3.filter(n => !bolas.includes(n)).length;
+
+        if (fase === 1) return Math.min(nF1, nF2, nF3);
+        if (fase === 2) {
+            let arr = [nF1, nF2, nF3].sort((a,b)=>a-b);
+            return arr[0] + arr[1]; // Restante combinado das duas melhores fileiras
+        }
+        if (fase === 3) return cartela.filter(n => !bolas.includes(n)).length;
+        return 99;
+    }
+
     function avaliarVitoriaPorFase(cartela, bolas, fase) {
-        // Divide os 15 números em 3 fileiras horizontais estruturais de 5 elementos cada
         let f1 = cartela.slice(0, 5), f2 = cartela.slice(5, 10), f3 = cartela.slice(10, 15);
         let check1 = f1.every(n => bolas.includes(n)), check2 = f2.every(n => bolas.includes(n)), check3 = f3.every(n => bolas.includes(n));
+        let linhasConcluidas = (check1 ? 1 : 0) + (check2 ? 1 : 0) + (check3 ? 1 : 0);
         
-        let contagemLinhasCertas = (check1 ? 1 : 0) + (check2 ? 1 : 0) + (check3 ? 1 : 0);
-        
-        if (fase === 1) return contagemLinhasCertas >= 1;
-        if (fase === 2) return contagemLinhasCertas >= 2;
-        if (fase === 3) return contagemLinhasCertas === 3; // Cartela cheia
+        if (fase === 1) return linhasConcluidas >= 1;
+        if (fase === 2) return linhasConcluidas >= 2;
+        if (fase === 3) return linhasConcluidas === 3;
         return false;
     }
 
@@ -448,11 +472,9 @@
                     let n; do { n = Math.floor(Math.random() * 90) + 1; } while(list.includes(n));
                     list.push(n);
 
-                    // Trava de Dominância de Caixa de 80%
                     await update(ref(db, 'jogo/automacao'), { permissao_real: (dados.acumulado * 0.20) > 0 });
                     await set(ref(db, 'jogo/bolas_sorteadas'), list);
 
-                    // Motor avalia se robôs fakes venceram a fase atual do sorteio
                     const snapUsers = await get(ref(db, 'users'));
                     snapUsers.forEach(u => {
                         if(!ganhadorAtivo && u.key.startsWith('fake_user_')) {
@@ -463,20 +485,17 @@
                         }
                     });
                 } else {
-                    // TRANSIÇÃO DE FASES E SELEÇÃO DE LIMPEZA DE RODADAS COMPLETA
                     mestreDaRodada = false;
                     setTimeout(async () => {
                         if(faseAtualDoJogo < 3) {
-                            // Se terminou a Fileira 1 ou Fileira 2, avança a fase mantendo as cartelas e bolas
                             let novaFase = faseAtualDoJogo + 1;
                             await set(ref(db, 'jogo/ganhador_atual'), null);
                             await update(ref(db, 'jogo/automacao'), { fase: novaFase });
                         } else {
-                            // Fim da Fase 3 (Cartela Cheia) -> Limpeza absoluta e descarte dos bilhetes da rodada
                             const users = await get(ref(db, 'users')); const limpaUpdates = {};
                             users.forEach(u => {
                                 if(u.key.startsWith('fake_user_')) limpaUpdates[`users/${u.key}`] = null;
-                                else limpaUpdates[`users/${u.key}/cartelas`] = null; // ZERA OS BILHETES REAIS DA RODADA EXPIRADA
+                                else limpaUpdates[`users/${u.key}/cartelas`] = null; 
                             });
                             await update(ref(db, '/'), limpaUpdates);
                             await set(ref(db, 'jogo/bolas_sorteadas'), []);
