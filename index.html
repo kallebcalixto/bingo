@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHOW DE PRÊMIOS - COMPLETO AUTOMÁTICO</title>
+    <title>SHOW DE PRÊMIOS - AUTOMÁTICO PROFISSIONAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --bg: #050505; --orange: #d35400; --green: #27ae60; --cyan: #00d4ff; --danger: #c0392b; }
+        :root { --bg: #050505; --orange: #d35400; --green: #27ae60; --cyan: #00d4ff; --danger: #c0392b; --dark-card: #111; }
         body { background: var(--bg); color: #fff; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; overflow-x: hidden; overflow-y: auto; }
-        .audio-control { background: #111; padding: 12px; text-align: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+        
+        .audio-control { background: #111; padding: 10px 20px; text-align: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         #btn-audio { background: var(--orange); color: #fff; border: none; padding: 10px 25px; border-radius: 20px; font-weight: bold; text-transform: uppercase; font-size: 13px; cursor: pointer; transition: 0.2s; }
-        #btn-audio:hover { opacity: 0.9; }
         #btn-audio.active { background: var(--green); }
         
         .container { display: flex; flex-direction: column; gap: 15px; padding: 15px; box-sizing: border-box; max-width: 1400px; margin: 0 auto; }
@@ -26,59 +26,95 @@
         
         .marked { background: var(--green) !important; color: #fff !important; box-shadow: 0 0 10px var(--green); }
         
-        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: pulseWin 1.5s infinite; }
-        @keyframes pulseWin { 0% { transform: scale(1); } 50% { transform: scale(1.03); background: rgba(211, 84, 0, 0.3); } 100% { transform: scale(1); } }
-        
-        #btn-logout { background: var(--danger); color: #fff; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; text-transform: uppercase; display: none; cursor: pointer; font-size: 11px; }
-        #btn-login-topo { background: #4285F4; color: #fff; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        /* BLOQUEIO DE CADASTRO OBRIGATÓRIO */
+        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .cadastro-box { background: #111; padding: 30px; border-radius: 12px; border: 2px solid var(--orange); max-width: 400px; width: 85%; text-align: left; }
+        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--orange); text-align: center; }
+        .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0 18px 0; background: #000; border: 1px solid #444; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .btn-salvar-cad { width: 100%; background: var(--green); color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        /* BANCA DE COMPRAS */
-        .banca-section { background: #111; border-radius: 12px; padding: 15px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
+        /* TELA DE VITORIA */
+        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        
+        /* BANCA DE COMPRAS E CRÉDITOS */
+        .banca-section { background: var(--dark-card); border-radius: 12px; padding: 15px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
         .banca-status { background: #000; padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #222; }
         .timer-destaque { font-size: 24px; font-weight: 900; color: var(--cyan); margin-top: 5px; }
-        .banca-controles { display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 5px; }
-        .btn-comprar { background: var(--green); color: #fff; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase; }
+        
+        .banca-abas { display: flex; gap: 5px; margin-bottom: 5px; }
+        .aba-btn { flex: 1; padding: 8px; background: #222; border: none; color: #aaa; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        .aba-btn.active { background: #333; color: #fff; border-bottom: 2px solid var(--cyan); }
+        
+        .btn-comprar, .btn-recargar { color: #fff; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase; }
+        .btn-comprar { background: var(--green); }
         .btn-comprar:disabled { background: #333; color: #777; cursor: not-allowed; }
+        .btn-recargar { background: var(--cyan); color: #000; }
         .input-qtd { width: 70px; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 16px; }
 
-        .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 250px; overflow-y:auto; }
+        .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 200px; overflow-y:auto; }
+        .fase-badge { background: #222; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; border: 1px solid #444; color: #ff9f43; }
 
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
             .col-left { flex: 1.3; display: flex; flex-direction: column; gap: 15px; }
             .col-right { flex: 1; display: flex; flex-direction: column; gap: 15px; }
             .num-geral { font-size: 16px; }
-            .participants-section { max-height: 350px; }
+            .participants-section { max-height: 280px; }
         }
     </style>
 </head>
 <body>
-<div class="audio-control">
-    <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
-    <div id="auth-status-area">
-        <button id="btn-login-topo" onclick="loginComGoogle()">
-            <svg width="16" height="16" viewBox="0 0 18 18" style="fill: #fff;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.3C13.46.89 11.43 0 9 0 5.46 0 2.43 2.55.95 5.7l3 2.28c.71-2.14 2.7-3.73 5.05-3.73z"/></svg>
-            Entrar com Google
-        </button>
-        <button id="btn-logout" onclick="fazerLogout()">Sair do Jogo</button>
+
+<!-- OVERLAY OBRIGATÓRIO PARA CAPTURA DE DADOS FINANCEIROS -->
+<div id="cadastro-overlay">
+    <div class="cadastro-box">
+        <h2>DADOS DE PREMIAÇÃO PIX</h2>
+        <p style="font-size: 12px; color: #aaa; margin: 0 0 15px 0; text-align: center;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
+        <label style="font-size: 11px; font-weight: bold; color: #aaa;">NÚMERO DO WHATSAPP:</label>
+        <input type="text" id="cad-whatsapp" placeholder="(41) 99999-9999">
+        <label style="font-size: 11px; font-weight: bold; color: #aaa;">CPF (CHAVE PIX):</label>
+        <input type="text" id="cad-cpf" placeholder="000.000.000-00">
+        <button class="btn-salvar-cad" onclick="salvarCadastroPix()">Liberar Painel de Jogo</button>
     </div>
 </div>
 
-<div id="winner-overlay"><div style="background:#fff; color:#000; padding:40px; border-radius:20px; border:8px solid var(--orange); max-width: 500px; width: 85%"><h1 style="font-size: 50px; margin:0">BINGO!</h1><h2 id="winner-name" style="font-size: 30px; color:var(--orange)">---</h2></div></div>
+<div class="audio-control">
+    <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div id="user-credits-display" style="font-size: 13px; font-weight: bold; color: var(--green); display: none;">CRÉDITOS: R$ 0,00</div>
+        <div id="auth-status-area">
+            <button id="btn-login-topo" onclick="loginComGoogle()">
+                <svg width="16" height="16" viewBox="0 0 18 18" style="fill: #fff;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.3C13.46.89 11.43 0 9 0 5.46 0 2.43 2.55.95 5.7l3 2.28c.71-2.14 2.7-3.73 5.05-3.73z"/></svg>
+                Entrar com Google
+            </button>
+            <button id="btn-logout" onclick="fazerLogout()">Sair</button>
+        </div>
+    </div>
+</div>
+
+<div id="winner-overlay">
+    <div style="background:#fff; color:#000; padding:40px; border-radius:20px; border:8px solid var(--orange); max-width: 500px; width: 85%">
+        <h1 style="font-size: 40px; margin:0" id="win-title-fase">BINGO!</h1>
+        <h2 id="winner-name" style="font-size: 26px; color:var(--orange); margin: 10px 0 0 0;">---</h2>
+    </div>
+</div>
 
 <div class="container">
     <div id="game-section">
         <div class="game-layout">
             
             <div class="col-left">
-                <div style="background: #111; border: 2px solid var(--orange); border-radius: 10px; padding: 15px; text-align: center;">
-                    <img id="img-premio" src="" style="width:100%; max-height:180px; object-fit:contain; display:none; margin-bottom:10px; border-radius:5px;">
-                    <h4 id="txt-premio" style="color:var(--orange); margin:0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">PRÊMIO DA RODADA</h4>
+                <div style="background: #111; border: 2px solid var(--orange); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="text-align: left;">
+                        <h4 id="txt-premio" style="color:var(--orange); margin:0; font-size: 14px; text-transform: uppercase;">PREMIAÇÃO EM ANDAMENTO</h4>
+                        <div id="fase-rodada-txt" style="font-size: 11px; color: #aaa; margin-top: 2px; font-weight: bold;">AGUARDANDO BANCA</div>
+                    </div>
+                    <span class="fase-badge" id="badge-fase-jogo">FASE: 1ª LINHA</span>
                 </div>
                 
                 <div style="position: relative; background: #000; border-radius: 15px; padding: 10px; border: 1px solid #222;">
                     <div id="tabela-90" class="painel-geral"></div>
-                    <div style="padding: 20px; text-align: center;">
+                    <div style="padding: 15px; text-align: center;">
                         <div class="ball-display">
                             <div id="bola-num">--</div>
                         </div>
@@ -89,16 +125,29 @@
             <div class="col-right">
                 <div id="area-cartelas-multiplas"></div>
 
-                <!-- BANCA DE COMPRAS -->
+                <!-- BANCA EVOLUÍDA: ABAS COMPRA E RECARGA PIX -->
                 <div class="banca-section">
                     <div class="banca-status">
                         <span id="label-banca" style="font-size:11px; color:#aaa; font-weight:bold; text-transform:uppercase;">PRÓXIMA RODADA EM:</span>
                         <div id="cronometro-banca" class="timer-destaque">04:00</div>
                         <div id="acumulado-banca" style="font-size:12px; margin-top:5px; color:var(--green); font-weight:bold;">PREMIAÇÃO ESTIMADA: R$ 0,00</div>
                     </div>
-                    <div class="banca-controles" id="banca-interacao">
+
+                    <div class="banca-abas">
+                        <button class="aba-btn active" id="aba-compra" onclick="mudarAbaBanca('compra')">Comprar Cartelas</button>
+                        <button class="aba-btn" id="aba-credito" onclick="mudarAbaBanca('credito')">Carregar Pix</button>
+                    </div>
+
+                    <!-- Conteúdo Aba Compra -->
+                    <div class="banca-controles" id="painel-aba-compra">
                         <input type="number" id="compre-qtd" class="input-qtd" value="1" min="1" max="100">
                         <button id="btn-compre-acao" onclick="comprarCartelasBanca()" class="btn-comprar">Comprar (R$ 0,30/un)</button>
+                    </div>
+
+                    <!-- Conteúdo Aba Recarga Pix -->
+                    <div class="banca-controles" id="painel-aba-credito" style="display: none;">
+                        <input type="number" id="recarga-valor" class="input-qtd" style="width: 100px;" value="10" min="10" max="1000" placeholder="R$">
+                        <button onclick="gerarCobrancaPix()" class="btn-recargar">Carregar Créditos</button>
                     </div>
                 </div>
 
@@ -131,20 +180,36 @@
     const googleProvider = new GoogleAuthProvider();
     
     let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
-    let estadoJogoGlobal = "espera";
-    let mestreDaRodada = false;
+    let estadoJogoGlobal = "espera", mestreDaRodada = false, meusCreditos = 0.00;
+    let faseAtualDoJogo = 1; // 1 = Linha 1, 2 = Linha 2, 3 = Cartela Cheia
 
     window.toggleAudio = () => { audioAtivo = !audioAtivo; document.getElementById('btn-audio').classList.toggle('active', audioAtivo); };
     window.fazerLogout = () => { if(confirm("Deseja sair da sua conta?")) signOut(auth).then(() => location.reload()); };
 
+    // Troca de abas internas da banca comercial
+    window.mudarAbaBanca = (aba) => {
+        document.getElementById('aba-compra').classList.toggle('active', aba === 'compra');
+        document.getElementById('aba-credito').classList.toggle('active', aba === 'credito');
+        document.getElementById('painel-aba-compra').style.display = aba === 'compra' ? 'flex' : 'none';
+        document.getElementById('painel-aba-credito').style.display = aba === 'credito' ? 'flex' : 'none';
+    };
+
+    // Sincronização do motor de automação
     onValue(ref(db, 'jogo/automacao'), (snap) => {
         const dados = snap.val();
         if(!dados) {
-            set(ref(db, 'jogo/automacao'), { estado: "espera", tempo_restante: 240, acumulado: 0, timestamp_controle: Date.now() });
+            set(ref(db, 'jogo/automacao'), { estado: "espera", tempo_restante: 240, acumulado: 0, timestamp_controle: Date.now(), fase: 1 });
             return;
         }
 
         estadoJogoGlobal = dados.estado;
+        faseAtualDoJogo = dados.fase || 1;
+        
+        // Atualiza badges de fases
+        const fasesNomes = ["1ª LINHA", "2ª LINHA", "CARTELA CHEIA"];
+        document.getElementById('badge-fase-jogo').innerText = `FASE: ${fasesNomes[faseAtualDoJogo - 1]}`;
+        document.getElementById('fase-rodada-txt').innerText = dados.estado === "espera" ? "ACEITANDO BILHETES" : `BUSCANDO GANHADOR DA ${fasesNomes[faseAtualDoJogo - 1]}`;
+
         const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
         const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
         
@@ -166,7 +231,12 @@
     onValue(ref(db, 'jogo/ganhador_atual'), (snap) => {
         ganhadorAtivo = snap.val();
         document.getElementById('winner-overlay').style.display = ganhadorAtivo ? 'flex' : 'none';
-        if(ganhadorAtivo) { document.getElementById('winner-name').innerText = ganhadorAtivo; confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
+        if(ganhadorAtivo) { 
+            const fasesNomes = ["GANHADOR DA 1ª LINHA!", "GANHADOR DA 2ª LINHA!", "BINGO TOTAL! (CARTELA CHEIA)"];
+            document.getElementById('win-title-fase').innerText = fasesNomes[faseAtualDoJogo - 1];
+            document.getElementById('winner-name').innerText = ganhadorAtivo; 
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
+        }
     });
 
     onValue(ref(db, 'jogo/config/rodada_ativa'), (snap) => { rodadaAtiva = snap.val() || 1; renderTudoUI(); });
@@ -174,13 +244,7 @@
     onValue(ref(db, 'jogo/bolas_sorteadas'), (snap) => {
         const novas = snap.val() || []; const ultima = novas[novas.length-1];
         if(novas.length > bolasGlobal.length && audioAtivo && ultima) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance("Número " + ultima)); }
-        
-        if(novas.length === 0) {
-            document.getElementById('bola-num').innerText = "--";
-        } else {
-            document.getElementById('bola-num').innerText = ultima || "--";
-        }
-
+        document.getElementById('bola-num').innerText = novas.length === 0 ? "--" : (ultima || "--");
         bolasGlobal = novas;
         document.querySelectorAll('.num-geral').forEach(el => el.classList.remove('active'));
         bolasGlobal.forEach(n => document.getElementById(`n90-${n}`)?.classList.add('active'));
@@ -190,76 +254,114 @@
     onAuthStateChanged(auth, (user) => {
         if(user) {
             document.getElementById('btn-login-topo').style.display = 'none';
+            document.getElementById('user-credits-display').style.display = 'block';
             onValue(ref(db, 'jogo/config/pode_deslogar'), (s) => { 
                 document.getElementById('btn-logout').style.display = s.val() ? 'block' : 'none'; 
             });
-            onValue(ref(db, `users/${user.uid}/cartelas`), (snap) => { minhasCartelas = snap.val() || []; renderTudoUI(); });
+            
+            // Verifica o preenchimento de segurança do perfil do jogador antes de liberar a tela
+            onValue(ref(db, `users/${user.uid}`), (sUser) => {
+                const dadosUser = sUser.val() || {};
+                meusCreditos = dadosUser.creditos || 0.00;
+                document.getElementById('user-credits-display').innerText = `CRÉDITOS: R$ ${parseFloat(meusCreditos).toFixed(2)}`;
+                
+                if(!dadosUser.whatsapp || !dadosUser.cpf) {
+                    document.getElementById('cadastro-overlay').style.display = 'flex';
+                } else {
+                    document.getElementById('cadastro-overlay').style.display = 'none';
+                }
+                minhasCartelas = dadosUser.cartelas || []; 
+                renderTudoUI();
+            });
         } else {
             document.getElementById('btn-login-topo').style.display = 'flex';
             document.getElementById('btn-logout').style.display = 'none';
+            document.getElementById('user-credits-display').style.display = 'none';
+            document.getElementById('cadastro-overlay').style.display = 'none';
             minhasCartelas = []; 
             renderTudoUI();
         }
     });
 
+    // Fluxo mandatório de cadastro Pix
+    window.salvarCadastroPix = async () => {
+        const zap = document.getElementById('cad-whatsapp').value.trim();
+        const cpf = document.getElementById('cad-cpf').value.trim();
+        if(!zap || !cpf) return alert("Preencha todos os campos para habilitar sua carteira de jogo.");
+        
+        await update(ref(db, `users/${auth.currentUser.uid}`), {
+            whatsapp: zap,
+            cpf: cpf,
+            nome: auth.currentUser.email.split('@')[0],
+            creditos: meusCreditos || 0.00
+        });
+        document.getElementById('cadastro-overlay').style.display = 'none';
+    };
+
+    // Gateway Simulado de Carga Pix (Mínimo R$10 / Máximo R$1000)
+    window.gerarCobrancaPix = async () => {
+        if(!auth.currentUser) return alert("Faça login com sua conta Google!");
+        const v = parseFloat(document.getElementById('recarga-valor').value) || 0;
+        if(v < 10 || v > 1000) return alert("Operação Inválida! O valor para recargas Pix deve ser entre R$ 10,00 e R$ 1.000,00.");
+        
+        let novoSaldo = meusCreditos + v;
+        await update(ref(db, `users/${auth.currentUser.uid}`), { creditos: novoSaldo });
+        alert(`PIX Identificado! R$ ${v.toFixed(2)} em créditos foram adicionados à sua carteira.`);
+        recalcularCaixaRodada();
+    };
+
+    // Sistema de Compra de Cartelas debitando dos Créditos Reais
     window.comprarCartelasBanca = async () => {
-        if(!auth.currentUser) {
-            alert("Por favor, conecte-se com sua conta Google para comprar!");
-            return;
-        }
-        if(estadoJogoGlobal !== "espera") {
-            alert("A banca está fechada! Aguarde a próxima rodada.");
-            return;
-        }
+        if(!auth.currentUser) return alert("Faça login primeiro!");
+        if(estadoJogoGlobal !== "espera") return alert("A banca está fechada para esta rodada.");
 
         let qtd = parseInt(document.getElementById('compre-qtd').value) || 1;
-        if(qtd < 1) qtd = 1;
-        if(qtd > 100) { qtd = 100; document.getElementById('compre-qtd').value = 100; }
+        if(qtd < 1) qtd = 1; if(qtd > 100) qtd = 100;
+
+        const custoTotal = qtd * 0.30;
+        if(meusCreditos < custoTotal) return alert(`Saldo Insuficiente! Você precisa de R$ ${custoTotal.toFixed(2)} em créditos para comprar ${qtd} cartelas.`);
 
         const uRef = ref(db, `users/${auth.currentUser.uid}`);
-        let listaAtual = (await get(uRef)).val()?.cartelas || [];
+        let listaAtual = [...minhasCartelas];
         
-        if((listaAtual.length + qtd) > 100) {
-            alert(`Você já tem ${listaAtual.length} cartelas. O limite é 100!`);
-            return;
-        }
+        if((listaAtual.length + qtd) > 100) return alert(`Limite estourado! O máximo é 100 cartelas por jogo.`);
 
         for(let c=0; c<qtd; c++) {
             let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
             listaAtual.push(n.sort((a,b)=>a-b));
         }
 
-        await update(uRef, { cartelas: listaAtual, nome: auth.currentUser.email.split('@')[0] });
-        alert(`Você comprou ${qtd} cartelas com sucesso!`);
-        
+        let saldoRestante = meusCreditos - custoTotal;
+        await update(uRef, { cartelas: listaAtual, creditos: saldoRestante });
+        alert(`Compra confirmada de ${qtd} cartelas! Bons jogos.`);
         recalcularCaixaRodada();
     };
 
     async function recalcularCaixaRodada() {
         const snapUsers = await get(ref(db, 'users'));
-        let totalCartelas = 0;
-        snapUsers.forEach(u => {
-            totalCartelas += (u.val().cartelas || []).length;
-        });
-        const novoFaturamento = totalCartelas * 0.30;
-        await update(ref(db, 'jogo/automacao'), { acumulado: novoFaturamento });
+        let total = 0;
+        snapUsers.forEach(u => { if(!u.key.startsWith('fake_user_')) total += (u.val().cartelas || []).length; });
+        const snapAuto = await get(ref(db, 'jogo/automacao'));
+        let fakesCount = snapAuto.val()?.acumulado_fakes || 0;
+        await update(ref(db, 'jogo/automacao'), { acumulado: (total * 0.30) + fakesCount });
     }
 
     function renderTudoUI() {
         const area = document.getElementById('area-cartelas-multiplas'); area.innerHTML = "";
-        
         if(minhasCartelas.length > 0) {
             minhasCartelas.forEach((cartela, i) => {
                 const numC = i + 1;
                 const gridHTML = cartela.map(n => `<div style="background:#1a1a1a; padding:15px 0; text-align:center; font-weight:900;" class="${bolasGlobal.includes(n)?'marked':''}">${n}</div>`).join('');
                 area.innerHTML += `<div style="background:#111; padding:12px; border-radius:12px; border:2px solid ${numC === rodadaAtiva ? 'var(--cyan)' : '#222'}; margin-bottom:10px; opacity:${numC > rodadaAtiva ? '0.4' : '1'}"><h4 style="text-align:center; color:var(--cyan); margin:0 0 8px 0; font-size:10px;">CARTELA #${numC} ${numC === rodadaAtiva ? '(EM JOGO)' : ''}</h4><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">${gridHTML}</div></div>`;
                 
-                if(!ganhadorAtivo && numC === rodadaAtiva && cartela.every(n => bolasGlobal.includes(n)) && auth.currentUser) {
-                    get(ref(db, 'jogo/automacao/permissao_real')).then(pSnap => {
-                        if(pSnap.val() === true) {
-                            set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
-                        }
-                    });
+                // Disparador de validação matemática de vitória real multi-fase
+                if(!ganhadorAtivo && numC === rodadaAtiva && auth.currentUser) {
+                    let ganhouFase = avaliarVitoriaPorFase(cartela, bolasGlobal, faseAtualDoJogo);
+                    if(ganhouFase) {
+                        get(ref(db, 'jogo/automacao/permissao_real')).then(pSnap => {
+                            if(pSnap.val() === true) set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+                        });
+                    }
                 }
             });
         }
@@ -284,44 +386,50 @@
         });
     }
 
-    async function injetarJogadoresFakes() {
-        let totalCartelasFakes = 0;
-        const updatesFakes = {};
+    // Mecanismo matemático de avaliação de linhas horizontais e cartela cheia
+    function avaliarVitoriaPorFase(cartela, bolas, fase) {
+        // Divide os 15 números em 3 fileiras horizontais estruturais de 5 elementos cada
+        let f1 = cartela.slice(0, 5), f2 = cartela.slice(5, 10), f3 = cartela.slice(10, 15);
+        let check1 = f1.every(n => bolas.includes(n)), check2 = f2.every(n => bolas.includes(n)), check3 = f3.every(n => bolas.includes(n));
         
+        let contagemLinhasCertas = (check1 ? 1 : 0) + (check2 ? 1 : 0) + (check3 ? 1 : 0);
+        
+        if (fase === 1) return contagemLinhasCertas >= 1;
+        if (fase === 2) return contagemLinhasCertas >= 2;
+        if (fase === 3) return contagemLinhasCertas === 3; // Cartela cheia
+        return false;
+    }
+
+    // ==========================================
+    // SISTEMA DO MOTOR AUTOMÁTICO DE REDE
+    // ==========================================
+    async function injetarJogadoresFakes() {
+        let totalCartelasFakes = 0; const updatesFakes = {};
         for(let i=1; i<=75; i++) {
-            let qtdFake = Math.floor(Math.random() * 5) + 1;
-            totalCartelasFakes += qtdFake;
+            let qtdFake = Math.floor(Math.random() * 5) + 1; totalCartelasFakes += qtdFake;
             let cartelasFake = [];
             for(let c=0; c<qtdFake; c++) {
                 let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
                 cartelasFake.push(n.sort((a,b)=>a-b));
             }
-            updatesFakes[`users/fake_user_${i}`] = { nome: `Jogador_${i}🔹`, cartelas: cartelasFake };
+            updatesFakes[`users/fake_user_${i}`] = { nome: `Jogador_${i}🔹`, cartelas: cartelasFake, whatsapp: "Automático", cpf: "Automático" };
         }
-        
-        await update(ref(db, '/'), updatesFakes);
-        return totalCartelasFakes;
+        await update(ref(db, '/'), updatesFakes); return totalCartelasFakes;
     }
 
     async function processarCicloDoJogo() {
-        const snap = await get(ref(db, 'jogo/automacao'));
-        let dados = snap.val();
-        if(!dados) return;
+        const snap = await get(ref(db, 'jogo/automacao')); let dados = snap.val(); if(!dados) return;
 
         if (!mestreDaRodada) {
-            if (Date.now() - (dados.timestamp_controle || 0) > 4000) {
-                mestreDaRodada = true;
-            } else {
-                return; 
-            }
+            if (Date.now() - (dados.timestamp_controle || 0) > 4000) mestreDaRodada = true;
+            else return;
         }
-        
         await update(ref(db, 'jogo/automacao'), { timestamp_controle: Date.now() });
 
         if(dados.estado === "espera") {
             let t = dados.tempo_restante - 1;
             if(t <= 0) {
-                await update(ref(db, 'jogo/automacao'), { estado: "rodando", tempo_restante: 0 });
+                await update(ref(db, 'jogo/automacao'), { estado: "rodando", tempo_restante: 0, fase: 1 });
                 window.tempoInternoBolas = 0;
             } else {
                 await update(ref(db, 'jogo/automacao'), { tempo_restante: t });
@@ -334,61 +442,54 @@
                 window.tempoInternoBolas = 0;
                 
                 if(!ganhadorAtivo) {
-                    const snapBolas = await get(ref(db, 'jogo/bolas_sorteadas'));
-                    let list = snapBolas.val() || [];
+                    const snapBolas = await get(ref(db, 'jogo/bolas_sorteadas')); let list = snapBolas.val() || [];
                     if(list.length >= 90) return;
 
                     let n; do { n = Math.floor(Math.random() * 90) + 1; } while(list.includes(n));
                     list.push(n);
 
-                    const premioDisponivelReais = dados.acumulado * 0.20;
-                    if(premioDisponivelReais > 0) {
-                        await update(ref(db, 'jogo/automacao'), { permissao_real: true });
-                    } else {
-                        await update(ref(db, 'jogo/automacao'), { permissao_real: false });
-                    }
-
+                    // Trava de Dominância de Caixa de 80%
+                    await update(ref(db, 'jogo/automacao'), { permissao_real: (dados.acumulado * 0.20) > 0 });
                     await set(ref(db, 'jogo/bolas_sorteadas'), list);
 
+                    // Motor avalia se robôs fakes venceram a fase atual do sorteio
                     const snapUsers = await get(ref(db, 'users'));
                     snapUsers.forEach(u => {
                         if(!ganhadorAtivo && u.key.startsWith('fake_user_')) {
                             const cartelas = u.val().cartelas || [];
-                            if(cartelas[rodadaAtiva - 1] && cartelas[rodadaAtiva - 1].every(num => list.includes(num))) {
+                            if(cartelas[rodadaAtiva - 1] && avaliarVitoriaPorFase(cartelas[rodadaAtiva - 1], list, faseAtualDoJogo)) {
                                 set(ref(db, 'jogo/ganhador_atual'), u.val().nome + " (Sorte Grande)");
                             }
                         }
                     });
                 } else {
-                    // REGRA DE DESCARTE CRÍTICA: Jogo acabou. Aguarda a tela de vitória por 10s e DELETA as cartelas de todos para o próximo ciclo
+                    // TRANSIÇÃO DE FASES E SELEÇÃO DE LIMPEZA DE RODADAS COMPLETA
                     mestreDaRodada = false;
                     setTimeout(async () => {
-                        const users = await get(ref(db, 'users'));
-                        const limpaUpdates = {};
-                        
-                        users.forEach(u => {
-                            if(u.key.startsWith('fake_user_')) {
-                                limpaUpdates[`users/${u.key}`] = null; // Remove fakes da rodada anterior
-                            } else {
-                                limpaUpdates[`users/${u.key}/cartelas`] = null; // ESTRELA DA REGRA: Deleta as cartelas compradas pelos clientes reais!
-                            }
-                        });
-                        
-                        await update(ref(db, '/'), limpaUpdates);
-                        await set(ref(db, 'jogo/bolas_sorteadas'), []);
-                        await set(ref(db, 'jogo/ganhador_atual'), null);
-                        
-                        // Inicia o novo faturamento com as apostas dos novos 75 fakes
-                        let fakesCartelasCount = await injetarJogadoresFakes();
-                        let faturamentoInicial = fakesCartelasCount * 0.30;
-                        
-                        await update(ref(db, 'jogo/automacao'), {
-                            estado: "espera",
-                            tempo_restante: 240, 
-                            acumulado: faturamentoInicial,
-                            permissao_real: false
-                        });
-                    }, 10000);
+                        if(faseAtualDoJogo < 3) {
+                            // Se terminou a Fileira 1 ou Fileira 2, avança a fase mantendo as cartelas e bolas
+                            let novaFase = faseAtualDoJogo + 1;
+                            await set(ref(db, 'jogo/ganhador_atual'), null);
+                            await update(ref(db, 'jogo/automacao'), { fase: novaFase });
+                        } else {
+                            // Fim da Fase 3 (Cartela Cheia) -> Limpeza absoluta e descarte dos bilhetes da rodada
+                            const users = await get(ref(db, 'users')); const limpaUpdates = {};
+                            users.forEach(u => {
+                                if(u.key.startsWith('fake_user_')) limpaUpdates[`users/${u.key}`] = null;
+                                else limpaUpdates[`users/${u.key}/cartelas`] = null; // ZERA OS BILHETES REAIS DA RODADA EXPIRADA
+                            });
+                            await update(ref(db, '/'), limpaUpdates);
+                            await set(ref(db, 'jogo/bolas_sorteadas'), []);
+                            await set(ref(db, 'jogo/ganhador_atual'), null);
+                            
+                            let fakesCartelasCount = await injetarJogadoresFakes();
+                            let faturamentoFakes = fakesCartelasCount * 0.30;
+                            
+                            await update(ref(db, 'jogo/automacao'), {
+                                estado: "espera", tempo_restante: 240, acumulado: faturamentoFakes, acumulado_fakes: faturamentoFakes, permissao_real: false, fase: 1
+                            });
+                        }
+                    }, 8000);
                 }
             }
         }
