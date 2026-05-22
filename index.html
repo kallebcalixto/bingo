@@ -207,6 +207,7 @@
             align-items: center; 
             box-shadow: 0 6px 15px rgba(0,0,0,0.2);
         }
+        @keyframes slideInMsg { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
 
         /* CARDS DOS PARTICIPANTES 3D REFLEXIVO */
         .participants-section { background: rgba(4,4,8,0.3); backdrop-filter: blur(10px); padding: 20px; border-radius: 24px; border: 1px solid var(--border); max-height: 320px; overflow-y: auto; width: 100%; box-sizing: border-box; }
@@ -262,7 +263,7 @@
         <div id="user-credits-display" style="font-size: 14px; font-weight: 800; color: var(--green); display: none; background: rgba(0,230,118,0.06); padding: 7px 16px; border-radius: 50px; border: 1px solid rgba(0,230,118,0.15);">CRÉDITOS: R$ 0,00</div>
         <div id="auth-status-area">
             <button id="btn-login-topo" onclick="loginComGoogle()" style="background: #fff; color: #000; border: none; padding: 11px 22px; border-radius: 50px; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 15px rgba(255,255,255,0.15); transition: 0.3s;">
-                <svg width="14" height="14" viewBox="0 0 18 18" style="fill: #000;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.30c1.54 1.41 3.57 2.3 6 2.3 3.54 0 6.57-2.55 8.05-5.7l-3-2.28c-.71 2.14-2.7 3.73-5.05 3.73z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 18 18" style="fill: #000;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.30c1.54 1.41 3.57(2.3 6 2.3 3.54 0 6.57-2.55 8.05-5.7l-3-2.28c-.71 2.14-2.7 3.73-5.05 3.73z"/></svg>
                 Entrar com Google
             </button>
             <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 18px; border-radius: 50px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; display: none; transition: 0.3s;">Sair</button>
@@ -378,7 +379,6 @@
         document.getElementById('painel-aba-credito').style.display = aba === 'credito' ? 'flex' : 'none';
     };
 
-    // ESCUTADOR EXPANDIDO PARA ADIÇÃO E RENDERIZAÇÃO DO WALLPAPER VINDO DO ADMIN[cite: 1]
     onValue(ref(db, 'jogo/config'), (snap) => {
         const c = snap.val(); 
         if(c) {
@@ -391,7 +391,7 @@
                 img.style.display = 'none';
             }
 
-            // Sincronização e transição suave do Fundo JPEG Dinâmico[cite: 1]
+            // Sincronização do Fundo JPEG Dinâmico vindo do Painel Admin[cite: 1, 2]
             if(c.url_fundo && c.url_fundo.trim() !== "") {
                 document.body.style.backgroundImage = `url('${c.url_fundo}')`;
                 document.body.classList.add('has-bg');
@@ -456,7 +456,6 @@
         const novas = snap.val() || []; const ultima = novas[novas.length-1];
         if(novas.length > bolasGlobal.length && audioAtivo && ultima) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance("Número " + ultima)); }
         
-        // Efeito de Impacto visual na bola principal ao atualizar
         if(novas.length !== bolasGlobal.length && novas.length > 0) {
             const elBall = document.getElementById('bola-display-3d');
             elBall.classList.add('bump');
@@ -585,6 +584,7 @@
                             let faltamBolas = calcularFaltantesPorFase(c, bolasGlobal, faseAtualDoJogo);
                             if (faltamBolas === 1) {
                                 temAlguemNaBoa = true;
+                                // Privacidade absoluta garantida: Sem dados de contato no Chat[cite: 2]
                                 painelNaBoa.innerHTML += `
                                     <div class="naboa-msg">
                                         <span>⚡ <strong>${d.nome || 'Jogador'}</strong> está na boa!</span>
