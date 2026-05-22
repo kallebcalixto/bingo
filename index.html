@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHOW DE PRÊMIOS - FULL DESKTOP</title>
+    <title>SHOW DE PRÊMIOS - AUTOMÁTICO</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -32,19 +32,23 @@
         #btn-logout { background: var(--danger); color: #fff; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; text-transform: uppercase; display: none; cursor: pointer; font-size: 11px; }
         #btn-login-topo { background: #4285F4; color: #fff; padding: 10px 20px; border: none; border-radius: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-        .chat-section { background:#111; border-radius:12px; padding:12px; border:1px solid #333; height: 250px; display:flex; flex-direction:column; }
-        .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 300px; overflow-y:auto; }
+        /* BANCA DE COMPRAS */
+        .banca-section { background: #111; border-radius: 12px; padding: 15px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
+        .banca-status { background: #000; padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #222; }
+        .timer-destaque { font-size: 24px; font-weight: 900; color: var(--cyan); margin-top: 5px; }
+        .banca-controles { display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 5px; }
+        .btn-comprar { background: var(--green); color: #fff; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1; text-transform: uppercase; }
+        .btn-comprar:disabled { background: #333; color: #777; cursor: not-allowed; }
+        .input-qtd { width: 70px; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 16px; }
 
-        .google-btn-chat { width: 100%; padding: 14px; background: #fff; color: #757575; border: 1px solid #ddd; border-radius: 5px; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background-color 0.2s; }
-        .google-btn-chat:hover { background-color: #f7f7f7; }
+        .participants-section { background:#080808; padding:12px; border-radius:12px; border:1px solid #222; max-height: 250px; overflow-y:auto; }
 
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
             .col-left { flex: 1.3; display: flex; flex-direction: column; gap: 15px; }
             .col-right { flex: 1; display: flex; flex-direction: column; gap: 15px; }
             .num-geral { font-size: 16px; }
-            .chat-section { height: 320px; }
-            .participants-section { max-height: 400px; }
+            .participants-section { max-height: 350px; }
         }
     </style>
 </head>
@@ -85,14 +89,22 @@
             <div class="col-right">
                 <div id="area-cartelas-multiplas"></div>
 
+                <!-- BANCA DE COMPRAS SUBSTUIU O CHAT -->
+                <div class="banca-section">
+                    <div class="banca-status">
+                        <span id="label-banca" style="font-size:11px; color:#aaa; font-weight:bold; text-transform:uppercase;">PRÓXIMA RODADA EM:</span>
+                        <div id="cronometro-banca" class="timer-destaque">04:00</div>
+                        <div id="acumulado-banca" style="font-size:12px; margin-top:5px; color:var(--green); font-weight:bold;">PREMIAÇÃO ESTIMADA: R$ 0,00</div>
+                    </div>
+                    <div class="banca-controles" id="banca-interacao">
+                        <input type="number" id="compre-qtd" class="input-qtd" value="1" min="1" max="100">
+                        <button id="btn-compre-acao" onclick="comprarCartelasBanca()" class="btn-comprar">Comprar (R$ 0,30/un)</button>
+                    </div>
+                </div>
+
                 <div class="participants-section">
                     <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 10px 0; font-weight: bold;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
                     <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
-                </div>
-
-                <div class="chat-section">
-                    <div id="chat-box" style="flex:1; overflow-y:auto; font-size:13px; padding-right: 5px;"></div>
-                    <div id="chat-controls" style="gap:5px; margin-top:8px;"></div>
                 </div>
             </div>
 
@@ -105,7 +117,6 @@
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, onValue, set, push, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // Configurações atualizadas para o novo projeto: azar-c7f24
     const firebaseConfig = { 
         apiKey: "AIzaSyAbDzmgd3QrRrx8R14dJSwjbN6fEFkR7pI", 
         authDomain: "azar-c7f24.firebaseapp.com",
@@ -120,9 +131,35 @@
     const googleProvider = new GoogleAuthProvider();
     
     let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
+    let estadoJogoGlobal = "espera"; // espera ou rodando
 
     window.toggleAudio = () => { audioAtivo = !audioAtivo; document.getElementById('btn-audio').classList.toggle('active', audioAtivo); };
     window.fazerLogout = () => { if(confirm("Deseja sair da sua conta?")) signOut(auth).then(() => location.reload()); };
+
+    // Sincronização do estado automatizado do jogo e do cronômetro baseado no Firebase remoto
+    onValue(ref(db, 'jogo/automacao'), (snap) => {
+        const dados = snap.val() || { estado: "espera", tempo_restante: 240, acumulado: 0 };
+        estadoJogoGlobal = dados.estado;
+        
+        // Formata o cronômetro visual de 4 minutos
+        const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
+        const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
+        
+        if (dados.estado === "espera") {
+            document.getElementById('label-banca').innerText = "PRÓXIMA RODADA EM:";
+            document.getElementById('cronometro-banca').innerText = `${minutos}:${segundos}`;
+            document.getElementById('cronometro-banca').style.color = "var(--cyan)";
+            document.getElementById('btn-compre-acao').disabled = false;
+        } else {
+            document.getElementById('label-banca').innerText = "JOGO EM ANDAMENTO:";
+            document.getElementById('cronometro-banca').innerText = "SORTEANDO...";
+            document.getElementById('cronometro-banca').style.color = "var(--green)";
+            document.getElementById('btn-compre-acao').disabled = true;
+        }
+
+        // Calcula a estimativa matemática de premiação (20% do total)
+        document.getElementById('acumulado-banca').innerText = `PREMIAÇÃO ESTIMADA: R$ ${parseFloat(dados.acumulado || 0).toFixed(2)}`;
+    });
 
     onValue(ref(db, 'jogo/ganhador_atual'), (snap) => {
         ganhadorAtivo = snap.val();
@@ -135,43 +172,66 @@
     onValue(ref(db, 'jogo/bolas_sorteadas'), (snap) => {
         const novas = snap.val() || []; const ultima = novas[novas.length-1];
         if(novas.length > bolasGlobal.length && audioAtivo && ultima) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance("Número " + ultima)); }
-        bolasGlobal = novas; document.getElementById('bola-num').innerText = ultima || "--";
+        
+        if(novas.length === 0) {
+            document.getElementById('bola-num').innerText = "--";
+        } else {
+            document.getElementById('bola-num').innerText = ultima || "--";
+        }
+
+        bolasGlobal = novas;
         document.querySelectorAll('.num-geral').forEach(el => el.classList.remove('active'));
         bolasGlobal.forEach(n => document.getElementById(`n90-${n}`)?.classList.add('active'));
         renderTudoUI();
     });
 
     onAuthStateChanged(auth, (user) => {
-        const ctrlChat = document.getElementById('chat-controls');
         if(user) {
             document.getElementById('btn-login-topo').style.display = 'none';
-            
             onValue(ref(db, 'jogo/config/pode_deslogar'), (s) => { 
                 document.getElementById('btn-logout').style.display = s.val() ? 'block' : 'none'; 
             });
-            
-            ctrlChat.style.display = 'flex';
-            ctrlChat.innerHTML = `
-                <input type="text" id="chat-input" placeholder="Mensagem..." style="flex:1; background:#000; border:1px solid #444; color:#fff; padding:10px; border-radius:5px; font-size: 13px;">
-                <button onclick="enviarMensagem()" style="background:var(--green); color:#fff; border:none; padding:0 15px; border-radius:5px; font-weight: bold; cursor: pointer;">OK</button>
-            `;
-            
             onValue(ref(db, `users/${user.uid}/cartelas`), (snap) => { minhasCartelas = snap.val() || []; renderTudoUI(); });
         } else {
             document.getElementById('btn-login-topo').style.display = 'flex';
             document.getElementById('btn-logout').style.display = 'none';
             minhasCartelas = []; 
             renderTudoUI();
-            
-            ctrlChat.style.display = 'block';
-            ctrlChat.innerHTML = `
-                <button class="google-btn-chat" onclick="loginComGoogle()">
-                    <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z" fill="#4285F4"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z" fill="#34A853"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z" fill="#FBBC05"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.3C13.46.89 11.43 0 9 0 5.46 0 2.43 2.55.95 5.7l3 2.28c.71-2.14 2.7-3.73 5.05-3.73z" fill="#EA4335"/></svg>
-                    CONECTAR COM O GOOGLE PARA ENTRAR NO CHAT
-                </button>
-            `;
         }
     });
+
+    // Função de Compra Direta na Banca (Máximo 100 cartelas por transação)
+    window.comprarCartelasBanca = async () => {
+        if(!auth.currentUser) {
+            alert("Por favor, conecte-se com sua conta Google no topo para poder comprar cartelas!");
+            return;
+        }
+        if(estadoJogoGlobal !== "espera") {
+            alert("A banca está fechada! O sorteio já iniciou.");
+            return;
+        }
+
+        let qtd = parseInt(document.getElementById('compre-qtd').value) || 1;
+        if(qtd < 1) qtd = 1;
+        if(qtd > 100) { qtd = 100; document.getElementById('compre-qtd').value = 100; }
+
+        const uRef = ref(db, `users/${auth.currentUser.uid}`);
+        let listaAtual = (await get(uRef)).val()?.cartelas || [];
+        
+        if((listaAtual.length + qtd) > 100) {
+            alert(`Você já possui ${listaAtual.length} cartelas. O limite máximo permitido é de 100 cartelas por rodada!`);
+            return;
+        }
+
+        // Geração matemática das cartelas compradas
+        for(let c=0; c<qtd; c++) {
+            let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
+            listaAtual.push(n.sort((a,b)=>a-b));
+        }
+
+        await update(uRef, { cartelas: listaAtual, nome: auth.currentUser.email.split('@')[0] });
+        alert(`Sucesso! Você adquiriu ${qtd} cartelas para esta rodada.`);
+    };
 
     function renderTudoUI() {
         const area = document.getElementById('area-cartelas-multiplas'); area.innerHTML = "";
@@ -181,7 +241,17 @@
                 const numC = i + 1;
                 const gridHTML = cartela.map(n => `<div style="background:#1a1a1a; padding:15px 0; text-align:center; font-weight:900;" class="${bolasGlobal.includes(n)?'marked':''}">${n}</div>`).join('');
                 area.innerHTML += `<div style="background:#111; padding:12px; border-radius:12px; border:2px solid ${numC === rodadaAtiva ? 'var(--cyan)' : '#222'}; margin-bottom:10px; opacity:${numC > rodadaAtiva ? '0.4' : '1'}"><h4 style="text-align:center; color:var(--cyan); margin:0 0 8px 0; font-size:10px;">CARTELA #${numC} ${numC === rodadaAtiva ? '(EM JOGO)' : ''}</h4><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">${gridHTML}</div></div>`;
-                if(!ganhadorAtivo && numC === rodadaAtiva && cartela.every(n => bolasGlobal.includes(n)) && auth.currentUser) set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+                
+                // Validação de segurança de ganhador real.
+                // A lógica de controle financeiro invisível avalia a elegibilidade contra o lucro de 80% do caixa.
+                if(!ganhadorAtivo && numC === rodadaAtiva && cartela.every(n => bolasGlobal.includes(n)) && auth.currentUser) {
+                    // Envia solicitação de verificação ao núcleo do jogo
+                    get(ref(db, 'jogo/automacao/permissao_real')).then(pSnap => {
+                        if(pSnap.val() === true) {
+                            set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+                        }
+                    });
+                }
             });
         }
 
@@ -204,33 +274,6 @@
             document.getElementById('player-count').innerText = count;
         });
     }
-
-    window.enviarMensagem = async () => {
-        if(!auth.currentUser) return;
-        const txt = document.getElementById('chat-input').value.trim(); if(!txt) return;
-        await push(ref(db, 'chat'), { user: auth.currentUser.email.split('@')[0], msg: txt });
-        if(txt.toLowerCase() === "quero uma cartela") {
-            const config = (await get(ref(db, 'jogo/config'))).val();
-            if(config?.pode_pedir) {
-                const uRef = ref(db, `users/${auth.currentUser.uid}`);
-                let lista = (await get(uRef)).val()?.cartelas || [];
-                if(lista.length === 0) {
-                    for(let i=0; i<4; i++) {
-                        let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
-                        lista.push(n.sort((a,b)=>a-b));
-                    }
-                    await update(uRef, { cartelas: lista, nome: auth.currentUser.email.split('@')[0] });
-                }
-            }
-        }
-        document.getElementById('chat-input').value = "";
-    };
-
-    onValue(ref(db, 'chat'), (snap) => {
-        const box = document.getElementById('chat-box'); box.innerHTML = "";
-        snap.forEach(c => { box.innerHTML += `<div style="margin-bottom: 4px;"><span style="color:var(--cyan); font-weight:bold;">${c.val().user}:</span> ${c.val().msg}</div>`; });
-        box.scrollTop = box.scrollHeight;
-    });
 
     onValue(ref(db, 'jogo/config'), (snap) => {
         const c = snap.val(); if(c) {
