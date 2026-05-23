@@ -6,7 +6,6 @@
     <title>🎰 LAS VEGAS ARCADE - BINGO ROYALE 🎰</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- SCRIPT ADICIONADO PARA GERAR O QR CODE DINAMICAMENTE NA TELA -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { 
@@ -249,19 +248,7 @@
         }
 
         .participants-section { background: #05000f; padding: 16px; border-radius: 8px; border: 3px solid var(--led-yellow); max-height: 350px; overflow-y: auto; width: 100%; box-sizing: border-box; }
-        .participants-section::-webkit-scrollbar, .naboa-chat-box::-webkit-scrollbar { width: 4px; }
-        .participants-section::-webkit-scrollbar-thumb, .naboa-chat-box::-webkit-scrollbar-thumb { background: #220044; border-radius: 4px; }
         
-        .fase-badge { background: var(--led-magenta); padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: 900; border: 1px solid #fff; color: #fff; font-family: 'Oswald', sans-serif; }
-
-        .mini-card-item {
-            background: #0c0017;
-            padding: 6px; 
-            width: 82px; 
-            border-radius: 4px; 
-            border: 1px solid #1f003a;
-        }
-
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
             .col-left { flex: 1.5; display: flex; flex-direction: column; gap: 16px; }
@@ -376,10 +363,9 @@
                                 <option value="500">R$ 500</option>
                                 <option value="1000">R$ 1000</option>
                             </select>
-                            <button id="btn-gerar-pix-mp" onclick="generarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
+                            <button id="btn-gerar-pix-mp" onclick="gerarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
                         </div>
                         
-                        <!-- PAINEL DE RETORNO DO PIX TOTALMENTE CORRIGIDO -->
                         <div id="area-pix-resultado" class="mp-pix-area" style="display: none; width: 100%;">
                             <span style="font-size: 11px; color: var(--led-cyan); font-weight: bold; display: block; margin-bottom: 8px;">ESCANEE O QR CODE ABAIXO:</span>
                             <div id="mp-qrcode-render" class="mp-qrcode-container"></div>
@@ -595,8 +581,8 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // FUNÇÃO ULTRA-BLINDADA PARA VARRER A RESPOSTA E PEGAR A CHAVE COPIA E COLA DE QUALQUER JEITO
-    window.generarCobrancaPix = async () => {
+    // URL ATUALIZADA EXATAMENTE IGUAL AO SEU WEBHOOK ATIVO DO RENDER
+    window.gerarCobrancaPix = async () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
         
         const btn = document.getElementById('btn-gerar-pix-mp');
@@ -621,7 +607,6 @@
             const resultado = await resposta.json();
             console.log("DADOS DO SERVIDOR:", resultado);
 
-            // Mapeamento profundo para capturar a string Pix de qualquer formato gerado
             const stringPix = resultado.copiaCola || 
                               resultado.copiacola || 
                               resultado.point_of_interaction?.transaction_data?.qr_code || 
@@ -630,7 +615,6 @@
             if (stringPix) {
                 document.getElementById('mp-copia-cola').value = stringPix;
                 
-                // Renderiza o QR Code dinâmico na tela do jogador
                 new QRCode(document.getElementById("mp-qrcode-render"), {
                     text: stringPix,
                     width: 168,
@@ -873,7 +857,7 @@
                                 else limpaUpdates[`users/${u.key}/cartelas`] = null; 
                             });
                             await update(ref(db, '/'), limpaUpdates);
-                            await set(ref(db, 'jogo/bolas_sorteadas'), []);
+                            await set(ref(db, 'bolas_sorteadas'), []);
                             await set(ref(db, 'jogo/ganhador_atual'), null);
                             
                             let fakesCartelasCount = await injetarJogadoresFakes();
