@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🎰 LAS VEGAS ARCADE - BINGO ROYALE 🎰</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
-            --bg: #020005; 
+            --bg: #050010; 
             --led-magenta: #ff007f;
-            --led-magenta-glow: rgba(255, 0, 127, 0.6);
             --led-cyan: #00f0ff;
-            --led-cyan-glow: rgba(0, 240, 255, 0.6);
             --led-yellow: #fffb00;
             --led-green: #00ff66;
             --green: var(--led-green);
@@ -21,10 +19,7 @@
         }
         
         body { 
-            background: radial-gradient(circle at 50% 20%, #15002b 0%, var(--bg) 90%); 
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center;
+            background: var(--bg);
             color: #fff; 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
@@ -38,45 +33,25 @@
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 0, 5, 0.9);
+            background: rgba(5, 0, 16, 0.85);
             z-index: -1;
             pointer-events: none;
         }
-
-        /* ANIMAÇÃO OTIMIZADA USANDO TRANSLATEZ PARA FORÇAR USO DA GPU (MAIS LEVE) */
-        @keyframes marqueeLeds {
-            0%, 100% { 
-                box-shadow: 0 0 15px var(--led-magenta-glow), inset 0 0 10px var(--led-magenta-glow); 
-                border-color: var(--led-magenta);
-                transform: translateZ(0);
-            }
-            50% { 
-                box-shadow: 0 0 20px var(--led-cyan-glow), inset 0 0 12px var(--led-cyan-glow); 
-                border-color: var(--led-cyan);
-                transform: translateZ(0);
-            }
-        }
-
-        @keyframes textoNeonPulsante {
-            0%, 100% { text-shadow: 0 0 8px var(--led-magenta), 2px 2px 0 #000; transform: translateZ(0); }
-            50% { text-shadow: 0 0 12px var(--led-yellow), 2px 2px 0 #000; color: var(--led-yellow); transform: translateZ(0); }
-        }
         
         .audio-control { 
-            background: #090014;
+            background: #0d0022;
             padding: 12px 20px; 
             position: sticky; 
             top: 0; 
             z-index: 1000; 
-            border-bottom: 4px solid var(--led-cyan); 
-            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
+            border-bottom: 3px solid var(--led-cyan); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
         }
         
         #btn-audio { 
-            background: linear-gradient(180deg, var(--led-magenta) 0%, #99004c 100%); 
+            background: var(--led-magenta); 
             color: #fff; 
             border: 2px solid #fff; 
             padding: 10px 20px; 
@@ -85,195 +60,173 @@
             text-transform: uppercase; 
             font-size: 12px; 
             cursor: pointer; 
-            box-shadow: 0 4px 0 #55002b, 0 0 10px var(--led-magenta-glow);
             font-family: 'Oswald', sans-serif;
-            text-shadow: 1px 1px 0 #000;
         }
-        #btn-audio:active { transform: translateY(2px); box-shadow: 0 2px 0 #55002b; }
-        #btn-audio.active { background: linear-gradient(180deg, var(--led-green) 0%, #006622 100%); box-shadow: 0 4px 0 #003311, 0 0 15px rgba(0,255,102,0.4); }
+        #btn-audio.active { background: var(--led-green); color: #000; border-color: #000; }
 
         .container { display: flex; flex-direction: column; gap: 16px; padding: 16px; box-sizing: border-box; max-width: 1480px; margin: 0 auto; }
         .game-layout { display: flex; flex-direction: column; gap: 16px; width: 100%; }
         
-        /* GRADE DO FLIPERAMA - OTIMIZADA PARA RESPONSIVIDADE AUTOMÁTICA */
+        /* PAINEL SEM ANIMAÇÃO PESADA - RENDIMENTO MÁXIMO */
         .painel-geral { 
-            background: #05000a;
+            background: #000;
             border: 4px solid var(--led-magenta);
-            border-radius: 12px; 
+            border-radius: 8px; 
             padding: 12px; 
             display: grid; 
             grid-template-columns: repeat(10, 1fr); 
             gap: 6px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            animation: marqueeLeds 4s infinite linear;
-            will-change: border-color, box-shadow;
         }
         
         .num-geral { 
             background: #11051c; 
             border: 1px solid #220b38;
-            border-radius: 6px; 
+            border-radius: 4px; 
             aspect-ratio: 1/1; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 15px; 
+            font-size: 16px; 
             font-weight: 900; 
-            color: #2c1642; 
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.8);
+            color: #3d205c; 
             font-family: 'Oswald', sans-serif;
         }
         
-        /* ACESSO RÁPIDO DO NÚMERO SORTEADO (REDUÇÃO DE FILTROS PESADOS) */
+        /* COR SÓLIDA FORTE VIBRANTE SEM FILTROS TURBO GRÁFICOS */
         .num-geral.active { 
-            background: radial-gradient(circle, #fff 0%, var(--led-cyan) 60%, #004b52 100%);
-            color: #fff; 
-            box-shadow: 0 0 15px var(--led-cyan); 
-            border: 2px solid #fff; 
-            text-shadow: 1px 1px 2px #000;
+            background: var(--led-cyan);
+            color: #000; 
+            border: 2px solid #fff;
             z-index: 5;
         }
         
         .ball-container { padding: 10px 0; text-align: center; }
         .ball-display { 
-            background: radial-gradient(circle at 35% 35%, #fff 0%, var(--led-yellow) 45%, #b38f00 80%); 
-            width: 130px; 
-            height: 130px; 
+            background: var(--led-yellow);
+            width: 120px; 
+            height: 120px; 
             border-radius: 50%; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             margin: 0 auto; 
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 251, 0, 0.4); 
-            border: 4px solid #fff;
-        }
-        .ball-display.bump {
-            animation: ballImpact 0.4s ease-out;
-        }
-        @keyframes ballImpact {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
+            border: 5px solid #fff;
         }
         
         #bola-num { 
-            font-size: 68px; 
+            font-size: 64px; 
             font-weight: 900; 
             color: #000; 
             font-family: 'Oswald', sans-serif;
-            text-shadow: 1px 1px 0px #fff;
         }
         
         .marked { 
-            background: radial-gradient(circle, #fff 0%, var(--led-green) 60%, #004d1a 100%) !important; 
-            color: #fff !important; 
-            box-shadow: 0 0 15px var(--led-green) !important;
+            background: var(--led-green) !important; 
+            color: #000 !important; 
             border: 2px solid #fff !important;
-            text-shadow: 1px 1px 2px #000 !important;
+            font-weight: 900 !important;
         }
 
         .card-premio-grande {
             background: #140024;
             border: 3px solid var(--led-yellow);
-            box-shadow: 0 0 20px rgba(255, 251, 0, 0.2);
             border-radius: 8px;
             padding: 16px;
             text-align: center;
             margin-bottom: 16px;
         }
         .txt-premio-valor {
-            font-size: 46px;
+            font-size: 48px;
             font-weight: 900;
             color: var(--led-green);
             font-family: 'Oswald', sans-serif;
-            text-shadow: 2px 2px 0px #000, 0 0 15px var(--led-green-glow);
             margin: 2px 0 0 0;
         }
         
-        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3,0,10,0.99); backdrop-filter: blur(10px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .cadastro-box { background: #0f001c; padding: 30px; border-radius: 12px; border: 3px solid var(--led-cyan); max-width: 400px; width: 85%; }
-        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-align: center; font-size: 28px; }
-        .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0 16px 0; background: #000; border: 2px solid var(--led-cyan); color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px; font-family: 'Oswald', sans-serif; }
-        .btn-salvar-cad { width: 100%; background: linear-gradient(180deg, var(--led-green) 0%, #008033 100%); color: #fff; border: 1px solid #fff; padding: 12px; border-radius: 6px; font-weight: 900; cursor: pointer; font-family: 'Oswald', sans-serif; font-size: 16px; box-shadow: 0 4px 0 #004d1f; }
+        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #03000a; z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .cadastro-box { background: #0f001c; padding: 30px; border-radius: 8px; border: 3px solid var(--led-cyan); max-width: 400px; width: 85%; }
+        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-align: center; font-size: 26px; }
+        .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0 16px 0; background: #000; border: 2px solid var(--led-cyan); color: #fff; border-radius: 4px; box-sizing: border-box; font-size: 16px; font-family: 'Oswald', sans-serif; }
+        .btn-salvar-cad { width: 100%; background: var(--led-green); color: #000; border: none; padding: 12px; border-radius: 4px; font-weight: 900; cursor: pointer; font-family: 'Oswald', sans-serif; font-size: 16px; }
 
-        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(2,0,5,0.98); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         
         .banca-section { 
             background: #0d001a; 
-            border-radius: 12px; 
+            border-radius: 8px; 
             padding: 16px; 
             border: 3px solid var(--led-cyan); 
             display: flex; 
             flex-direction: column; 
             gap: 12px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.7); 
         }
-        .banca-status { background: #000; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #220044; }
-        .timer-destaque { font-size: 36px; font-weight: 900; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-shadow: 0 0 10px var(--led-cyan-glow); }
+        .banca-status { background: #000; padding: 12px; border-radius: 6px; text-align: center; }
+        .timer-destaque { font-size: 38px; font-weight: 900; color: var(--led-cyan); font-family: 'Oswald', sans-serif; }
         
         .banca-abas { display: flex; gap: 8px; background: #000; padding: 4px; border-radius: 6px; }
         .aba-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #5e4c73; cursor: pointer; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 13px; }
-        .aba-btn.active { background: linear-gradient(180deg, var(--led-magenta) 0%, #99004c 100%); color: #fff; border: 1px solid #fff; border-radius: 4px; }
+        .aba-btn.active { background: var(--led-magenta); color: #fff; border-radius: 4px; }
         
         .banca-controles { display: flex; gap: 8px; align-items: center; }
-        .btn-comprar, .btn-recargar { color: #fff; border: 2px solid #fff; padding: 12px 16px; border-radius: 6px; font-weight: 900; cursor: pointer; flex: 1; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 14px; text-shadow: 1px 1px 0 #000; }
-        .btn-comprar { background: linear-gradient(180deg, var(--led-green) 0%, #008033 100%); box-shadow: 0 4px 0 #004d1f; }
-        .btn-comprar:disabled { background: #1a1126; color: #443754; border-color: #2d203d; cursor: not-allowed; box-shadow: none; text-shadow: none; }
-        .btn-recargar { background: linear-gradient(180deg, var(--led-cyan) 0%, #00808a 100%); color: #000; text-shadow: 1px 1px 0 #fff; box-shadow: 0 4px 0 #00474d; }
-        .input-qtd { width: 75px; background: #000; border: 2px solid #220044; color: var(--led-yellow); padding: 10px; border-radius: 8px; text-align: center; font-weight: 900; font-size: 20px; font-family: 'Oswald', sans-serif; }
+        .btn-comprar, .btn-recargar { color: #fff; border: 1px solid #fff; padding: 12px 16px; border-radius: 4px; font-weight: 900; cursor: pointer; flex: 1; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 14px; }
+        .btn-comprar { background: var(--led-green); color: #000; border: none; }
+        .btn-comprar:disabled { background: #1a1126; color: #443754; border: none; cursor: not-allowed; }
+        .btn-recargar { background: var(--led-cyan); color: #000; border: none; }
+        .input-qtd { width: 75px; background: #000; border: 2px solid #220044; color: var(--led-yellow); padding: 10px; border-radius: 4px; text-align: center; font-weight: 900; font-size: 20px; font-family: 'Oswald', sans-serif; }
 
         .naboa-section { 
-            background: #05000f; 
+            background: #000; 
             border: 3px solid var(--led-magenta); 
-            border-radius: 12px; 
+            border-radius: 8px; 
             padding: 16px; 
-            height: 280px; 
+            height: 260px; 
             display: flex; 
             flex-direction: column; 
             box-sizing: border-box; 
         }
-        .naboa-chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .naboa-chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
         
         .naboa-msg { 
             font-size: 13px; 
-            background: linear-gradient(90deg, rgba(255, 0, 127, 0.2) 0%, rgba(0,0,0,0.6) 100%); 
+            background: #110014; 
             padding: 10px 14px; 
-            border-radius: 6px; 
+            border-radius: 4px; 
             border: 1px solid var(--led-magenta);
             border-left: 5px solid var(--led-yellow);
-            animation: textoNeonPulsante 3s infinite linear;
+            color: #fff;
             font-weight: bold;
         }
 
-        .participants-section { background: rgba(5, 0, 15, 0.95); padding: 16px; border-radius: 12px; border: 3px solid var(--led-yellow); max-height: 350px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .participants-section { background: #05000f; padding: 16px; border-radius: 8px; border: 3px solid var(--led-yellow); max-height: 350px; overflow-y: auto; width: 100%; box-sizing: border-box; }
         .participants-section::-webkit-scrollbar, .naboa-chat-box::-webkit-scrollbar { width: 4px; }
-        .participants-section::-webkit-scrollbar-thumb, .naboa-chat-box::-webkit-scrollbar-thumb { background: #33145a; border-radius: 4px; }
+        .participants-section::-webkit-scrollbar-thumb, .naboa-chat-box::-webkit-scrollbar-thumb { background: #220044; border-radius: 4px; }
         
-        .fase-badge { background: var(--led-magenta); padding: 6px 16px; border-radius: 6px; font-size: 12px; font-weight: 900; border: 1px solid #fff; color: #fff; font-family: 'Oswald', sans-serif; text-shadow: 1px 1px 0 #000; }
+        .fase-badge { background: var(--led-magenta); padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: 900; border: 1px solid #fff; color: #fff; font-family: 'Oswald', sans-serif; }
 
         .mini-card-item {
             background: #0c0017;
-            padding: 8px; 
+            padding: 6px; 
             width: 82px; 
-            border-radius: 6px; 
+            border-radius: 4px; 
             border: 1px solid #1f003a;
         }
 
-        /* CONFIGURAÇÃO EXCLUSIVA DE RESPONSIVIDADE (PC VS SMARTPHONE) */
+        /* RESPONSIVIDADE HÍBRIDA (MÁXIMA PERFORMANCE PC/CELULAR) */
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
             .col-left { flex: 1.5; display: flex; flex-direction: column; gap: 16px; }
             .col-right { flex: 1; display: flex; flex-direction: column; gap: 16px; }
-            .num-geral { font-size: 22px; }
+            .num-geral { font-size: 20px; }
             .naboa-section { height: 320px; }
             .participants-section { max-height: 420px; }
         }
 
         @media (max-width: 901px) {
-            .num-geral { font-size: 14px; padding: 2px 0; }
-            .txt-premio-valor { font-size: 38px; }
-            #bola-num { font-size: 58px; }
-            .ball-display { width: 110px; height: 110px; }
+            .num-geral { font-size: 13px; padding: 1px 0; }
+            .txt-premio-valor { font-size: 36px; }
+            #bola-num { font-size: 54px; }
+            .ball-display { width: 100px; height: 100px; }
+            .container { padding: 10px; gap: 12px; }
         }
     </style>
 </head>
@@ -305,9 +258,9 @@
 </div>
 
 <div id="winner-overlay">
-    <div style="background:#090014; color:#fff; padding:40px; border-radius:16px; border:4px solid var(--led-yellow); max-width: 480px; width: 85%; box-shadow: 0 0 35px var(--led-yellow); text-align:center;">
-        <h1 style="font-size: 48px; margin:0; font-weight: 900; font-family: 'Oswald', sans-serif; color: var(--led-magenta); text-shadow: 2px 2px 0 #000;" id="win-title-fase">BINGO!</h1>
-        <h2 id="winner-name" style="font-size: 32px; color:var(--led-yellow); margin: 12px 0 0 0; font-weight: 900; font-family: 'Oswald', sans-serif; text-shadow: 1px 1px 0 #000;">---</h2>
+    <div style="background:#090014; color:#fff; padding:40px; border-radius:16px; border:4px solid var(--led-yellow); max-width: 480px; width: 85%; text-align:center;">
+        <h1 style="font-size: 44px; margin:0; font-weight: 900; font-family: 'Oswald', sans-serif; color: var(--led-magenta);" id="win-title-fase">BINGO!</h1>
+        <h2 id="winner-name" style="font-size: 30px; color:var(--led-yellow); margin: 12px 0 0 0; font-weight: 900; font-family: 'Oswald', sans-serif;">---</h2>
     </div>
 </div>
 
@@ -316,7 +269,7 @@
         <div class="game-layout">
             
             <div class="col-left">
-                <div style="background: #05000a; border: 2px solid var(--led-magenta); border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                <div style="background: #000; border: 2px solid var(--led-magenta); border-radius: 8px; padding: 14px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="text-align: left;">
                         <h4 id="txt-premio" style="color:var(--led-yellow); margin:0; font-size: 15px; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px;">PREMIAÇÃO EM ANDAMENTO</h4>
                         <div id="fase-rodada-txt" style="font-size: 11px; color: #76628c; margin-top: 2px; font-weight: bold; text-transform: uppercase;">AGUARDANDO BANCA</div>
@@ -324,9 +277,9 @@
                     <span class="fase-badge" id="badge-fase-jogo">FASE: 1ª LINHA</span>
                 </div>
                 
-                <div style="position: relative; background: #070012; border-radius: 16px; padding: 16px; border: 1px solid #1a0033; margin-top: 16px;">
+                <div style="position: relative; background: #000; border-radius: 12px; padding: 16px; border: 2px solid #1a0033; margin-top: 16px;">
                     <div style="padding: 5px; text-align: center;">
-                        <img id="img-premio" src="" style="width:100%; max-height:170px; object-fit:contain; display:none; margin-bottom:16px; border-radius:12px; border: 2px solid var(--led-magenta);">
+                        <img id="img-premio" src="" style="width:100%; max-height:160px; object-fit:contain; display:none; margin-bottom:16px; border-radius:8px; border: 2px solid var(--led-magenta);">
                     </div>
 
                     <div class="card-premio-grande">
@@ -519,12 +472,6 @@
         const novas = snap.val() || []; const ultima = novas[novas.length-1];
         if(novas.length > bolasGlobal.length && audioAtivo && ultima) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance("Número " + ultima)); }
         
-        if(novas.length !== bolasGlobal.length && novas.length > 0) {
-            const elBall = document.getElementById('bola-display-3d');
-            elBall.classList.add('bump');
-            setTimeout(() => elBall.classList.remove('bump'), 400);
-        }
-
         document.getElementById('bola-num').innerText = novas.length === 0 ? "--" : (ultima || "--");
         bolasGlobal = novas;
         document.querySelectorAll('.num-geral').forEach(el => el.classList.remove('active'));
@@ -583,7 +530,7 @@
         if(v < 10 || v > 1000) return alert("Operação Inválida! O valor para recargas Pix deve ser entre R$ 10,00 e R$ 1.000,00.");
         
         let novoSaldo = meusCreditos + v;
-        await update(ref(db, `users/${auth.currentUser.uid}`), { credited: novoSaldo });
+        await update(ref(db, `users/${auth.currentUser.uid}`), { creditos: novoSaldo });
         alert(`PIX Identificado! R$ ${v.toFixed(2)} adicionados.`);
         recalcularCaixaRodada();
     };
@@ -625,8 +572,11 @@
 
     function renderTudoUI() {
         get(ref(db, 'users')).then(snap => {
-            const div = document.getElementById('lista-participantes'); div.innerHTML = ""; 
-            const painelNaBoa = document.getElementById('lista-na-boa'); painelNaBoa.innerHTML = "";
+            const div = document.getElementById('lista-participantes'); 
+            const painelNaBoa = document.getElementById('lista-na-boa');
+            
+            let htmlCards = "";
+            let htmlNaBoa = "";
             let count = 0;
             let temAlguemNaBoa = false;
 
@@ -637,8 +587,8 @@
                     d.cartelas.forEach((c, idx) => {
                         const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#000; font-size:10px; padding:4px 0; text-align:center; font-weight:800; border-radius:4px; border:1px solid rgba(255,255,255,0.05); color:#ccc;">${n}</div>`).join('');
                         
-                        div.innerHTML += `
-                            <div class="mini-card-item" style="border:2px solid ${idx+1 === rodadaAtiva ? 'var(--led-cyan)' : '#1f003a'}; opacity:${idx+1 > rodadaAtiva ? '0.15' : '1'}">
+                        htmlCards += `
+                            <div class="mini-card-item" style="border:1px solid ${idx+1 === rodadaAtiva ? 'var(--led-cyan)' : '#1f003a'}; opacity:${idx+1 > rodadaAtiva ? '0.15' : '1'}">
                                 <span style="font-size:9px; color:var(--led-cyan); display:block; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:700; margin-bottom:4px;">${d.nome || 'User'} (#${idx+1})</span>
                                 <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:2px;">${ns}</div>
                             </div>`;
@@ -647,7 +597,7 @@
                             let faltamBolas = calcularFaltantesPorFase(c, bolasGlobal, faseAtualDoJogo);
                             if (faltamBolas === 1) {
                                 temAlguemNaBoa = true;
-                                painelNaBoa.innerHTML += `
+                                htmlNaBoa += `
                                     <div class="naboa-msg">
                                         <span>⚡ CASINO ALERT: <strong>${d.nome || 'Jogador'}</strong> está por 1 bola!</span>
                                     </div>`;
@@ -669,9 +619,12 @@
                 }
             });
             
+            div.innerHTML = htmlCards;
+            
             if (!temAlguemNaBoa) {
-                painelNaBoa.innerHTML = `<div style="text-align:center; color:#443259; font-size:12px; padding-top:40px; font-weight: bold;">Buscando combinações premiadas...</div>`;
+                painelNaBoa.innerHTML = `<div style="text-align:center; color:#443259; font-size:13px; padding-top:40px; font-weight: bold;">Buscando combinações premiadas...</div>`;
             } else {
+                painelNaBoa.innerHTML = htmlNaBoa;
                 painelNaBoa.scrollTop = painelNaBoa.scrollHeight;
             }
             document.getElementById('player-count').innerText = count;
