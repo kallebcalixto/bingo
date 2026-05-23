@@ -173,7 +173,7 @@
         .btn-comprar:disabled { background: #1a1126; color: #443754; border: none; cursor: not-allowed; }
         .btn-recargar { background: var(--led-cyan); color: #000; border: none; }
         
-        /* ESTILO DA CAIXA SELETORA DE VALOR */
+        /* ESTILO DO MENU SELETOR DE VALORES */
         .select-valores-mp {
             width: 105px;
             background: #000;
@@ -190,14 +190,23 @@
 
         .input-qtd { width: 75px; background: #000; border: 2px solid #220044; color: var(--led-yellow); padding: 10px; border-radius: 4px; text-align: center; font-weight: 900; font-size: 20px; font-family: 'Oswald', sans-serif; }
 
-        /* AREA DO PIX DO MERCADO PAGO */
+        /* AREA DO PIX DO MERCADO PAGO COM SUPORTE A IMAGEM DO QR CODE */
         .mp-pix-area {
             background: #000;
             border: 2px dashed var(--led-yellow);
-            padding: 12px;
+            padding: 16px;
             border-radius: 6px;
             margin-top: 10px;
             text-align: center;
+        }
+        .mp-qrcode-img {
+            width: 180px;
+            height: 180px;
+            background: #fff;
+            padding: 6px;
+            border-radius: 4px;
+            margin: 0 auto 12px auto;
+            display: block;
         }
         .mp-copia-cola-input {
             width: 100%;
@@ -354,7 +363,6 @@
 
                     <div class="banca-controles" id="painel-aba-credito" style="display: none; flex-direction: column;">
                         <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
-                            <!-- MODIFICADO: INPUT MUDOU PARA SELECT COM OS SEUS VALORES EXATOS -->
                             <select id="recarga-valor" class="select-valores-mp">
                                 <option value="10">R$ 10</option>
                                 <option value="20">R$ 20</option>
@@ -368,11 +376,13 @@
                             <button id="btn-gerar-pix-mp" onclick="gerarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
                         </div>
                         
-                        <!-- ÁREA QUE EXIBE O QR CODE COPIA E COLA DO MERCADO PAGO -->
+                        <!-- ÁREA ATUALIZADA: EXIBE O QR CODE POR IMAGEM E O BOTÃO COPIA E COLA -->
                         <div id="area-pix-resultado" class="mp-pix-area" style="display: none; width: 100%;">
-                            <span style="font-size: 11px; color: var(--led-yellow); font-weight: bold; display: block; margin-bottom: 6px;">CÓDIGO PIX GERADO:</span>
+                            <span style="font-size: 11px; color: var(--led-cyan); font-weight: bold; display: block; margin-bottom: 8px;">LEIA O QR CODE COM O APP DO BANCO:</span>
+                            <img id="mp-qrcode-imagem" class="mp-qrcode-img" src="" alt="Mercado Pago QR Code">
+                            <span style="font-size: 11px; color: var(--led-yellow); font-weight: bold; display: block; margin-bottom: 6px;">OU USE O COPIA E COLA:</span>
                             <input type="text" id="mp-copia-cola" class="mp-copia-cola-input" readonly onclick="this.select()">
-                            <button onclick="copiarPixMP()" style="background: var(--led-yellow); border: none; color: #000; font-weight: 900; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; text-transform: uppercase;">Copiar Código</button>
+                            <button onclick="copiarPixMP()" style="background: var(--led-yellow); border: none; color: #000; font-weight: 900; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; text-transform: uppercase; width: 100%;">Copiar Código Pix</button>
                         </div>
                     </div>
                 </div>
@@ -581,7 +591,7 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // CORRIGIDO: FUNÇÃO ADAPTADA PARA LER CORRETAMENTE O RETORNO DA API E EVITAR O ALERTA DE ERRO
+    // LEITURA CORRIGIDA E ADAPTADA PARA EXIBIR IMAGEM DO QR CODE + COPIA E COLA DO MERCADO PAGO
     window.gerarCobrancaPix = async () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
         
@@ -605,15 +615,25 @@
 
             const resultado = await resposta.json();
 
-            // VALIDAÇÃO BLINDADA: Lê o código direto, independente de caixa alta ou formato do objeto
-            const stringPix = resultado.copiaCola || resultado.copiacola || resultado.data?.copiaCola;
+            // Mapeamento dinâmico que lê o formato exato enviado pelo servidor v2
+            const stringPix = resultado.copiaCola;
+            const imagemBase64 = resultado.qrCodeBase64;
 
             if (stringPix) {
                 document.getElementById('mp-copia-cola').value = stringPix;
+                
+                // Injeta a imagem do QR Code se ela for retornada em Base64 pelo Mercado Pago
+                if (imagemBase64) {
+                    document.getElementById('mp-qrcode-imagem').src = `data:image/jpeg;base64,${imagemBase64}`;
+                    document.getElementById('mp-qrcode-imagem').style.display = 'block';
+                } else {
+                    document.getElementById('mp-qrcode-imagem').style.display = 'none';
+                }
+
                 document.getElementById('area-pix-resultado').style.display = 'block';
             } else {
-                console.error("Resposta do servidor:", resultado);
-                alert("Erro: O servidor processou mas não retornou o texto do Pix Copia e Cola.");
+                console.error("Erro na estrutura:", resultado);
+                alert("Erro: O servidor não retornou os dados válidos do Pix.");
             }
         } catch (erro) {
             console.error(erro);
