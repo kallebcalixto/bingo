@@ -3,28 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🎰 LAS VEGAS SHOW - BINGO ROYALE 🎰</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <title>SHOW DE PRÊMIOS - AUTOMÁTICO PROFISSIONAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
-            --bg: #030108; 
-            --gold: #ffd700;
-            --gold-glow: rgba(255, 215, 0, 0.6);
-            --neon-red: #ff0055;
-            --neon-red-glow: rgba(255, 0, 85, 0.6);
+            --bg: #06060c; 
             --orange: #ff6b00; 
-            --orange-glow: rgba(255, 107, 0, 0.5);
-            --green: #00ff66; 
-            --green-glow: rgba(0, 255, 102, 0.5);
+            --orange-glow: rgba(255, 107, 0, 0.45);
+            --green: #00e676; 
             --cyan: #00f0ff; 
-            --cyan-glow: rgba(0, 240, 255, 0.6);
-            --dark-slot: #0d0718;
-            --border-gold: linear-gradient(145deg, #ffd700, #b8860b, #ffd700);
+            --cyan-glow: rgba(0, 240, 255, 0.5);
+            --danger: #ff3d00; 
+            --dark-card: rgba(15, 15, 27, 0.85); 
+            --glass: rgba(18, 18, 32, 0.65);
+            --border: rgba(255, 255, 255, 0.07);
+            --neon-border: rgba(0, 240, 255, 0.15);
         }
         
         body { 
-            background: radial-gradient(circle at 50% 30%, #1c0a2d 0%, var(--bg) 85%); 
+            background: radial-gradient(circle at 50% 0%, #171730 0%, var(--bg) 75%); 
             background-attachment: fixed;
             background-size: cover;
             background-position: center;
@@ -34,249 +32,225 @@
             padding: 0; 
             overflow-x: hidden; 
             overflow-y: auto; 
+            transition: background 1s ease-in-out;
         }
 
         body.has-bg::before {
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 1, 8, 0.85);
+            background: rgba(6, 6, 12, 0.75);
             z-index: -1;
             pointer-events: none;
         }
-
-        /* LUZES MARQUEE PISCANTES DO CASSINO */
-        @keyframes piscarLuzes {
-            0%, 100% { box-shadow: 0 0 15px var(--gold-glow), inset 0 0 10px var(--gold-glow); border-color: #ffd700; }
-            50% { box-shadow: 0 0 25px var(--neon-red-glow), inset 0 0 15px var(--neon-red-glow); border-color: var(--neon-red); }
-        }
-
-        @keyframes piscarTexto {
-            0%, 100% { filter: drop-shadow(0 0 8px var(--neon-red)); color: #fff; }
-            50% { filter: drop-shadow(0 0 15px var(--gold)); color: var(--gold); }
-        }
         
         .audio-control { 
-            background: linear-gradient(180deg, #150922 0%, #090310 100%);
+            background: rgba(8, 8, 14, 0.75); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 16px 28px; 
             position: sticky; 
             top: 0; 
             z-index: 1000; 
-            border-bottom: 3px solid #ffd700; 
+            border-bottom: 1px solid var(--border); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
         
         #btn-audio { 
-            background: linear-gradient(135deg, var(--neon-red), #b3003b); 
+            background: linear-gradient(135deg, var(--orange), #ff9100); 
             color: #fff; 
-            border: 2px solid #fff; 
-            padding: 12px 35px; 
-            border-radius: 8px; 
-            font-weight: 900; 
+            border: none; 
+            padding: 11px 32px; 
+            border-radius: 50px; 
+            font-weight: 800; 
             text-transform: uppercase; 
-            font-size: 12px; 
+            font-size: 11px; 
             cursor: pointer; 
-            transition: 0.3s;
-            box-shadow: 0 0 15px var(--neon-red-glow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            box-shadow: 0 0 20px var(--orange-glow);
             letter-spacing: 1.5px;
-            font-family: 'Oswald', sans-serif;
         }
-        #btn-audio:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--neon-red); }
-        #btn-audio.active { background: linear-gradient(135deg, #00c853, var(--green)); box-shadow: 0 0 20px var(--green-glow); }
+        #btn-audio:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 0 30px rgba(255,107,0,0.7); }
+        #btn-audio.active { background: linear-gradient(135deg, #00c853, var(--green)); box-shadow: 0 0 20px rgba(0,230,118,0.5); }
         
         .container { display: flex; flex-direction: column; gap: 24px; padding: 24px; box-sizing: border-box; max-width: 1480px; margin: 0 auto; }
         .game-layout { display: flex; flex-direction: column; gap: 24px; width: 100%; }
         
-        /* PAINEL DE NÚMEROS ESTILO MÁQUINA DE SLOT */
         .painel-geral { 
-            background: #090412;
-            border: 4px solid #ffd700;
-            border-radius: 16px; 
-            padding: 20px; 
+            background: var(--glass); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 24px; 
+            padding: 22px; 
             display: grid; 
             grid-template-columns: repeat(10, 1fr); 
+            border: 1px solid var(--border); 
             gap: 10px; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.8);
-            animation: piscarLuzes 4s infinite;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1);
         }
         
         .num-geral { 
-            background: #140d24; 
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px; 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 50%; 
             aspect-ratio: 1/1; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 18px; 
+            font-size: 16px; 
             font-weight: 700; 
-            color: rgba(255, 255, 255, 0.2); 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
-            transition: all 0.2s ease;
-            font-family: 'Oswald', sans-serif;
+            color: rgba(255, 255, 255, 0.15); 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         
-        /* BOLA SORTEADA NO ACUMULADO COM SUPER GLOW NEON */
         .num-geral.active { 
-            background: radial-gradient(circle, #ff0055 0%, #990033 100%);
-            color: #fff; 
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--cyan) 55%, #00667a 100%); 
+            color: #020205; 
             font-weight: 900;
-            transform: scale(1.08);
-            box-shadow: 0 0 15px var(--neon-red), inset 0 0 8px #fff; 
-            border: 2px solid #fff; 
-            text-shadow: 0 0 5px #fff;
+            transform: scale(1.12) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 240, 255, 0.6), inset -3px -3px 7px rgba(0,0,0,0.5); 
+            border: 1px solid #ffffff; 
+            text-shadow: 0 1px 3px rgba(255,255,255,0.8);
             z-index: 5;
         }
         
-        /* GLOBO EXIBIDOR CENTRAL MAIS AGRESSIVO */
-        .ball-container { padding: 15px 0; text-align: center; }
+        .ball-container { padding: 10px 0 25px 0; text-align: center; perspective: 1200px; }
         .ball-display { 
-            background: radial-gradient(circle at 30% 30%, #fff 0%, #ffd700 40%, #b8860b 85%, #4c3603 100%); 
-            width: 180px; 
-            height: 180px; 
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f5f5f7 15%, #cccccc 45%, #444446 80%, #1a1a1c 100%); 
+            width: 160px; 
+            height: 160px; 
             border-radius: 50%; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             margin: 0 auto; 
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 40px var(--gold-glow), inset -10px -10px 30px rgba(0,0,0,0.6); 
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.85), inset -12px -12px 35px rgba(0,0,0,0.85), inset 12px 12px 25px rgba(255,255,255,0.95); 
             position: relative;
-            border: 5px solid #fff;
+            transform-style: preserve-3d;
+            animation: floatBall 4.5s ease-in-out infinite;
         }
         .ball-display.bump {
-            animation: ballImpact 0.4s ease-in-out;
+            animation: ballImpact 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        @keyframes floatBall {
+            0%, 100% { transform: translateY(0) rotateY(0deg); }
+            50% { transform: translateY(-10px) rotateY(4deg); }
         }
         @keyframes ballImpact {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); box-shadow: 0 0 60px var(--cyan); }
-            100% { transform: scale(1); }
+            10%, 90% { transform: scale(1.08) translate3d(-1px, 0, 0); }
+            20%, 80% { transform: scale(1.08) translate3d(2px, -2px, 0); }
+            30%, 50%, 70% { transform: scale(0.95) translate3d(-4px, 4px, 0); box-shadow: 0 0 40px var(--cyan-glow); }
+            40%, 60% { transform: scale(1.05) translate3d(4px, -2px, 0); }
         }
         
         #bola-num { 
-            font-size: 90px; 
+            font-size: 76px; 
             font-weight: 900; 
-            color: #111; 
-            font-family: 'Oswald', sans-serif;
-            text-shadow: 0 2px 0 #fff;
+            color: #0d0d13; 
+            text-shadow: 1px 2px 2px rgba(255,255,255,0.9);
             z-index: 2;
         }
         
-        /* MARCAÇÃO DE ACERTO NA CARTELA DO CLIENTE */
         .marked { 
-            background: linear-gradient(135deg, #00ff66, #00993d) !important; 
+            background: linear-gradient(135deg, #00f576, #00a843) !important; 
             color: #fff !important; 
-            box-shadow: 0 0 12px var(--green) !important;
-            border: 1px solid #fff !important;
-            text-shadow: 0 1px 2px #000;
+            box-shadow: 0 0 15px rgba(0,245,118,0.6) !important; 
         }
 
-        /* CONTAINER PLACAR DO PRÊMIO CENTRAL */
         .card-premio-grande {
-            background: linear-gradient(135deg, #250516 0%, #0f021b 100%);
-            border: 3px solid #ff0055;
-            box-shadow: 0 0 30px var(--neon-red-glow), inset 0 0 15px rgba(255,0,85,0.3);
-            border-radius: 16px;
-            padding: 24px;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.8), rgba(13, 13, 22, 0.9));
+            border: 2px solid var(--orange);
+            box-shadow: 0 0 25px var(--orange-glow);
+            border-radius: 20px;
+            padding: 20px;
             text-align: center;
             margin-bottom: 20px;
         }
         .txt-premio-valor {
-            font-size: 64px;
+            font-size: 52px;
             font-weight: 900;
-            color: var(--gold);
-            font-family: 'Oswald', sans-serif;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7), 0 4px 10px rgba(0,0,0,0.9);
+            color: var(--green);
+            text-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
             margin: 5px 0 0 0;
-            letter-spacing: 1px;
+            letter-spacing: -1px;
         }
         
-        /* SOBREPOSIÇÕES DE MODAL */
-        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,2,12,0.98); backdrop-filter: blur(20px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .cadastro-box { background: #130a24; padding: 40px; border-radius: 16px; border: 3px solid #ffd700; max-width: 440px; width: 85%; box-shadow: 0 0 40px var(--gold-glow); }
-        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--gold); font-family: 'Oswald', sans-serif; text-align: center; font-size: 32px; }
-        .cadastro-box input { width: 100%; padding: 15px; margin: 8px 0 22px 0; background: #000; border: 2px solid #ffd700; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .btn-salvar-cad { width: 100%; background: linear-gradient(135deg, var(--green), #00b04a); color: #fff; border: none; padding: 15px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 16px; box-shadow: 0 5px 15px rgba(0,230,118,0.4); }
+        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3,3,6,0.97); backdrop-filter: blur(25px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .cadastro-box { background: #0f0f18; padding: 40px; border-radius: 28px; border: 1px solid rgba(255, 107, 0, 0.25); max-width: 440px; width: 85%; text-shadow: 0 0 30px rgba(0,0,0,0.5); box-shadow: 0 30px 70px rgba(0,0,0,0.8), 0 0 50px var(--orange-glow); }
+        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--orange); font-weight: 900; text-align: center; font-size: 26px; letter-spacing: 0.5px; }
+        .cadastro-box input { width: 100%; padding: 15px; margin: 8px 0 22px 0; background: #050508; border: 1px solid var(--border); color: #fff; border-radius: 14px; box-sizing: border-box; font-size: 15px; font-family: inherit; transition: all 0.3s; }
+        .cadastro-box input:focus { border-color: var(--orange); outline: none; box-shadow: 0 0 12px var(--orange-glow); }
+        .btn-salvar-cad { width: 100%; background: linear-gradient(135deg, var(--green), #00b04a); color: #fff; border: none; padding: 15px; border-radius: 14px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 5px 20px rgba(0,230,118,0.4); }
 
-        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(5,1,10,0.96); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(3,3,6,0.97); backdrop-filter: blur(15px); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         
-        /* SEÇÕES LATERAIS DO HUB DE CONTROLE E SALDO */
-        .banca-section { 
-            background: linear-gradient(145deg, #18092b 0%, #0a0314 100%); 
-            border-radius: 16px; 
-            padding: 24px; 
-            border: 3px solid #ffd700; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 16px; 
-            box-shadow: 0 10px 35px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.2); 
-        }
-        .banca-status { background: #000; padding: 16px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .timer-destaque { font-size: 42px; font-weight: 900; color: var(--cyan); font-family: 'Oswald', sans-serif; text-shadow: 0 0 15px var(--cyan-glow); }
+        .banca-section { background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 24px; padding: 22px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .banca-status { background: #06060a; padding: 16px; border-radius: 16px; text-align: center; border: 1px solid var(--border); }
+        .timer-destaque { font-size: 36px; font-weight: 900; color: var(--cyan); margin-top: 5px; text-shadow: 0 0 20px var(--cyan-glow); font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
         
-        .banca-abas { display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 6px; border-radius: 10px; }
-        .aba-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #8a819c; cursor: pointer; border-radius: 6px; font-weight: 800; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 13px; }
-        .aba-btn.active { background: linear-gradient(180deg, #ff0055 0%, #990033 100%); color: #fff; box-shadow: 0 4px 10px var(--neon-red-glow); }
+        .banca-abas { display: flex; gap: 10px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 14px; }
+        .aba-btn { flex: 1; padding: 11px; background: transparent; border: none; color: #72728f; cursor: pointer; border-radius: 10px; font-weight: 700; font-size: 12px; text-transform: uppercase; transition: all 0.3s; font-family: inherit; }
+        .aba-btn.active { background: #131322; color: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.4); border: 1px solid var(--border); }
         
         .banca-controles { display: flex; gap: 12px; align-items: center; }
-        .btn-comprar, .btn-recargar { color: #fff; border: none; padding: 15px 26px; border-radius: 8px; font-weight: 800; cursor: pointer; flex: 1; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 15px; }
-        .btn-comprar { background: linear-gradient(135deg, var(--green), #00993d); box-shadow: 0 4px 15px var(--green-glow); }
-        .btn-comprar:disabled { background: #221a2e; color: #554a66; cursor: not-allowed; box-shadow: none; }
-        .btn-recargar { background: linear-gradient(135deg, var(--cyan), #009cb3); color: #000; font-weight: 900; box-shadow: 0 4px 15px var(--cyan-glow); }
-        .input-qtd { width: 90px; background: #000; border: 2px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 8px; text-align: center; font-weight: 800; font-size: 22px; font-family: 'Oswald', sans-serif; }
+        .btn-comprar, .btn-recargar { color: #fff; border: none; padding: 15px 26px; border-radius: 14px; font-weight: 800; cursor: pointer; flex: 1; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s; }
+        .btn-comprar { background: linear-gradient(135deg, var(--green), #00b04a); box-shadow: 0 5px 20px rgba(0,230,118,0.25); }
+        .btn-comprar:disabled { background: #191926; color: #4b4b5c; cursor: not-allowed; box-shadow: none; border: 1px solid rgba(255,255,255,0.01); }
+        .btn-recargar { background: linear-gradient(135deg, var(--cyan), #00a4bd); color: #030308; box-shadow: 0 5px 20px var(--cyan-glow); font-weight: 900; }
+        .input-qtd { width: 90px; background: #06060a; border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 19px; font-family: inherit; }
 
-        /* BOX DE CHAT ESTILO FEED DE CASSINO */
-        .naboa-section { 
-            background: #0b0514; 
-            border: 2px solid #ff0055; 
-            border-radius: 16px; 
-            padding: 20px; 
-            height: 350px; 
-            display: flex; 
-            flex-direction: column; 
-            box-sizing: border-box; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,0,85,0.2); 
-        }
-        .naboa-chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .naboa-section { background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--border); border-radius: 24px; padding: 20px; height: 300px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 10px; }
+        .naboa-chat-box::-webkit-scrollbar { width: 4px; }
+        .naboa-chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
         
         .naboa-msg { 
-            font-size: 14px; 
-            background: linear-gradient(90deg, rgba(255, 0, 85, 0.15) 0%, rgba(0,0,0,0.4) 100%); 
-            padding: 12px 16px; 
-            border-radius: 8px; 
-            border-left: 5px solid var(--neon-red);
+            font-size: 13px; 
+            background: linear-gradient(90deg, rgba(255, 107, 0, 0.06) 0%, rgba(15, 15, 25, 0.2) 100%); 
+            padding: 14px 18px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 107, 0, 0.18);
+            border-left: 5px solid var(--orange);
+            animation: slideInMsg 0.35s cubic-bezier(0.075, 0.82, 0.165, 1) both; 
             display: flex; 
             align-items: center; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            animation: piscarTexto 2s infinite;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
         }
 
-        /* PAINEL DE CARTELAS DOS COMPONENTES / OUTROS JOGADORES */
-        .participants-section { background: rgba(12, 5, 22, 0.8); padding: 20px; border-radius: 16px; border: 2px solid #ffd700; max-height: 420px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .participants-section { background: rgba(4,4,8,0.3); backdrop-filter: blur(10px); padding: 20px; border-radius: 24px; border: 1px solid var(--border); max-height: 320px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .participants-section::-webkit-scrollbar { width: 4px; }
+        .participants-section::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.04); border-radius: 10px; }
         
-        .fase-badge { background: #ff0055; padding: 8px 24px; border-radius: 4px; font-size: 13px; font-weight: 900; border: 2px solid #fff; color: #fff; font-family: 'Oswald', sans-serif; letter-spacing: 1px; box-shadow: 0 0 10px var(--neon-red-glow); }
+        .fase-badge { background: rgba(255, 107, 0, 0.12); padding: 7px 20px; border-radius: 50px; font-size: 11px; font-weight: 800; border: 1px solid rgba(255, 107, 0, 0.25); color: #ff9100; letter-spacing: 0.8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
 
-        /* CARTELAS MINIATURA (SLOTS) */
         .mini-card-item {
-            background: #140b24;
+            background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(5px);
             padding: 10px; 
-            width: 88px; 
-            border-radius: 8px; 
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: 0.2s;
+            width: 86px; 
+            border-radius: 14px; 
+            border: 1px solid rgba(255,255,255,0.04); 
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transform-style: preserve-3d;
         }
         .mini-card-item:hover {
-            transform: translateY(-3px);
-            border-color: #ffd700;
-            box-shadow: 0 5px 15px var(--gold-glow);
+            transform: translateY(-4px) scale(1.05) rotateX(4deg);
+            border-color: rgba(0, 240, 255, 0.3);
+            box-shadow: 0 8px 20px rgba(0,240,245,0.15);
+            background: rgba(255,255,255,0.04);
         }
 
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
             .col-left { flex: 1.4; display: flex; flex-direction: column; gap: 24px; }
             .col-right { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+            .num-geral { font-size: 18px; }
+            .naboa-section { height: 350px; }
+            .participants-section { max-height: 420px; }
         }
     </style>
 </head>
@@ -285,10 +259,10 @@
 <div id="cadastro-overlay">
     <div class="cadastro-box">
         <h2>DADOS DE PREMIAÇÃO PIX</h2>
-        <p style="font-size: 13px; color: #a196b3; margin: 0 0 20px 0; text-align: center; line-height: 1.6;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
-        <label style="font-size: 11px; font-weight: bold; color: #ffd700; letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
+        <p style="font-size: 12px; color: #72728f; margin: 0 0 20px 0; text-align: center; line-height: 1.6;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
+        <label style="font-size: 11px; font-weight: bold; color: #72728f; letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
         <input type="text" id="cad-whatsapp" placeholder="(41) 99999-9999">
-        <label style="font-size: 11px; font-weight: bold; color: #ffd700; letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
+        <label style="font-size: 11px; font-weight: bold; color: #72728f; letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
         <input type="text" id="cad-cpf" placeholder="000.000.000-00">
         <button class="btn-salvar-cad" onclick="salvarCadastroPix()">Liberar Painel de Jogo</button>
     </div>
@@ -297,21 +271,21 @@
 <div class="audio-control">
     <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
     <div style="display: flex; align-items: center; gap: 15px;">
-        <div id="user-credits-display" style="font-size: 16px; font-weight: 900; color: var(--green); display: none; background: rgba(0,255,102,0.1); padding: 8px 20px; border-radius: 4px; border: 2px solid var(--green); font-family: 'Oswald', sans-serif;">CRÉDITOS: R$ 0,00</div>
+        <div id="user-credits-display" style="font-size: 14px; font-weight: 800; color: var(--green); display: none; background: rgba(0,230,118,0.06); padding: 7px 16px; border-radius: 50px; border: 1px solid rgba(0,230,118,0.15);">CRÉDITOS: R$ 0,00</div>
         <div id="auth-status-area">
-            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: #ffd700; color: #000; border: none; padding: 12px 25px; border-radius: 4px; font-weight: 900; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'Oswald', sans-serif; box-shadow: 0 4px 15px var(--gold-glow); text-transform: uppercase;">
+            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: #fff; color: #000; border: none; padding: 11px 22px; border-radius: 50px; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 15px rgba(255,255,255,0.15); transition: 0.3s;">
                 <svg width="14" height="14" viewBox="0 0 18 18" style="fill: #000;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.30c1.54 1.41 3.57 2.3 6 2.3 3.54 0 6.57-2.55 8.05-5.7l-3-2.28c-.71 2.14-2.7 3.73-5.05 3.73z"/></svg>
                 Entrar com Google
             </button>
-            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 18px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; display: none;">Sair</button>
+            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 18px; border-radius: 50px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; display: none; transition: 0.3s;">Sair</button>
         </div>
     </div>
 </div>
 
 <div id="winner-overlay">
-    <div style="background:#11021c; color:#fff; padding:50px; border-radius:16px; border:4px solid #ffd700; max-width: 520px; width: 85%; box-shadow: 0 0 50px var(--gold), 0 0 20px #000; text-align:center;">
-        <h1 style="font-size: 56px; margin:0; font-weight: 900; font-family: 'Oswald', sans-serif; color: #ff0055; text-shadow: 0 0 20px var(--neon-red-glow);" id="win-title-fase">BINGO!</h1>
-        <h2 id="winner-name" style="font-size: 36px; color:#ffd700; margin: 18px 0 0 0; font-weight: 700; font-family: 'Oswald', sans-serif;">---</h2>
+    <div style="background:#0b0b12; color:#fff; padding:50px; border-radius:36px; border:2px solid var(--orange); max-width: 520px; width: 85%; box-shadow: 0 35px 80px rgba(0,0,0,0.9), 0 0 60px var(--orange-glow);">
+        <h1 style="font-size: 46px; margin:0; font-weight: 900; background: linear-gradient(135deg, #fff, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="win-title-fase">BINGO!</h1>
+        <h2 id="winner-name" style="font-size: 30px; color:#fff; margin: 18px 0 0 0; font-weight: 600; letter-spacing: 0.5px;">---</h2>
     </div>
 </div>
 
@@ -320,21 +294,21 @@
         <div class="game-layout">
             
             <div class="col-left">
-                <div style="background: #090412; border: 2px solid #ffd700; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+                <div style="background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; padding: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
                     <div style="text-align: left;">
-                        <h4 id="txt-premio" style="color:#ffd700; margin:0; font-size: 18px; font-weight: 800; text-transform: uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px;">PREMIAÇÃO EM ANDAMENTO</h4>
-                        <div id="fase-rodada-txt" style="font-size: 13px; color: #8a819c; margin-top: 2px; font-weight: 600;">AGUARDANDO BANCA</div>
+                        <h4 id="txt-premio" style="color:var(--orange); margin:0; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PREMIAÇÃO EM ANDAMENTO</h4>
+                        <div id="fase-rodada-txt" style="font-size: 12px; color: #72728f; margin-top: 2px; font-weight: 600;">AGUARDANDO BANCA</div>
                     </div>
                     <span class="fase-badge" id="badge-fase-jogo">FASE: 1ª LINHA</span>
                 </div>
                 
-                <div style="position: relative; background: #0c0616; border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); margin-top: 20px;">
+                <div style="position: relative; background: rgba(4,4,8,0.4); backdrop-filter: blur(10px); border-radius: 28px; padding: 18px; border: 1px solid var(--border);">
                     <div style="padding: 5px; text-align: center;">
-                        <img id="img-premio" src="" style="width:100%; max-height:190px; object-fit:contain; display:none; margin-bottom:20px; border-radius:12px; border: 2px solid #ffd700;">
+                        <img id="img-premio" src="" style="width:100%; max-height:190px; object-fit:contain; display:none; margin-bottom:20px; border-radius:16px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                     </div>
 
                     <div class="card-premio-grande">
-                        <label style="font-size: 12px; font-weight: 800; color: #ff0055; letter-spacing: 1px; text-transform: uppercase; font-family: 'Oswald', sans-serif;">PRÊMIO DESTA FASE:</label>
+                        <label style="font-size: 11px; font-weight: 800; color: #72728f; letter-spacing: 1px; text-transform: uppercase;">PRÊMIO DESTA FASE:</label>
                         <div class="txt-premio-valor" id="txt-fase-premio-real">R$ 0,00</div>
                     </div>
                     
@@ -351,7 +325,7 @@
             <div class="col-right">
                 <div class="banca-section">
                     <div class="banca-status">
-                        <span id="label-banca" style="font-size:12px; color:#ffd700; font-weight:800; text-transform:uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px;">PRÓXIMA RODADA EM:</span>
+                        <span id="label-banca" style="font-size:11px; color:#72728f; font-weight:800; text-transform:uppercase; letter-spacing: 0.5px;">PRÓXIMA RODADA EM:</span>
                         <div id="cronometro-banca" class="timer-destaque">04:00</div>
                     </div>
 
@@ -371,15 +345,15 @@
                     </div>
                 </div>
 
-                <div class="naboa-section" style="margin-top: 20px;">
-                    <h4 style="color:#ff0055; font-size:13px; margin:0 0 12px 0; font-weight: 800; text-transform:uppercase; font-family: 'Oswald', sans-serif; letter-spacing:0.8px; text-align: left;">📢 FEED DE ALERTA (TÁ NA BOA)</h4>
+                <div class="naboa-section">
+                    <h4 style="color:var(--orange); font-size:11px; margin:0 0 12px 0; font-weight: 800; text-transform:uppercase; letter-spacing:0.8px; text-align: left;">📢 CHAT DA RODADA (TÁ NA BOA)</h4>
                     <div class="naboa-chat-box" id="lista-na-boa">
-                        <div style="text-align:center; color:#554a66; font-size:12px; padding-top:60px;">Aguardando início do sorteio...</div>
+                        <div style="text-align:center; color:#555566; font-size:12px; padding-top:60px;">Aguardando início do sorteio...</div>
                     </div>
                 </div>
 
-                <div class="participants-section" style="margin-top: 20px;">
-                    <h4 style="text-align:center; color:#00ff66; font-size:13px; margin:0 0 12px 0; font-weight: 800; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-transform: uppercase;">CARTELAS NA MESA (<span id="player-count">0</span>)</h4>
+                <div class="participants-section">
+                    <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 12px 0; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
                     <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;"></div>
                 </div>
             </div>
@@ -500,9 +474,12 @@
         recalcularPremiosUI();
     });
 
+    // SISTEMA CORRIGIDO DE CÁLCULO DE PREMIAÇÃO VISUAL DINÂMICA (SOMA FAKE + REAL)[cite: 2]
     function recalcularPremiosUI() {
         let caixaGeralCalculo = bancaFakeInjetadaDoBanco + totalPixRealAcumulado;
         const escolhaFator = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
+        
+        // Exibe o valor do prêmio completo na tela (mesmo sendo originado de saldo fake do admin)[cite: 2]
         document.getElementById('txt-fase-premio-real').innerText = `R$ ${(caixaGeralCalculo * (escolhaFator / 100)).toFixed(2)}`;
     }
 
@@ -639,11 +616,11 @@
                 if(d.cartelas) {
                     count++;
                     d.cartelas.forEach((c, idx) => {
-                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#000; font-size:10px; padding:4px 0; text-align:center; font-weight:800; border-radius:4px; border:1px solid rgba(255,255,255,0.05); color:#ccc;">${n}</div>`).join('');
+                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#050509; font-size:9px; padding:3px 0; text-align:center; font-weight:800; border-radius:4px; border:1px solid rgba(255,255,255,0.02);">${n}</div>`).join('');
                         
                         div.innerHTML += `
-                            <div class="mini-card-item" style="border:1px solid ${idx+1 === rodadaAtiva ? '#ffd700' : 'rgba(255,255,255,0.1)'}; opacity:${idx+1 > rodadaAtiva ? '0.15' : '1'}">
-                                <span style="font-size:9px; color:var(--cyan); display:block; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:700; margin-bottom:4px;">${d.nome || 'User'} (#${idx+1})</span>
+                            <div class="mini-card-item" style="border:1px solid ${idx+1 === rodadaAtiva ? 'rgba(0, 240, 255, 0.35)' : 'rgba(255,255,255,0.04)'}; opacity:${idx+1 > rodadaAtiva ? '0.2' : '1'}">
+                                <span style="font-size:8px; color:var(--cyan); display:block; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:600; margin-bottom:4px;">${d.nome || 'User'} (#${idx+1})</span>
                                 <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:2px;">${ns}</div>
                             </div>`;
 
@@ -653,13 +630,16 @@
                                 temAlguemNaBoa = true;
                                 painelNaBoa.innerHTML += `
                                     <div class="naboa-msg">
-                                        <span>⚡ CASINO ALERT: <strong>${d.nome || 'Jogador'}</strong> está por 1 bola!</span>
+                                        <span>⚡ <strong>${d.nome || 'Jogador'}</strong> está na boa!</span>
                                     </div>`;
                             }
                         }
 
+                        // VALIDALÇÃO DE VITÓRIA PREMIUM EM TEMPO REAL PARA JOGADORES REAIS
                         if(!ganhadorAtivo && idx+1 === rodadaAtiva && auth.currentUser && u.key === auth.currentUser.uid) {
                             if (avaliarVitoriaPorFase(c, bolasGlobal, faseAtualDoJogo)) {
+                                
+                                // O jogador real só pode ganhar se o faturamento líquido do Pix na rodada cobrir matematicamente o prêmio visual gerado[cite: 2]
                                 let caixaGeral = bancaFakeInjetadaDoBanco + totalPixRealAcumulado;
                                 let pctFase = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
                                 let custoPremioVisual = caixaGeral * (pctFase / 100);
@@ -674,7 +654,7 @@
             });
             
             if (!temAlguemNaBoa) {
-                painelNaBoa.innerHTML = `<div style="text-align:center; color:#554a66; font-size:12px; padding-top:60px;">Buscando combinações premiadas...</div>`;
+                painelNaBoa.innerHTML = `<div style="text-align:center; color:#555566; font-size:12px; padding-top:60px;">Nenhum jogador na boa no momento...</div>`;
             } else {
                 painelNaBoa.scrollTop = painelNaBoa.scrollHeight;
             }
@@ -700,7 +680,7 @@
     function avaliarVitoriaPorFase(cartela, bolas, fase) {
         let f1 = cartela.slice(0, 5), f2 = cartela.slice(5, 10), f3 = cartela.slice(10, 15);
         let check1 = f1.every(n => bolas.includes(n)), check2 = f2.every(n => bolas.includes(n)), check3 = f3.every(n => bolas.includes(n));
-        let linhas Concluidas = (check1 ? 1 : 0) + (check2 ? 1 : 0) + (check3 ? 1 : 0);
+        let linhasConcluidas = (check1 ? 1 : 0) + (check2 ? 1 : 0) + (check3 ? 1 : 0);
         
         if (fase === 1) return linhasConcluidas >= 1;
         if (fase === 2) return linhasConcluidas >= 2;
