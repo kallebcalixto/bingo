@@ -248,7 +248,7 @@
             font-weight: bold;
         }
 
-        .participants-section { background: #05000f; padding: 16px; border-radius: 8px; border: 3px solid var(--yellow); max-height: 350px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .participants-section { background: #05000f; padding: 16px; border-radius: 8px; border: 3px solid var(--led-yellow); max-height: 350px; overflow-y: auto; width: 100%; box-sizing: border-box; }
         
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
@@ -413,6 +413,10 @@
     const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
     
+    // ⚠️ ATENÇÃO: COLE A URL REAL DO SEU NOVO RENDER ENTRE AS ASPAS ABAIXO!
+    // Olhe no topo do painel do Render, copie o link que termina com .onrender.com e cole aqui
+    const MINHA_URL_RENDER_BACKEND = 'https://bingo-backend-novo.onrender.com';
+
     let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
     let estadoJogoGlobal = "espera", mestreDaRodada = false, meusCreditos = 0.00;
     let faseAtualDoJogo = 1, bancaFakeInjetadaDoBanco = 0, totalPixRealAcumulado = 0;
@@ -582,7 +586,7 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // LINK DO SEU NOVO SERVIDOR NO RENDER ADICIONADO E MAIS DO QUE PRONTO
+    // PROCESSAMENTO DA INTEGRACAO COM A CHAVE FIXADA NO TOPO DO SCRIPT
     window.gerarCobrancaPix = async () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
         
@@ -594,8 +598,11 @@
         document.getElementById('area-pix-resultado').style.display = 'none';
         document.getElementById('mp-qrcode-render').innerHTML = ""; 
 
+        // Garante a formatação correta removendo barras extras do link
+        const urlLimpa = MINHA_URL_RENDER_BACKEND.endsWith('/') ? MINHA_URL_RENDER_BACKEND.slice(0, -1) : MINHA_URL_RENDER_BACKEND;
+
         try {
-            const resposta = await fetch('https://bingo-backend-novo.onrender.com/criar-pix', {
+            const resposta = await fetch(`${urlLimpa}/criar-pix`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
