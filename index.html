@@ -174,6 +174,28 @@
         .btn-recargar { background: var(--led-cyan); color: #000; border: none; }
         .input-qtd { width: 75px; background: #000; border: 2px solid #220044; color: var(--led-yellow); padding: 10px; border-radius: 4px; text-align: center; font-weight: 900; font-size: 20px; font-family: 'Oswald', sans-serif; }
 
+        /* AREA DO PIX DO MERCADO PAGO */
+        .mp-pix-area {
+            background: #000;
+            border: 2px dashed var(--led-yellow);
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .mp-copia-cola-input {
+            width: 100%;
+            padding: 8px;
+            background: #11051c;
+            border: 1px solid var(--led-yellow);
+            color: #fff;
+            font-size: 11px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
         .naboa-section { 
             background: #000; 
             border: 3px solid var(--led-magenta); 
@@ -314,9 +336,18 @@
                         <button id="btn-compre-acao" onclick="comprarCartelasBanca()" class="btn-comprar">Comprar (R$ 0,30/un)</button>
                     </div>
 
-                    <div class="banca-controles" id="painel-aba-credito" style="display: none;">
-                        <input type="number" id="recarga-valor" class="input-qtd" style="width: 85px;" value="10" min="10" max="1000">
-                        <button onclick="gerarCobrancaPix()" class="btn-recargar">Recarregar</button>
+                    <div class="banca-controles" id="painel-aba-credito" style="display: none; flex-direction: column;">
+                        <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
+                            <input type="number" id="recarga-valor" class="input-qtd" style="width: 85px;" value="10" min="10" max="1000">
+                            <button id="btn-gerar-pix-mp" onclick="gerarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
+                        </div>
+                        
+                        <!-- ÁREA QUE EXIBE O QR CODE COPIA E COLA DO MERCADO PAGO -->
+                        <div id="area-pix-resultado" class="mp-pix-area" style="display: none; width: 100%;">
+                            <span style="font-size: 11px; color: var(--led-yellow); font-weight: bold; display: block; margin-bottom: 6px;">CÓDIGO PIX GERADO:</span>
+                            <input type="text" id="mp-copia-cola" class="mp-copia-cola-input" readonly onclick="this.select()">
+                            <button onclick="copiarPixMP()" style="background: var(--led-yellow); border: none; color: #000; font-weight: 900; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; text-transform: uppercase;">Copiar Código</button>
+                        </div>
                     </div>
                 </div>
 
@@ -524,24 +555,58 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // INTEGRAÇÃO REAL COM LIVEPIX - COPIA O UID AUTOMATICAMENTE E ABRE O LINK
-    window.gerarCobrancaPix = () => {
+    // NOVA FUNÇÃO: SE CONECTA COM O SEU SERVIDOR DO RENDER E GERA O COPIA E COLA DO MERCADO PAGO
+    window.gerarCobrancaPix = async () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
         
-        const identificador = auth.currentUser.uid;
-        const urlLivePix = "https://livepix.gg/kspodcast"; 
+        const btn = document.getElementById('btn-gerar-pix-mp');
+        const valorInput = parseFloat(document.getElementById('recarga-valor').value) || 10;
         
-        navigator.clipboard.writeText(identificador).then(() => {
-            alert(`CÓDIGO DE SALDO COPIADO!\n\nPara o seu saldo entrar na hora, basta COLA-LO no campo "MENSAGEM" dentro do LivePix.\n\n(Já copiamos o código para você, é só dar 'Colar' lá no Pix!)`);
-            window.open(urlLivePix, '_blank');
-        }).catch(() => {
-            alert(`ATENÇÃO:\n\nPara o saldo entrar na hora, digite ou cole exatamente este código abaixo no campo "MENSAGEM" do LivePix:\n\n${identificador}`);
-            window.open(urlLivePix, '_blank');
-        });
+        if (valorInput < 10) return alert("O valor mínimo para recarga é R$ 10,00");
+
+        btn.innerText = "GERANDO...";
+        btn.disabled = true;
+
+        try {
+            // Endereço do seu servidor no Render
+            const resposta = await fetch('https://bingo-webhook-livepix.onrender.com/criar-pix', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    uid: auth.currentUser.uid,
+                    valor: valorInput,
+                    email: auth.currentUser.email
+                })
+            });
+
+            const resultado = await resposta.json();
+
+            if (resultado && resultado.copiaCola) {
+                document.getElementById('mp-copia-cola').value = resultado.copiaCola;
+                document.getElementById('area-pix-resultado').style.display = 'block';
+                alert("Pix gerado! Copie o código abaixo e pague no app do seu Banco.");
+            } else {
+                alert("Erro ao processar resposta do Pix.");
+            }
+        } catch (erro) {
+            console.error(erro);
+            alert("Erro ao conectar com o servidor de pagamento.");
+        } finally {
+            btn.innerText = "GERAR PIX";
+            btn.disabled = false;
+        }
+    };
+
+    // FUNÇÃO AUXILIAR PARA O BOTÃO COPIAR
+    window.copiarPixMP = () => {
+        const input = document.getElementById('mp-copia-cola');
+        input.select();
+        document.execCommand('copy');
+        alert("Código Pix copiado com sucesso! Abra o app do seu banco e use o 'Pix Copia e Cola'.");
     };
 
     window.comprarCartelasBanca = async () => {
-        if(!auth.currentUser) return alert("Faça login primeiro!");
+        if(!auth.currentUser) return alert("Faça login first!");
         if(estadoJogoGlobal !== "espera") return alert("A banca está fechada para esta rodada.");
 
         let qtd = parseInt(document.getElementById('compre-qtd').value) || 1;
