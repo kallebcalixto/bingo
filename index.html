@@ -524,15 +524,20 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    window.gerarCobrancaPix = async () => {
+    // INTEGRAÇÃO REAL COM LIVEPIX - COPIA O UID AUTOMATICAMENTE E ABRE O LINK
+    window.gerarCobrancaPix = () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
-        const v = parseFloat(document.getElementById('recarga-valor').value) || 0;
-        if(v < 10 || v > 1000) return alert("Operação Inválida! O valor para recargas Pix deve ser entre R$ 10,00 e R$ 1.000,00.");
         
-        let novoSaldo = meusCreditos + v;
-        await update(ref(db, `users/${auth.currentUser.uid}`), { creditos: novoSaldo });
-        alert(`PIX Identificado! R$ ${v.toFixed(2)} adicionados.`);
-        recalcularCaixaRodada();
+        const identificador = auth.currentUser.uid;
+        const urlLivePix = "https://livepix.gg/kspodcast"; 
+        
+        navigator.clipboard.writeText(identificador).then(() => {
+            alert(`CÓDIGO DE SALDO COPIADO!\n\nPara o seu saldo entrar na hora, basta COLA-LO no campo "MENSAGEM" dentro do LivePix.\n\n(Já copiamos o código para você, é só dar 'Colar' lá no Pix!)`);
+            window.open(urlLivePix, '_blank');
+        }).catch(() => {
+            alert(`ATENÇÃO:\n\nPara o saldo entrar na hora, digite ou cole exatamente este código abaixo no campo "MENSAGEM" do LivePix:\n\n${identificador}`);
+            window.open(urlLivePix, '_blank');
+        });
     };
 
     window.comprarCartelasBanca = async () => {
