@@ -6,7 +6,7 @@
     <title>🎰 LAS VEGAS ARCADE - BINGO ROYALE 🎰</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- BIBLIOTECA PARA GERAR QR CODE SE O MERCADO PAGO NÃO MANDAR A IMAGEM -->
+    <!-- SCRIPT ADICIONADO PARA GERAR O QR CODE DINAMICAMENTE NA TELA -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { 
@@ -197,7 +197,6 @@
             margin-top: 10px;
             text-align: center;
         }
-        /* CONTAINER DO QR CODE CONFIGURADO PARA CENTRALIZAR CORETAMENTE */
         .mp-qrcode-container {
             width: 180px;
             height: 180px;
@@ -377,14 +376,12 @@
                                 <option value="500">R$ 500</option>
                                 <option value="1000">R$ 1000</option>
                             </select>
-                            <button id="btn-gerar-pix-mp" onclick="gerarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
+                            <button id="btn-gerar-pix-mp" onclick="generarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
                         </div>
                         
-                        <!-- ESPAÇO DO RETORNO TOTALMENTE REESTRUTURADO -->
+                        <!-- PAINEL DE RETORNO DO PIX TOTALMENTE CORRIGIDO -->
                         <div id="area-pix-resultado" class="mp-pix-area" style="display: none; width: 100%;">
                             <span style="font-size: 11px; color: var(--led-cyan); font-weight: bold; display: block; margin-bottom: 8px;">ESCANEE O QR CODE ABAIXO:</span>
-                            
-                            <!-- DIV QUE COMPORTA O SCRIPT DO GERADOR DINÂMICO -->
                             <div id="mp-qrcode-render" class="mp-qrcode-container"></div>
                             
                             <span style="font-size: 11px; color: var(--led-yellow); font-weight: bold; display: block; margin-bottom: 6px;">OU USE O COPIA E COLA:</span>
@@ -598,8 +595,8 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // FUNÇÃO QUE CONSOME A ROTA E GERA O RETORNO COMPLETO DO QR CODE DINÂMICO
-    window.gerarCobrancaPix = async () => {
+    // FUNÇÃO ULTRA-BLINDADA PARA VARRER A RESPOSTA E PEGAR A CHAVE COPIA E COLA DE QUALQUER JEITO
+    window.generarCobrancaPix = async () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
         
         const btn = document.getElementById('btn-gerar-pix-mp');
@@ -608,7 +605,7 @@
         btn.innerText = "GERANDO...";
         btn.disabled = true;
         document.getElementById('area-pix-resultado').style.display = 'none';
-        document.getElementById('mp-qrcode-render').innerHTML = ""; // Limpa o QR Code anterior
+        document.getElementById('mp-qrcode-render').innerHTML = ""; 
 
         try {
             const resposta = await fetch('https://bingo-webhook-livepix.onrender.com/criar-pix', {
@@ -622,12 +619,18 @@
             });
 
             const resultado = await resposta.json();
-            const stringPix = resultado.copiaCola;
+            console.log("DADOS DO SERVIDOR:", resultado);
+
+            // Mapeamento profundo para capturar a string Pix de qualquer formato gerado
+            const stringPix = resultado.copiaCola || 
+                              resultado.copiacola || 
+                              resultado.point_of_interaction?.transaction_data?.qr_code || 
+                              (resultado.data && (resultado.data.copiaCola || resultado.data.qr_code));
 
             if (stringPix) {
                 document.getElementById('mp-copia-cola').value = stringPix;
                 
-                // CRIA O QR CODE USANDO A STRING DO COPIA E COLA DIRETAMENTE NA TELA DO USUÁRIO
+                // Renderiza o QR Code dinâmico na tela do jogador
                 new QRCode(document.getElementById("mp-qrcode-render"), {
                     text: stringPix,
                     width: 168,
@@ -639,12 +642,12 @@
 
                 document.getElementById('area-pix-resultado').style.display = 'block';
             } else {
-                console.error("Erro na estrutura de dados:", resultado);
-                alert("Erro: O servidor processou, mas nao retornou a chave Pix copia e cola.");
+                console.error("Erro na varredura da resposta:", resultado);
+                alert("Erro do Servidor: " + JSON.stringify(resultado));
             }
         } catch (erro) {
             console.error(erro);
-            alert("Erro ao conectar com o servidor de pagamento.");
+            alert("Erro ao conectar com o servidor de pagamento: " + erro.message);
         } finally {
             btn.innerText = "GERAR PIX";
             btn.disabled = false;
