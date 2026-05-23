@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHOW DE PRÊMIOS - AUTOMÁTICO PROFISSIONAL</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>🎰 LAS VEGAS ARCADE - BINGO ROYALE 🎰</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { 
-            --bg: #1a0f1a; /* Roxo escuro vintage */
-            --retro-red: #d62828; /* Vermelho Jukebox */
-            --retro-yellow: #fcbf49; /* Amarelo Creme Marquee */
-            --retro-yellow-glow: rgba(252, 191, 73, 0.6);
-            --retro-teal: #00b4d8; /* Azul Turquesa Cadilac */
-            --retro-teal-glow: rgba(0, 180, 216, 0.5);
-            --retro-green: #2a9d8f; /* Verde Menta Vintage */
-            --retro-cream: #fdf0d5; /* Bege Creme de época */
-            --dark-box: #2b1e3a;
-            --glass: rgba(43, 30, 58, 0.85);
-            --border: 3px solid #fcbf49;
-            --green: #2a9d8f;
-            --cyan: #00b4d8;
+            --bg: #020005; 
+            --led-magenta: #ff007f;
+            --led-magenta-glow: rgba(255, 0, 127, 0.85);
+            --led-cyan: #00f0ff;
+            --led-cyan-glow: rgba(0, 240, 255, 0.85);
+            --led-yellow: #fffb00;
+            --led-yellow-glow: rgba(255, 251, 0, 0.85);
+            --led-green: #00ff66;
+            --led-green-glow: rgba(0, 255, 102, 0.85);
+            --border-3d: linear-gradient(180deg, #555, #111);
+            --green: var(--led-green);
+            --cyan: var(--led-cyan);
+            --orange: #ff6b00;
         }
         
         body { 
-            background: radial-gradient(circle at 50% 30%, #3d2252 0%, var(--bg) 85%); 
+            background: radial-gradient(circle at 50% 20%, #15002b 0%, var(--bg) 90%); 
             background-attachment: fixed;
             background-size: cover;
             background-position: center;
-            color: var(--retro-cream); 
+            color: #fff; 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
             padding: 0; 
@@ -41,248 +41,261 @@
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(26, 15, 26, 0.85);
+            background: rgba(2, 0, 5, 0.9);
             z-index: -1;
             pointer-events: none;
         }
 
-        /* ANIMAÇÃO DE LUZES MARQUEE DOS ANOS 60 */
-        @keyframes piscarLuzesRetro {
-            0%, 100% { box-shadow: 0 0 15px var(--retro-yellow-glow), inset 0 0 10px var(--retro-yellow-glow); border-color: #fcbf49; }
-            50% { box-shadow: 0 0 22px rgba(214, 40, 40, 0.6), inset 0 0 12px rgba(214, 40, 40, 0.4); border-color: var(--retro-red); }
+        /* ANIMAÇÃO DE LEDS PISCANTES ULTRA VIBRANTES */
+        @keyframes marqueeLeds {
+            0%, 100% { 
+                box-shadow: 0 0 25px var(--led-magenta-glow), inset 0 0 15px var(--led-magenta-glow); 
+                border-color: var(--led-magenta);
+            }
+            50% { 
+                box-shadow: 0 0 35px var(--led-cyan-glow), inset 0 0 20px var(--led-cyan-glow); 
+                border-color: var(--led-cyan);
+            }
         }
 
-        @keyframes letreiroTexto {
-            0%, 100% { filter: drop-shadow(0 0 4px var(--retro-red)); color: var(--retro-cream); }
-            50% { filter: drop-shadow(0 0 10px var(--retro-yellow)); color: var(--retro-yellow); }
+        @keyframes textoNeonPulsante {
+            0%, 100% { filter: drop-shadow(0 0 8px var(--led-magenta)); text-shadow: 0 2px 0 #000; }
+            50% { filter: drop-shadow(0 0 18px var(--led-yellow)); color: var(--led-yellow); text-shadow: 0 4px 0 #000; }
         }
         
         .audio-control { 
-            background: linear-gradient(180deg, #3d2252 0%, #1a0f1a 100%);
+            background: #090014;
             padding: 16px 28px; 
             position: sticky; 
             top: 0; 
             z-index: 1000; 
-            border-bottom: 4px solid var(--retro-yellow); 
+            border-bottom: 5px solid var(--led-cyan); 
+            box-shadow: 0 0 25px var(--led-cyan-glow);
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
         }
         
         #btn-audio { 
-            background: linear-gradient(135deg, var(--retro-red), #9b1c1c); 
-            color: var(--retro-cream); 
-            border: 2px solid var(--retro-yellow); 
+            background: linear-gradient(180deg, var(--led-magenta) 0%, #99004c 100%); 
+            color: #fff; 
+            border: 3px solid #fff; 
             padding: 12px 35px; 
-            border-radius: 4px; 
+            border-radius: 6px; 
             font-weight: 900; 
             text-transform: uppercase; 
-            font-size: 13px; 
+            font-size: 14px; 
             cursor: pointer; 
-            transition: 0.3s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: 0.2s;
+            box-shadow: 0 5px 0 #55002b, 0 0 15px var(--led-magenta-glow);
             letter-spacing: 1.5px;
             font-family: 'Oswald', sans-serif;
+            text-shadow: 2px 2px 0 #000;
         }
-        #btn-audio:hover { transform: scale(1.05); background: var(--retro-red); }
-        #btn-audio.active { background: linear-gradient(135deg, var(--retro-green), #1b665d); box-shadow: 0 0 15px rgba(42,157,143,0.6); }
-        
+        #btn-audio:active { transform: translateY(4px); box-shadow: 0 1px 0 #55002b, 0 0 15px var(--led-magenta-glow); }
+        #btn-audio.active { background: linear-gradient(180deg, var(--led-green) 0%, #006622 100%); box-shadow: 0 5px 0 #003311, 0 0 20px var(--led-green-glow); }
+        #btn-audio.active:active { box-shadow: 0 1px 0 #003311, 0 0 20px var(--led-green-glow); }
+
         .container { display: flex; flex-direction: column; gap: 24px; padding: 24px; box-sizing: border-box; max-width: 1480px; margin: 0 auto; }
         .game-layout { display: flex; flex-direction: column; gap: 24px; width: 100%; }
         
-        /* TABELA DE NÚMEROS ESTILO PAINEL ELETROMECÂNICO */
+        /* CONTAINER PRINCIPAL COM TEXTURA 3D ARCADE */
         .painel-geral { 
-            background: #120914;
-            border: 6px double var(--retro-yellow);
-            border-radius: 4px; 
-            padding: 20px; 
+            background: #05000a;
+            border: 6px solid var(--led-magenta);
+            border-radius: 12px; 
+            padding: 24px; 
             display: grid; 
             grid-template-columns: repeat(10, 1fr); 
-            gap: 10px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.9);
-            animation: piscarLuzesRetro 3s infinite;
+            gap: 12px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9), inset 0 0 35px rgba(0,0,0,0.9);
+            animation: marqueeLeds 3.5s infinite;
         }
         
         .num-geral { 
-            background: #221528; 
-            border: 2px solid rgba(253, 240, 213, 0.1);
-            border-radius: 4px; 
+            background: #11051c; 
+            border: 2px solid #220b38;
+            border-radius: 8px; 
             aspect-ratio: 1/1; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 20px; 
-            font-weight: 700; 
-            color: rgba(253, 240, 213, 0.2); 
-            box-shadow: inset 0 3px 5px rgba(0,0,0,0.6);
+            font-size: 22px; 
+            font-weight: 900; 
+            color: #2c1642; 
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.85), 0 2px 0 rgba(255,255,255,0.05);
             transition: all 0.2s ease;
             font-family: 'Oswald', sans-serif;
         }
         
-        /* BOLA ATIVA NA MESA COM LOOK POP ART COR SÓLIDA FORTE */
+        /* LED NUMÉRICO SORTEADO COM BRILHO ANIMAL */
         .num-geral.active { 
-            background: var(--retro-red);
-            color: var(--retro-yellow); 
-            font-weight: 900;
-            transform: scale(1.05);
-            box-shadow: 0 0 12px var(--retro-red), inset 0 0 5px #fff; 
-            border: 2px solid var(--retro-yellow); 
-            text-shadow: 2px 2px 0px #000;
+            background: radial-gradient(circle, #fff 0%, var(--led-cyan) 40%, #004b52 100%);
+            color: #fff; 
+            transform: scale(1.08);
+            box-shadow: 0 0 25px var(--led-cyan), inset 0 0 8px #fff; 
+            border: 3px solid #fff; 
+            text-shadow: 0 0 8px #fff, 2px 2px 4px #000;
             z-index: 5;
         }
         
-        /* GLOBO DE SORTEIO RETRO */
+        /* GLOBO DE SORTEIO COM BRILHO 3D ELETRÔNICO */
         .ball-container { padding: 15px 0; text-align: center; }
         .ball-display { 
-            background: radial-gradient(circle at 30% 30%, #fdf0d5 0%, #fcbf49 60%, #ae7c11 100%); 
-            width: 160px; 
-            height: 160px; 
+            background: radial-gradient(circle at 35% 35%, #fff 0%, var(--led-yellow) 45%, #b38f00 80%, #3d3100 100%); 
+            width: 170px; 
+            height: 170px; 
             border-radius: 50%; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             margin: 0 auto; 
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 25px var(--retro-yellow-glow), inset -10px -10px 25px rgba(0,0,0,0.5); 
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.9), 0 0 45px var(--led-yellow-glow), inset -12px -12px 30px rgba(0,0,0,0.7); 
             position: relative;
-            border: 4px solid var(--retro-cream);
+            border: 6px solid #fff;
         }
         .ball-display.bump {
-            animation: ballImpact 0.4s ease-in-out;
+            animation: ballImpact 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes ballImpact {
             0% { transform: scale(1); }
-            50% { transform: scale(1.15); box-shadow: 0 0 40px var(--retro-teal); }
+            50% { transform: scale(1.22); box-shadow: 0 0 60px var(--led-magenta); }
             100% { transform: scale(1); }
         }
         
         #bola-num { 
-            font-size: 82px; 
+            font-size: 88px; 
             font-weight: 900; 
-            color: #111; 
+            color: #000; 
             font-family: 'Oswald', sans-serif;
-            text-shadow: 1px 1px 0px #fff;
+            text-shadow: 2px 2px 0px #fff;
             z-index: 2;
         }
         
-        /* MARCAÇÃO DO COPO DA CARTELA */
+        /* MARCAÇÃO DO ACERTO DO CLIENTE EM LED VERDE */
         .marked { 
-            background: linear-gradient(135deg, var(--retro-teal), #0077b6) !important; 
-            color: var(--retro-cream) !important; 
-            box-shadow: 0 0 10px var(--retro-teal) !important;
-            border: 1px solid var(--retro-cream) !important;
-            text-shadow: 1px 1px 2px #000;
+            background: radial-gradient(circle, #fff 0%, var(--led-green) 50%, #004d1a 100%) !important; 
+            color: #fff !important; 
+            box-shadow: 0 0 25px var(--led-green) !important;
+            border: 3px solid #fff !important;
+            text-shadow: 2px 2px 3px #000 !important;
         }
 
-        /* CARD DE PLACAR DE PRÊMIO SLOTS */
+        /* CARTÃO DE PLACAR GRANDE 3D */
         .card-premio-grande {
-            background: #2b1424;
-            border: 3px dashed var(--retro-yellow);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border-radius: 6px;
+            background: #140024;
+            border: 4px solid var(--led-yellow);
+            box-shadow: 0 0 35px rgba(255, 251, 0, 0.3), inset 0 0 20px rgba(255,251,0,0.1);
+            border-radius: 8px;
             padding: 24px;
             text-align: center;
             margin-bottom: 20px;
+            transform: translateY(-2px);
         }
         .txt-premio-valor {
-            font-size: 60px;
+            font-size: 68px;
             font-weight: 900;
-            color: var(--retro-green);
+            color: var(--led-green);
             font-family: 'Oswald', sans-serif;
-            text-shadow: 2px 2px 0px #000, 0 0 10px rgba(42,157,143,0.4);
+            text-shadow: 3px 3px 0px #000, 0 0 25px var(--led-green-glow);
             margin: 5px 0 0 0;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
         
-        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26,15,26,0.98); backdrop-filter: blur(10px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .cadastro-box { background: #321b44; padding: 40px; border-radius: 4px; border: 4px solid var(--retro-yellow); max-width: 440px; width: 85%; box-shadow: 0 0 30px var(--retro-yellow-glow); }
-        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--retro-yellow); font-family: 'Oswald', sans-serif; text-align: center; font-size: 30px; text-shadow: 2px 2px 0px #000; }
-        .cadastro-box input { width: 100%; padding: 15px; margin: 8px 0 22px 0; background: #120914; border: 2px solid var(--retro-cream); color: #fff; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
-        .btn-salvar-cad { width: 100%; background: var(--retro-red); color: #fff; border: 2px solid var(--retro-yellow); padding: 15px; border-radius: 4px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3,0,10,0.99); backdrop-filter: blur(15px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .cadastro-box { background: #0f001c; padding: 40px; border-radius: 12px; border: 4px solid var(--led-cyan); max-width: 440px; width: 85%; box-shadow: 0 0 40px var(--led-cyan-glow); }
+        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-align: center; font-size: 34px; text-shadow: 2px 2px 0 #000; }
+        .cadastro-box input { width: 100%; padding: 15px; margin: 8px 0 22px 0; background: #000; border: 3px solid var(--led-cyan); color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 18px; font-weight: bold; font-family: 'Oswald', sans-serif; }
+        .btn-salvar-cad { width: 100%; background: linear-gradient(180deg, var(--led-green) 0%, #008033 100%); color: #fff; border: 2px solid #fff; padding: 15px; border-radius: 6px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 18px; box-shadow: 0 5px 0 #004d1f; }
+        .btn-salvar-cad:active { transform: translateY(4px); box-shadow: 0 1px 0 #004d1f; }
 
-        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(18,9,20,0.96); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(2,0,5,0.98); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         
-        /* BOX BANCA LATERAIS */
+        /* BANCA E BOTÕES ARCADE 3D */
         .banca-section { 
-            background: #2b1e3a; 
-            border-radius: 4px; 
+            background: #0d001a; 
+            border-radius: 12px; 
             padding: 24px; 
-            border: 4px solid var(--retro-yellow); 
+            border: 4px solid var(--led-cyan); 
             display: flex; 
             flex-direction: column; 
             gap: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 25px rgba(0, 240, 255, 0.2); 
         }
-        .banca-status { background: #120914; padding: 16px; border-radius: 4px; text-align: center; border: 1px solid rgba(253,240,213,0.1); }
-        .timer-destaque { font-size: 40px; font-weight: 900; color: var(--retro-teal); font-family: 'Oswald', sans-serif; text-shadow: 1px 1px 0px #000; }
+        .banca-status { background: #000; padding: 16px; border-radius: 8px; text-align: center; border: 2px solid #1a0033; }
+        .timer-destaque { font-size: 46px; font-weight: 900; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-shadow: 0 0 20px var(--led-cyan-glow), 2px 2px 0 #000; }
         
-        .banca-abas { display: flex; gap: 10px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 4px; }
-        .aba-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #a59bb5; cursor: pointer; border-radius: 4px; font-weight: 800; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 14px; }
-        .aba-btn.active { background: var(--retro-red); color: #fff; border: 1px solid var(--retro-yellow); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .banca-abas { display: flex; gap: 10px; background: #000; padding: 6px; border-radius: 8px; border: 1px solid #220044; }
+        .aba-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #5e4c73; cursor: pointer; border-radius: 6px; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 15px; }
+        .aba-btn.active { background: linear-gradient(180deg, var(--led-magenta) 0%, #99004c 100%); color: #fff; box-shadow: 0 0 15px var(--led-magenta-glow); border: 1px solid #fff; }
         
         .banca-controles { display: flex; gap: 12px; align-items: center; }
-        .btn-comprar, .btn-recargar { color: #fff; border: 2px solid var(--retro-yellow); padding: 15px 26px; border-radius: 4px; font-weight: 800; cursor: pointer; flex: 1; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 16px; }
-        .btn-comprar { background: var(--retro-green); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .btn-comprar:disabled { background: #3d314a; color: #6e617c; border-color: #554863; cursor: not-allowed; box-shadow: none; }
-        .btn-recargar { background: var(--retro-teal); color: #000; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .input-qtd { width: 90px; background: #120914; border: 2px solid var(--retro-cream); color: #fff; padding: 12px; border-radius: 4px; text-align: center; font-weight: 800; font-size: 24px; font-family: 'Oswald', sans-serif; }
+        .btn-comprar, .btn-recargar { color: #fff; border: 3px solid #fff; padding: 15px 26px; border-radius: 8px; font-weight: 900; cursor: pointer; flex: 1; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 16px; text-shadow: 2px 2px 0 #000; }
+        .btn-comprar { background: linear-gradient(180deg, var(--led-green) 0%, #008033 100%); box-shadow: 0 5px 0 #004d1f, 0 0 15px var(--led-green-glow); }
+        .btn-comprar:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 #004d1f, 0 0 15px var(--led-green-glow); }
+        .btn-comprar:disabled { background: #1a1126; color: #443754; border-color: #2d203d; cursor: not-allowed; box-shadow: none; text-shadow: none; }
+        .btn-recargar { background: linear-gradient(180deg, var(--led-cyan) 0%, #00808a 100%); color: #000; text-shadow: 1px 1px 0 #fff; font-weight: 900; box-shadow: 0 5px 0 #00474d, 0 0 15px var(--led-cyan-glow); }
+        .btn-recargar:active { transform: translateY(4px); box-shadow: 0 1px 0 #00474d, 0 0 15px var(--led-cyan-glow); }
+        .input-qtd { width: 90px; background: #000; border: 3px solid #220044; color: var(--led-yellow); padding: 12px; border-radius: 8px; text-align: center; font-weight: 900; font-size: 26px; font-family: 'Oswald', sans-serif; text-shadow: 0 0 10px rgba(255,251,0,0.5); }
 
-        /* LISTA CHAT DE ALERTA */
+        /* FEED DE ALERTAS NEON */
         .naboa-section { 
-            background: #120914; 
-            border: 3px solid var(--retro-red); 
-            border-radius: 4px; 
+            background: #05000f; 
+            border: 4px solid var(--led-magenta); 
+            border-radius: 12px; 
             padding: 20px; 
             height: 350px; 
             display: flex; 
             flex-direction: column; 
             box-sizing: border-box; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,127,0.2); 
         }
         .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 10px; }
-        .naboa-chat-box::-webkit-scrollbar { width: 4px; }
-        .naboa-chat-box::-webkit-scrollbar-thumb { background: var(--retro-yellow); border-radius: 4px; }
+        .naboa-chat-box::-webkit-scrollbar { width: 6px; }
+        .naboa-chat-box::-webkit-scrollbar-thumb { background: var(--led-magenta); border-radius: 10px; }
         
         .naboa-msg { 
-            font-size: 14px; 
-            background: linear-gradient(90deg, rgba(214, 40, 40, 0.2) 0%, rgba(0,0,0,0.5) 100%); 
-            padding: 12px 16px; 
-            border-radius: 4px; 
-            border-left: 6px solid var(--retro-yellow);
+            font-size: 15px; 
+            background: linear-gradient(90deg, rgba(255, 0, 127, 0.25) 0%, rgba(0,0,0,0.7) 100%); 
+            padding: 14px 18px; 
+            border-radius: 6px; 
+            border: 1px solid var(--led-magenta);
+            border-left: 6px solid var(--led-yellow);
             display: flex; 
             align-items: center; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            animation: letreiroTexto 2.5s infinite;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: textoNeonPulsante 2s infinite;
+            font-weight: bold;
         }
 
-        /* SEÇÃO DE CARTELAS DOS COMPONENTES */
-        .participants-section { background: #1a0f21; padding: 20px; border-radius: 4px; border: 3px solid var(--retro-yellow); max-height: 420px; overflow-y: auto; width: 100%; box-sizing: border-box; }
-        .participants-section::-webkit-scrollbar { width: 4px; }
-        .participants-section::-webkit-scrollbar-thumb { background: var(--retro-cream); border-radius: 4px; }
+        /* SEÇÃO DAS CARTELAS DOS COMPONENTES */
+        .participants-section { background: rgba(5, 0, 15, 0.95); padding: 20px; border-radius: 12px; border: 4px solid var(--led-yellow); max-height: 420px; overflow-y: auto; width: 100%; box-sizing: border-box; box-shadow: 0 15px 35px rgba(0,0,0,0.9); }
+        .participants-section::-webkit-scrollbar { width: 6px; }
+        .participants-section::-webkit-scrollbar-thumb { background: var(--led-yellow); border-radius: 10px; }
         
-        .fase-badge { background: var(--retro-red); padding: 8px 24px; border-radius: 4px; font-size: 14px; font-weight: 900; border: 2px solid var(--retro-yellow); color: var(--retro-cream); font-family: 'Oswald', sans-serif; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        .fase-badge { background: var(--led-magenta); padding: 8px 24px; border-radius: 6px; font-size: 14px; font-weight: 900; border: 2px solid #fff; color: #fff; font-family: 'Oswald', sans-serif; letter-spacing: 1px; box-shadow: 0 0 15px var(--led-magenta-glow); text-shadow: 2px 2px 0 #000; }
 
         /* MINI SLOTS DAS CARTELAS */
         .mini-card-item {
-            background: #251730;
+            background: #0c0017;
             padding: 10px; 
             width: 88px; 
-            border-radius: 4px; 
-            border: 1px solid rgba(253,240,213,0.1);
+            border-radius: 6px; 
+            border: 2px solid #1f003a;
             transition: 0.2s;
             transform-style: preserve-3d;
         }
         .mini-card-item:hover {
-            transform: scale(1.04);
-            border-color: var(--retro-yellow);
-            box-shadow: 0 4px 12px rgba(252,191,73,0.3);
+            transform: scale(1.06) translateY(-2px);
+            border-color: var(--led-cyan);
+            box-shadow: 0 5px 15px var(--led-cyan-glow);
         }
 
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
             .col-left { flex: 1.4; display: flex; flex-direction: column; gap: 24px; }
             .col-right { flex: 1; display: flex; flex-direction: column; gap: 24px; }
-            .num-geral { font-size: 20px; }
+            .num-geral { font-size: 22px; }
             .naboa-section { height: 350px; }
             .participants-section { max-height: 420px; }
         }
@@ -293,10 +306,10 @@
 <div id="cadastro-overlay">
     <div class="cadastro-box">
         <h2>DADOS DE PREMIAÇÃO PIX</h2>
-        <p style="font-size: 12px; color: #72728f; margin: 0 0 20px 0; text-align: center; line-height: 1.6;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
-        <label style="font-size: 11px; font-weight: bold; color: #72728f; letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
+        <p style="font-size: 13px; color: #a289b8; margin: 0 0 20px 0; text-align: center; line-height: 1.6;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
+        <label style="font-size: 11px; font-weight: bold; color: var(--led-cyan); letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
         <input type="text" id="cad-whatsapp" placeholder="(41) 99999-9999">
-        <label style="font-size: 11px; font-weight: bold; color: #72728f; letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
+        <label style="font-size: 11px; font-weight: bold; color: var(--led-cyan); letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
         <input type="text" id="cad-cpf" placeholder="000.000.000-00">
         <button class="btn-salvar-cad" onclick="salvarCadastroPix()">Liberar Painel de Jogo</button>
     </div>
@@ -305,21 +318,21 @@
 <div class="audio-control">
     <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
     <div style="display: flex; align-items: center; gap: 15px;">
-        <div id="user-credits-display" style="font-size: 14px; font-weight: 800; color: var(--green); display: none; background: rgba(0,230,118,0.06); padding: 7px 16px; border-radius: 50px; border: 1px solid rgba(0,230,118,0.15);">CRÉDITOS: R$ 0,00</div>
+        <div id="user-credits-display" style="font-size: 16px; font-weight: 900; color: var(--led-green); display: none; background: rgba(0,255,102,0.1); padding: 8px 20px; border-radius: 4px; border: 2px solid var(--led-green); font-family: 'Oswald', sans-serif; text-shadow: 0 0 10px rgba(0,255,102,0.4);">CRÉDITOS: R$ 0,00</div>
         <div id="auth-status-area">
-            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: #fff; color: #000; border: none; padding: 11px 22px; border-radius: 50px; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 15px rgba(255,255,255,0.15); transition: 0.3s;">
+            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: var(--led-yellow); color: #000; border: 2px solid #fff; padding: 11px 22px; border-radius: 6px; font-weight: 900; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'Oswald', sans-serif; box-shadow: 0 4px 15px var(--led-yellow-glow); text-transform: uppercase;">
                 <svg width="14" height="14" viewBox="0 0 18 18" style="fill: #000;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.30c1.54 1.41 3.57 2.3 6 2.3 3.54 0 6.57-2.55 8.05-5.7l-3-2.28c-.71 2.14-2.7 3.73-5.05 3.73z"/></svg>
                 Entrar com Google
             </button>
-            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 18px; border-radius: 50px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; display: none; transition: 0.3s;">Sair</button>
+            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 2px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 800; display: none; text-transform: uppercase;">Sair</button>
         </div>
     </div>
 </div>
 
 <div id="winner-overlay">
-    <div style="background:#0b0b12; color:#fff; padding:50px; border-radius:36px; border:2px solid var(--orange); max-width: 520px; width: 85%; box-shadow: 0 35px 80px rgba(0,0,0,0.9), 0 0 60px var(--orange-glow);">
-        <h1 style="font-size: 46px; margin:0; font-weight: 900; background: linear-gradient(135deg, #fff, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="win-title-fase">BINGO!</h1>
-        <h2 id="winner-name" style="font-size: 30px; color:#fff; margin: 18px 0 0 0; font-weight: 600; letter-spacing: 0.5px;">---</h2>
+    <div style="background:#090014; color:#fff; padding:50px; border-radius:16px; border:5px solid var(--led-yellow); max-width: 520px; width: 85%; box-shadow: 0 0 50px var(--led-yellow), 0 0 30px #000; text-align:center;">
+        <h1 style="font-size: 62px; margin:0; font-weight: 900; font-family: 'Oswald', sans-serif; color: var(--led-magenta); text-shadow: 0 0 20px var(--led-magenta-glow), 3px 3px 0 #000;" id="win-title-fase">BINGO!</h1>
+        <h2 id="winner-name" style="font-size: 38px; color:var(--led-yellow); margin: 18px 0 0 0; font-weight: 900; font-family: 'Oswald', sans-serif; text-shadow: 2px 2px 0 #000;">---</h2>
     </div>
 </div>
 
@@ -328,21 +341,21 @@
         <div class="game-layout">
             
             <div class="col-left">
-                <div style="background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; padding: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
+                <div style="background: #05000a; border: 3px solid var(--led-magenta); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.8);">
                     <div style="text-align: left;">
-                        <h4 id="txt-premio" style="color:var(--orange); margin:0; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PREMIAÇÃO EM ANDAMENTO</h4>
-                        <div id="fase-rodada-txt" style="font-size: 12px; color: #72728f; margin-top: 2px; font-weight: 600;">AGUARDANDO BANCA</div>
+                        <h4 id="txt-premio" style="color:var(--led-yellow); margin:0; font-size: 18px; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-shadow: 2px 2px 0 #000;">PREMIAÇÃO EM ANDAMENTO</h4>
+                        <div id="fase-rodada-txt" style="font-size: 13px; color: #76628c; margin-top: 2px; font-weight: bold; text-transform: uppercase;">AGUARDANDO BANCA</div>
                     </div>
                     <span class="fase-badge" id="badge-fase-jogo">FASE: 1ª LINHA</span>
                 </div>
                 
-                <div style="position: relative; background: rgba(4,4,8,0.4); backdrop-filter: blur(10px); border-radius: 28px; padding: 18px; border: 1px solid var(--border);">
+                <div style="position: relative; background: #070012; border-radius: 16px; padding: 20px; border: 3px solid #1a0033; margin-top: 20px;">
                     <div style="padding: 5px; text-align: center;">
-                        <img id="img-premio" src="" style="width:100%; max-height:190px; object-fit:contain; display:none; margin-bottom:20px; border-radius:16px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <img id="img-premio" src="" style="width:100%; max-height:190px; object-fit:contain; display:none; margin-bottom:20px; border-radius:12px; border: 3px solid var(--led-magenta); box-shadow: 0 0 20px var(--led-magenta-glow);">
                     </div>
 
                     <div class="card-premio-grande">
-                        <label style="font-size: 11px; font-weight: 800; color: #72728f; letter-spacing: 1px; text-transform: uppercase;">PRÊMIO DESTA FASE:</label>
+                        <label style="font-size: 13px; font-weight: 900; color: var(--led-magenta); letter-spacing: 1px; text-transform: uppercase; font-family: 'Oswald', sans-serif; text-shadow: 1px 1px 0 #000;">PRÊMIO DESTA FASE:</label>
                         <div class="txt-premio-valor" id="txt-fase-premio-real">R$ 0,00</div>
                     </div>
                     
@@ -359,7 +372,7 @@
             <div class="col-right">
                 <div class="banca-section">
                     <div class="banca-status">
-                        <span id="label-banca" style="font-size:11px; color:#72728f; font-weight:800; text-transform:uppercase; letter-spacing: 0.5px;">PRÓXIMA RODADA EM:</span>
+                        <span id="label-banca" style="font-size:12px; color:var(--led-cyan); font-weight:900; text-transform:uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-shadow: 1px 1px 0 #000;">PRÓXIMA RODADA EM:</span>
                         <div id="cronometro-banca" class="timer-destaque">04:00</div>
                     </div>
 
@@ -379,15 +392,15 @@
                     </div>
                 </div>
 
-                <div class="naboa-section">
-                    <h4 style="color:var(--orange); font-size:11px; margin:0 0 12px 0; font-weight: 800; text-transform:uppercase; letter-spacing:0.8px; text-align: left;">📢 CHAT DA RODADA (TÁ NA BOA)</h4>
+                <div class="naboa-section" style="margin-top: 20px;">
+                    <h4 style="color:var(--led-magenta); font-size:14px; margin:0 0 12px 0; font-weight: 900; text-transform:uppercase; font-family: 'Oswald', sans-serif; letter-spacing:0.8px; text-align: left; text-shadow: 1px 1px 0 #000;">📢 FEED DE ALERTA (TÁ NA BOA)</h4>
                     <div class="naboa-chat-box" id="lista-na-boa">
-                        <div style="text-align:center; color:#555566; font-size:12px; padding-top:60px;">Aguardando início do sorteio...</div>
+                        <div style="text-align:center; color:#443259; font-size:13px; padding-top:60px; font-weight: bold;">Aguardando início do sorteio...</div>
                     </div>
                 </div>
 
-                <div class="participants-section">
-                    <h4 style="text-align:center; color:var(--green); font-size:12px; margin:0 0 12px 0; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">TODAS AS CARTELAS EM JOGO (<span id="player-count">0</span>)</h4>
+                <div class="participants-section" style="margin-top: 20px;">
+                    <h4 style="text-align:center; color:var(--led-green); font-size:14px; margin:0 0 12px 0; font-weight: 900; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; text-shadow: 1px 1px 0 #000;">CARTELAS NA MESA (<span id="player-count">0</span>)</h4>
                     <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;"></div>
                 </div>
             </div>
@@ -490,18 +503,18 @@
             document.getElementById('fase-rodada-txt').innerText = "ACEITANDO BILHETES";
         }
 
-        const minutes = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
+        const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
         const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
         
         if (dados.estado === "espera") {
             document.getElementById('label-banca').innerText = "PRÓXIMA RODADA EM:";
-            document.getElementById('cronometro-banca').innerText = `${minutes}:${segundos}`;
-            document.getElementById('cronometro-banca').style.color = "var(--cyan)";
+            document.getElementById('cronometro-banca').innerText = `${minutos}:${segundos}`;
+            document.getElementById('cronometro-banca').style.color = "var(--led-cyan)";
             document.getElementById('btn-compre-acao').disabled = false;
         } else {
             document.getElementById('label-banca').innerText = "JOGO EM ANDAMENTO:";
             document.getElementById('cronometro-banca').innerText = "SORTEANDO...";
-            document.getElementById('cronometro-banca').style.color = "var(--green)";
+            document.getElementById('cronometro-banca').style.color = "var(--led-green)";
             document.getElementById('btn-compre-acao').disabled = true;
         }
 
@@ -511,7 +524,6 @@
     function recalcularPremiosUI() {
         let caixaGeralCalculo = bancaFakeInjetadaDoBanco + totalPixRealAcumulado;
         const escolhaFator = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
-        
         document.getElementById('txt-fase-premio-real').innerText = `R$ ${(caixaGeralCalculo * (escolhaFator / 100)).toFixed(2)}`;
     }
 
@@ -648,11 +660,11 @@
                 if(d.cartelas) {
                     count++;
                     d.cartelas.forEach((c, idx) => {
-                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#050509; font-size:9px; padding:3px 0; text-align:center; font-weight:800; border-radius:4px; border:1px solid rgba(255,255,255,0.02);">${n}</div>`).join('');
+                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#000; font-size:10px; padding:4px 0; text-align:center; font-weight:800; border-radius:4px; border:1px solid rgba(255,255,255,0.05); color:#ccc;">${n}</div>`).join('');
                         
                         div.innerHTML += `
-                            <div class="mini-card-item" style="border:1px solid ${idx+1 === rodadaAtiva ? '#fcbf49' : 'rgba(255,255,255,0.04)'}; opacity:${idx+1 > rodadaAtiva ? '0.2' : '1'}">
-                                <span style="font-size:8px; color:var(--cyan); display:block; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:600; margin-bottom:4px;">${d.nome || 'User'} (#${idx+1})</span>
+                            <div class="mini-card-item" style="border:2px solid ${idx+1 === rodadaAtiva ? 'var(--led-cyan)' : '#1f003a'}; opacity:${idx+1 > rodadaAtiva ? '0.15' : '1'}">
+                                <span style="font-size:9px; color:var(--led-cyan); display:block; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:700; margin-bottom:4px;">${d.nome || 'User'} (#${idx+1})</span>
                                 <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:2px;">${ns}</div>
                             </div>`;
 
@@ -662,7 +674,7 @@
                                 temAlguemNaBoa = true;
                                 painelNaBoa.innerHTML += `
                                     <div class="naboa-msg">
-                                        <span>⚡ <strong>${d.nome || 'Jogador'}</strong> está na boa!</span>
+                                        <span>⚡ CASINO ALERT: <strong>${d.nome || 'Jogador'}</strong> está por 1 bola!</span>
                                     </div>`;
                             }
                         }
@@ -683,7 +695,7 @@
             });
             
             if (!temAlguemNaBoa) {
-                painelNaBoa.innerHTML = `<div style="text-align:center; color:#555566; font-size:12px; padding-top:60px;">Nenhum jogador na boa no momento...</div>`;
+                painelNaBoa.innerHTML = `<div style="text-align:center; color:#443259; font-size:13px; padding-top:60px; font-weight: bold;">Buscando combinações premiadas...</div>`;
             } else {
                 painelNaBoa.scrollTop = painelNaBoa.scrollHeight;
             }
