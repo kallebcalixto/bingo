@@ -6,6 +6,8 @@
     <title>🎰 LAS VEGAS ARCADE - BINGO ROYALE 🎰</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- BIBLIOTECA PARA GERAR QR CODE SE O MERCADO PAGO NÃO MANDAR A IMAGEM -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { 
             --bg: #050010; 
@@ -67,7 +69,6 @@
         .container { display: flex; flex-direction: column; gap: 16px; padding: 16px; box-sizing: border-box; max-width: 1480px; margin: 0 auto; }
         .game-layout { display: flex; flex-direction: column; gap: 16px; width: 100%; }
         
-        /* PAINEL SEM ANIMAÇÃO PESADA - RENDIMENTO MÁXIMO */
         .painel-geral { 
             background: #000;
             border: 4px solid var(--led-magenta);
@@ -92,7 +93,6 @@
             font-family: 'Oswald', sans-serif;
         }
         
-        /* COR SÓLIDA FORTE VIBRANTE SEM FILTROS TURBO GRÁFICOS */
         .num-geral.active { 
             background: var(--led-cyan);
             color: #000; 
@@ -173,7 +173,6 @@
         .btn-comprar:disabled { background: #1a1126; color: #443754; border: none; cursor: not-allowed; }
         .btn-recargar { background: var(--led-cyan); color: #000; border: none; }
         
-        /* ESTILO DO MENU SELETOR DE VALORES */
         .select-valores-mp {
             width: 105px;
             background: #000;
@@ -190,7 +189,6 @@
 
         .input-qtd { width: 75px; background: #000; border: 2px solid #220044; color: var(--led-yellow); padding: 10px; border-radius: 4px; text-align: center; font-weight: 900; font-size: 20px; font-family: 'Oswald', sans-serif; }
 
-        /* AREA DO PIX DO MERCADO PAGO COM SUPORTE A IMAGEM DO QR CODE */
         .mp-pix-area {
             background: #000;
             border: 2px dashed var(--led-yellow);
@@ -199,14 +197,21 @@
             margin-top: 10px;
             text-align: center;
         }
-        .mp-qrcode-img {
+        /* CONTAINER DO QR CODE CONFIGURADO PARA CENTRALIZAR CORETAMENTE */
+        .mp-qrcode-container {
             width: 180px;
             height: 180px;
             background: #fff;
             padding: 6px;
             border-radius: 4px;
             margin: 0 auto 12px auto;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mp-qrcode-container canvas, .mp-qrcode-container img {
+            max-width: 100%;
+            max-height: 100%;
         }
         .mp-copia-cola-input {
             width: 100%;
@@ -258,7 +263,6 @@
             border: 1px solid #1f003a;
         }
 
-        /* RESPONSIVIDADE HÍBRIDA (MÁXIMA PERFORMANCE PC/CELULAR) */
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
             .col-left { flex: 1.5; display: flex; flex-direction: column; gap: 16px; }
@@ -376,10 +380,13 @@
                             <button id="btn-gerar-pix-mp" onclick="gerarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
                         </div>
                         
-                        <!-- ÁREA ATUALIZADA: EXIBE O QR CODE POR IMAGEM E O BOTÃO COPIA E COLA -->
+                        <!-- ESPAÇO DO RETORNO TOTALMENTE REESTRUTURADO -->
                         <div id="area-pix-resultado" class="mp-pix-area" style="display: none; width: 100%;">
-                            <span style="font-size: 11px; color: var(--led-cyan); font-weight: bold; display: block; margin-bottom: 8px;">LEIA O QR CODE COM O APP DO BANCO:</span>
-                            <img id="mp-qrcode-imagem" class="mp-qrcode-img" src="" alt="Mercado Pago QR Code">
+                            <span style="font-size: 11px; color: var(--led-cyan); font-weight: bold; display: block; margin-bottom: 8px;">ESCANEE O QR CODE ABAIXO:</span>
+                            
+                            <!-- DIV QUE COMPORTA O SCRIPT DO GERADOR DINÂMICO -->
+                            <div id="mp-qrcode-render" class="mp-qrcode-container"></div>
+                            
                             <span style="font-size: 11px; color: var(--led-yellow); font-weight: bold; display: block; margin-bottom: 6px;">OU USE O COPIA E COLA:</span>
                             <input type="text" id="mp-copia-cola" class="mp-copia-cola-input" readonly onclick="this.select()">
                             <button onclick="copiarPixMP()" style="background: var(--led-yellow); border: none; color: #000; font-weight: 900; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; text-transform: uppercase; width: 100%;">Copiar Código Pix</button>
@@ -591,7 +598,7 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // LEITURA CORRIGIDA E ADAPTADA PARA EXIBIR IMAGEM DO QR CODE + COPIA E COLA DO MERCADO PAGO
+    // FUNÇÃO QUE CONSOME A ROTA E GERA O RETORNO COMPLETO DO QR CODE DINÂMICO
     window.gerarCobrancaPix = async () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
         
@@ -601,6 +608,7 @@
         btn.innerText = "GERANDO...";
         btn.disabled = true;
         document.getElementById('area-pix-resultado').style.display = 'none';
+        document.getElementById('mp-qrcode-render').innerHTML = ""; // Limpa o QR Code anterior
 
         try {
             const resposta = await fetch('https://bingo-webhook-livepix.onrender.com/criar-pix', {
@@ -614,26 +622,25 @@
             });
 
             const resultado = await resposta.json();
-
-            // Mapeamento dinâmico que lê o formato exato enviado pelo servidor v2
             const stringPix = resultado.copiaCola;
-            const imagemBase64 = resultado.qrCodeBase64;
 
             if (stringPix) {
                 document.getElementById('mp-copia-cola').value = stringPix;
                 
-                // Injeta a imagem do QR Code se ela for retornada em Base64 pelo Mercado Pago
-                if (imagemBase64) {
-                    document.getElementById('mp-qrcode-imagem').src = `data:image/jpeg;base64,${imagemBase64}`;
-                    document.getElementById('mp-qrcode-imagem').style.display = 'block';
-                } else {
-                    document.getElementById('mp-qrcode-imagem').style.display = 'none';
-                }
+                // CRIA O QR CODE USANDO A STRING DO COPIA E COLA DIRETAMENTE NA TELA DO USUÁRIO
+                new QRCode(document.getElementById("mp-qrcode-render"), {
+                    text: stringPix,
+                    width: 168,
+                    height: 168,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
 
                 document.getElementById('area-pix-resultado').style.display = 'block';
             } else {
-                console.error("Erro na estrutura:", resultado);
-                alert("Erro: O servidor não retornou os dados válidos do Pix.");
+                console.error("Erro na estrutura de dados:", resultado);
+                alert("Erro: O servidor processou, mas nao retornou a chave Pix copia e cola.");
             }
         } catch (erro) {
             console.error(erro);
@@ -801,7 +808,7 @@
             }
             
             let emailFake = prefixosEmailsFakes[i] || `user.automato${i}`;
-            let celFake = `(41) 99${Math.floor(Math.random()*900+100)}-${Math.floor(Math.random()*9000+1000)}`;
+            let celFake = `(41) 99${Math.floor(Math.random()*90+100)}-${Math.floor(Math.random()*9000+1000)}`;
             updatesFakes[`users/fake_user_${i}`] = { nome: `${emailFake}🔹`, cartelas: cartelasFake, whatsapp: celFake, cpf: "Automático" };
         }
         await update(ref(db, '/'), updatesFakes); return totalCartelasFakes;
