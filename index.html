@@ -172,6 +172,22 @@
         .btn-comprar { background: var(--led-green); color: #000; border: none; }
         .btn-comprar:disabled { background: #1a1126; color: #443754; border: none; cursor: not-allowed; }
         .btn-recargar { background: var(--led-cyan); color: #000; border: none; }
+        
+        /* ESTILO DA CAIXA SELETORA DE VALOR */
+        .select-valores-mp {
+            width: 105px;
+            background: #000;
+            border: 2px solid #220044;
+            color: var(--led-yellow);
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 900;
+            font-size: 18px;
+            font-family: 'Oswald', sans-serif;
+            text-align: center;
+            cursor: pointer;
+        }
+
         .input-qtd { width: 75px; background: #000; border: 2px solid #220044; color: var(--led-yellow); padding: 10px; border-radius: 4px; text-align: center; font-weight: 900; font-size: 20px; font-family: 'Oswald', sans-serif; }
 
         /* AREA DO PIX DO MERCADO PAGO */
@@ -338,7 +354,17 @@
 
                     <div class="banca-controles" id="painel-aba-credito" style="display: none; flex-direction: column;">
                         <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
-                            <input type="number" id="recarga-valor" class="input-qtd" style="width: 85px;" value="10" min="10" max="1000">
+                            <!-- MODIFICADO: INPUT MUDOU PARA SELECT COM OS SEUS VALORES EXATOS -->
+                            <select id="recarga-valor" class="select-valores-mp">
+                                <option value="10">R$ 10</option>
+                                <option value="20">R$ 20</option>
+                                <option value="30">R$ 30</option>
+                                <option value="50">R$ 50</option>
+                                <option value="70">R$ 70</option>
+                                <option value="100">R$ 100</option>
+                                <option value="500">R$ 500</option>
+                                <option value="1000">R$ 1000</option>
+                            </select>
                             <button id="btn-gerar-pix-mp" onclick="gerarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
                         </div>
                         
@@ -462,12 +488,12 @@
             document.getElementById('fase-rodada-txt').innerText = "ACEITANDO BILHETES";
         }
 
-        const minutos = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
-        const segundos = (dados.tempo_restante % 60).toString().padStart(2, '0');
+        const minutes = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
+        const seconds = (dados.tempo_restante % 60).toString().padStart(2, '0');
         
         if (dados.estado === "espera") {
             document.getElementById('label-banca').innerText = "PRÓXIMA RODADA EM:";
-            document.getElementById('cronometro-banca').innerText = `${minutos}:${segundos}`;
+            document.getElementById('cronometro-banca').innerText = `${minutes}:${seconds}`;
             document.getElementById('cronometro-banca').style.color = "var(--led-cyan)";
             document.getElementById('btn-compre-acao').disabled = false;
         } else {
@@ -555,20 +581,18 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // NOVA FUNÇÃO: SE CONECTA COM O SEU SERVIDOR DO RENDER E GERA O COPIA E COLA DO MERCADO PAGO
+    // CORRIGIDO: FUNÇÃO ADAPTADA PARA LER CORRETAMENTE O RETORNO DA API E EVITAR O ALERTA DE ERRO
     window.gerarCobrancaPix = async () => {
         if(!auth.currentUser) return alert("Faça login com sua conta Google!");
         
         const btn = document.getElementById('btn-gerar-pix-mp');
         const valorInput = parseFloat(document.getElementById('recarga-valor').value) || 10;
         
-        if (valorInput < 10) return alert("O valor mínimo para recarga é R$ 10,00");
-
         btn.innerText = "GERANDO...";
         btn.disabled = true;
+        document.getElementById('area-pix-resultado').style.display = 'none';
 
         try {
-            // Endereço do seu servidor no Render
             const resposta = await fetch('https://bingo-webhook-livepix.onrender.com/criar-pix', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -581,12 +605,15 @@
 
             const resultado = await resposta.json();
 
-            if (resultado && resultado.copiaCola) {
-                document.getElementById('mp-copia-cola').value = resultado.copiaCola;
+            // VALIDAÇÃO BLINDADA: Lê o código direto, independente de caixa alta ou formato do objeto
+            const stringPix = resultado.copiaCola || resultado.copiacola || resultado.data?.copiaCola;
+
+            if (stringPix) {
+                document.getElementById('mp-copia-cola').value = stringPix;
                 document.getElementById('area-pix-resultado').style.display = 'block';
-                alert("Pix gerado! Copie o código abaixo e pague no app do seu Banco.");
             } else {
-                alert("Erro ao processar resposta do Pix.");
+                console.error("Resposta do servidor:", resultado);
+                alert("Erro: O servidor processou mas não retornou o texto do Pix Copia e Cola.");
             }
         } catch (erro) {
             console.error(erro);
@@ -597,7 +624,6 @@
         }
     };
 
-    // FUNÇÃO AUXILIAR PARA O BOTÃO COPIAR
     window.copiarPixMP = () => {
         const input = document.getElementById('mp-copia-cola');
         input.select();
