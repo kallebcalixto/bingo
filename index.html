@@ -10,14 +10,11 @@
         :root { 
             --bg: #020005; 
             --led-magenta: #ff007f;
-            --led-magenta-glow: rgba(255, 0, 127, 0.85);
+            --led-magenta-glow: rgba(255, 0, 127, 0.6);
             --led-cyan: #00f0ff;
-            --led-cyan-glow: rgba(0, 240, 255, 0.85);
+            --led-cyan-glow: rgba(0, 240, 255, 0.6);
             --led-yellow: #fffb00;
-            --led-yellow-glow: rgba(255, 251, 0, 0.85);
             --led-green: #00ff66;
-            --led-green-glow: rgba(0, 255, 102, 0.85);
-            --border-3d: linear-gradient(180deg, #555, #111);
             --green: var(--led-green);
             --cyan: var(--led-cyan);
             --orange: #ff6b00;
@@ -34,7 +31,7 @@
             padding: 0; 
             overflow-x: hidden; 
             overflow-y: auto; 
-            transition: background 1s ease-in-out;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.has-bg::before {
@@ -46,31 +43,33 @@
             pointer-events: none;
         }
 
-        /* ANIMAÇÃO DE LEDS PISCANTES ULTRA VIBRANTES */
+        /* ANIMAÇÃO OTIMIZADA USANDO TRANSLATEZ PARA FORÇAR USO DA GPU (MAIS LEVE) */
         @keyframes marqueeLeds {
             0%, 100% { 
-                box-shadow: 0 0 25px var(--led-magenta-glow), inset 0 0 15px var(--led-magenta-glow); 
+                box-shadow: 0 0 15px var(--led-magenta-glow), inset 0 0 10px var(--led-magenta-glow); 
                 border-color: var(--led-magenta);
+                transform: translateZ(0);
             }
             50% { 
-                box-shadow: 0 0 35px var(--led-cyan-glow), inset 0 0 20px var(--led-cyan-glow); 
+                box-shadow: 0 0 20px var(--led-cyan-glow), inset 0 0 12px var(--led-cyan-glow); 
                 border-color: var(--led-cyan);
+                transform: translateZ(0);
             }
         }
 
         @keyframes textoNeonPulsante {
-            0%, 100% { filter: drop-shadow(0 0 8px var(--led-magenta)); text-shadow: 0 2px 0 #000; }
-            50% { filter: drop-shadow(0 0 18px var(--led-yellow)); color: var(--led-yellow); text-shadow: 0 4px 0 #000; }
+            0%, 100% { text-shadow: 0 0 8px var(--led-magenta), 2px 2px 0 #000; transform: translateZ(0); }
+            50% { text-shadow: 0 0 12px var(--led-yellow), 2px 2px 0 #000; color: var(--led-yellow); transform: translateZ(0); }
         }
         
         .audio-control { 
             background: #090014;
-            padding: 16px 28px; 
+            padding: 12px 20px; 
             position: sticky; 
             top: 0; 
             z-index: 1000; 
-            border-bottom: 5px solid var(--led-cyan); 
-            box-shadow: 0 0 25px var(--led-cyan-glow);
+            border-bottom: 4px solid var(--led-cyan); 
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
@@ -79,225 +78,202 @@
         #btn-audio { 
             background: linear-gradient(180deg, var(--led-magenta) 0%, #99004c 100%); 
             color: #fff; 
-            border: 3px solid #fff; 
-            padding: 12px 35px; 
+            border: 2px solid #fff; 
+            padding: 10px 20px; 
             border-radius: 6px; 
             font-weight: 900; 
             text-transform: uppercase; 
-            font-size: 14px; 
+            font-size: 12px; 
             cursor: pointer; 
-            transition: 0.2s;
-            box-shadow: 0 5px 0 #55002b, 0 0 15px var(--led-magenta-glow);
-            letter-spacing: 1.5px;
+            box-shadow: 0 4px 0 #55002b, 0 0 10px var(--led-magenta-glow);
             font-family: 'Oswald', sans-serif;
-            text-shadow: 2px 2px 0 #000;
+            text-shadow: 1px 1px 0 #000;
         }
-        #btn-audio:active { transform: translateY(4px); box-shadow: 0 1px 0 #55002b, 0 0 15px var(--led-magenta-glow); }
-        #btn-audio.active { background: linear-gradient(180deg, var(--led-green) 0%, #006622 100%); box-shadow: 0 5px 0 #003311, 0 0 20px var(--led-green-glow); }
-        #btn-audio.active:active { box-shadow: 0 1px 0 #003311, 0 0 20px var(--led-green-glow); }
+        #btn-audio:active { transform: translateY(2px); box-shadow: 0 2px 0 #55002b; }
+        #btn-audio.active { background: linear-gradient(180deg, var(--led-green) 0%, #006622 100%); box-shadow: 0 4px 0 #003311, 0 0 15px rgba(0,255,102,0.4); }
 
-        .container { display: flex; flex-direction: column; gap: 24px; padding: 24px; box-sizing: border-box; max-width: 1480px; margin: 0 auto; }
-        .game-layout { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+        .container { display: flex; flex-direction: column; gap: 16px; padding: 16px; box-sizing: border-box; max-width: 1480px; margin: 0 auto; }
+        .game-layout { display: flex; flex-direction: column; gap: 16px; width: 100%; }
         
-        /* CONTAINER PRINCIPAL COM TEXTURA 3D ARCADE */
+        /* GRADE DO FLIPERAMA - OTIMIZADA PARA RESPONSIVIDADE AUTOMÁTICA */
         .painel-geral { 
             background: #05000a;
-            border: 6px solid var(--led-magenta);
+            border: 4px solid var(--led-magenta);
             border-radius: 12px; 
-            padding: 24px; 
+            padding: 12px; 
             display: grid; 
             grid-template-columns: repeat(10, 1fr); 
-            gap: 12px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.9), inset 0 0 35px rgba(0,0,0,0.9);
-            animation: marqueeLeds 3.5s infinite;
+            gap: 6px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            animation: marqueeLeds 4s infinite linear;
+            will-change: border-color, box-shadow;
         }
         
         .num-geral { 
             background: #11051c; 
-            border: 2px solid #220b38;
-            border-radius: 8px; 
+            border: 1px solid #220b38;
+            border-radius: 6px; 
             aspect-ratio: 1/1; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 22px; 
+            font-size: 15px; 
             font-weight: 900; 
             color: #2c1642; 
-            box-shadow: inset 0 5px 10px rgba(0,0,0,0.85), 0 2px 0 rgba(255,255,255,0.05);
-            transition: all 0.2s ease;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.8);
             font-family: 'Oswald', sans-serif;
         }
         
-        /* LED NUMÉRICO SORTEADO COM BRILHO ANIMAL */
+        /* ACESSO RÁPIDO DO NÚMERO SORTEADO (REDUÇÃO DE FILTROS PESADOS) */
         .num-geral.active { 
-            background: radial-gradient(circle, #fff 0%, var(--led-cyan) 40%, #004b52 100%);
+            background: radial-gradient(circle, #fff 0%, var(--led-cyan) 60%, #004b52 100%);
             color: #fff; 
-            transform: scale(1.08);
-            box-shadow: 0 0 25px var(--led-cyan), inset 0 0 8px #fff; 
-            border: 3px solid #fff; 
-            text-shadow: 0 0 8px #fff, 2px 2px 4px #000;
+            box-shadow: 0 0 15px var(--led-cyan); 
+            border: 2px solid #fff; 
+            text-shadow: 1px 1px 2px #000;
             z-index: 5;
         }
         
-        /* GLOBO DE SORTEIO COM BRILHO 3D ELETRÔNICO */
-        .ball-container { padding: 15px 0; text-align: center; }
+        .ball-container { padding: 10px 0; text-align: center; }
         .ball-display { 
-            background: radial-gradient(circle at 35% 35%, #fff 0%, var(--led-yellow) 45%, #b38f00 80%, #3d3100 100%); 
-            width: 170px; 
-            height: 170px; 
+            background: radial-gradient(circle at 35% 35%, #fff 0%, var(--led-yellow) 45%, #b38f00 80%); 
+            width: 130px; 
+            height: 130px; 
             border-radius: 50%; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             margin: 0 auto; 
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.9), 0 0 45px var(--led-yellow-glow), inset -12px -12px 30px rgba(0,0,0,0.7); 
-            position: relative;
-            border: 6px solid #fff;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 251, 0, 0.4); 
+            border: 4px solid #fff;
         }
         .ball-display.bump {
-            animation: ballImpact 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: ballImpact 0.4s ease-out;
         }
         @keyframes ballImpact {
             0% { transform: scale(1); }
-            50% { transform: scale(1.22); box-shadow: 0 0 60px var(--led-magenta); }
+            50% { transform: scale(1.15); }
             100% { transform: scale(1); }
         }
         
         #bola-num { 
-            font-size: 88px; 
+            font-size: 68px; 
             font-weight: 900; 
             color: #000; 
             font-family: 'Oswald', sans-serif;
-            text-shadow: 2px 2px 0px #fff;
-            z-index: 2;
+            text-shadow: 1px 1px 0px #fff;
         }
         
-        /* MARCAÇÃO DO ACERTO DO CLIENTE EM LED VERDE */
         .marked { 
-            background: radial-gradient(circle, #fff 0%, var(--led-green) 50%, #004d1a 100%) !important; 
+            background: radial-gradient(circle, #fff 0%, var(--led-green) 60%, #004d1a 100%) !important; 
             color: #fff !important; 
-            box-shadow: 0 0 25px var(--led-green) !important;
-            border: 3px solid #fff !important;
-            text-shadow: 2px 2px 3px #000 !important;
+            box-shadow: 0 0 15px var(--led-green) !important;
+            border: 2px solid #fff !important;
+            text-shadow: 1px 1px 2px #000 !important;
         }
 
-        /* CARTÃO DE PLACAR GRANDE 3D */
         .card-premio-grande {
             background: #140024;
-            border: 4px solid var(--led-yellow);
-            box-shadow: 0 0 35px rgba(255, 251, 0, 0.3), inset 0 0 20px rgba(255,251,0,0.1);
+            border: 3px solid var(--led-yellow);
+            box-shadow: 0 0 20px rgba(255, 251, 0, 0.2);
             border-radius: 8px;
-            padding: 24px;
+            padding: 16px;
             text-align: center;
-            margin-bottom: 20px;
-            transform: translateY(-2px);
+            margin-bottom: 16px;
         }
         .txt-premio-valor {
-            font-size: 68px;
+            font-size: 46px;
             font-weight: 900;
             color: var(--led-green);
             font-family: 'Oswald', sans-serif;
-            text-shadow: 3px 3px 0px #000, 0 0 25px var(--led-green-glow);
-            margin: 5px 0 0 0;
-            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px #000, 0 0 15px var(--led-green-glow);
+            margin: 2px 0 0 0;
         }
         
-        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3,0,10,0.99); backdrop-filter: blur(15px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .cadastro-box { background: #0f001c; padding: 40px; border-radius: 12px; border: 4px solid var(--led-cyan); max-width: 440px; width: 85%; box-shadow: 0 0 40px var(--led-cyan-glow); }
-        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-align: center; font-size: 34px; text-shadow: 2px 2px 0 #000; }
-        .cadastro-box input { width: 100%; padding: 15px; margin: 8px 0 22px 0; background: #000; border: 3px solid var(--led-cyan); color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 18px; font-weight: bold; font-family: 'Oswald', sans-serif; }
-        .btn-salvar-cad { width: 100%; background: linear-gradient(180deg, var(--led-green) 0%, #008033 100%); color: #fff; border: 2px solid #fff; padding: 15px; border-radius: 6px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 18px; box-shadow: 0 5px 0 #004d1f; }
-        .btn-salvar-cad:active { transform: translateY(4px); box-shadow: 0 1px 0 #004d1f; }
+        #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3,0,10,0.99); backdrop-filter: blur(10px); z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .cadastro-box { background: #0f001c; padding: 30px; border-radius: 12px; border: 3px solid var(--led-cyan); max-width: 400px; width: 85%; }
+        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-align: center; font-size: 28px; }
+        .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0 16px 0; background: #000; border: 2px solid var(--led-cyan); color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px; font-family: 'Oswald', sans-serif; }
+        .btn-salvar-cad { width: 100%; background: linear-gradient(180deg, var(--led-green) 0%, #008033 100%); color: #fff; border: 1px solid #fff; padding: 12px; border-radius: 6px; font-weight: 900; cursor: pointer; font-family: 'Oswald', sans-serif; font-size: 16px; box-shadow: 0 4px 0 #004d1f; }
 
         #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(2,0,5,0.98); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         
-        /* BANCA E BOTÕES ARCADE 3D */
         .banca-section { 
             background: #0d001a; 
             border-radius: 12px; 
-            padding: 24px; 
-            border: 4px solid var(--led-cyan); 
+            padding: 16px; 
+            border: 3px solid var(--led-cyan); 
             display: flex; 
             flex-direction: column; 
-            gap: 16px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 25px rgba(0, 240, 255, 0.2); 
+            gap: 12px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.7); 
         }
-        .banca-status { background: #000; padding: 16px; border-radius: 8px; text-align: center; border: 2px solid #1a0033; }
-        .timer-destaque { font-size: 46px; font-weight: 900; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-shadow: 0 0 20px var(--led-cyan-glow), 2px 2px 0 #000; }
+        .banca-status { background: #000; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #220044; }
+        .timer-destaque { font-size: 36px; font-weight: 900; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-shadow: 0 0 10px var(--led-cyan-glow); }
         
-        .banca-abas { display: flex; gap: 10px; background: #000; padding: 6px; border-radius: 8px; border: 1px solid #220044; }
-        .aba-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #5e4c73; cursor: pointer; border-radius: 6px; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 15px; }
-        .aba-btn.active { background: linear-gradient(180deg, var(--led-magenta) 0%, #99004c 100%); color: #fff; box-shadow: 0 0 15px var(--led-magenta-glow); border: 1px solid #fff; }
+        .banca-abas { display: flex; gap: 8px; background: #000; padding: 4px; border-radius: 6px; }
+        .aba-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #5e4c73; cursor: pointer; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 13px; }
+        .aba-btn.active { background: linear-gradient(180deg, var(--led-magenta) 0%, #99004c 100%); color: #fff; border: 1px solid #fff; border-radius: 4px; }
         
-        .banca-controles { display: flex; gap: 12px; align-items: center; }
-        .btn-comprar, .btn-recargar { color: #fff; border: 3px solid #fff; padding: 15px 26px; border-radius: 8px; font-weight: 900; cursor: pointer; flex: 1; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 16px; text-shadow: 2px 2px 0 #000; }
-        .btn-comprar { background: linear-gradient(180deg, var(--led-green) 0%, #008033 100%); box-shadow: 0 5px 0 #004d1f, 0 0 15px var(--led-green-glow); }
-        .btn-comprar:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 #004d1f, 0 0 15px var(--led-green-glow); }
+        .banca-controles { display: flex; gap: 8px; align-items: center; }
+        .btn-comprar, .btn-recargar { color: #fff; border: 2px solid #fff; padding: 12px 16px; border-radius: 6px; font-weight: 900; cursor: pointer; flex: 1; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 14px; text-shadow: 1px 1px 0 #000; }
+        .btn-comprar { background: linear-gradient(180deg, var(--led-green) 0%, #008033 100%); box-shadow: 0 4px 0 #004d1f; }
         .btn-comprar:disabled { background: #1a1126; color: #443754; border-color: #2d203d; cursor: not-allowed; box-shadow: none; text-shadow: none; }
-        .btn-recargar { background: linear-gradient(180deg, var(--led-cyan) 0%, #00808a 100%); color: #000; text-shadow: 1px 1px 0 #fff; font-weight: 900; box-shadow: 0 5px 0 #00474d, 0 0 15px var(--led-cyan-glow); }
-        .btn-recargar:active { transform: translateY(4px); box-shadow: 0 1px 0 #00474d, 0 0 15px var(--led-cyan-glow); }
-        .input-qtd { width: 90px; background: #000; border: 3px solid #220044; color: var(--led-yellow); padding: 12px; border-radius: 8px; text-align: center; font-weight: 900; font-size: 26px; font-family: 'Oswald', sans-serif; text-shadow: 0 0 10px rgba(255,251,0,0.5); }
+        .btn-recargar { background: linear-gradient(180deg, var(--led-cyan) 0%, #00808a 100%); color: #000; text-shadow: 1px 1px 0 #fff; box-shadow: 0 4px 0 #00474d; }
+        .input-qtd { width: 75px; background: #000; border: 2px solid #220044; color: var(--led-yellow); padding: 10px; border-radius: 8px; text-align: center; font-weight: 900; font-size: 20px; font-family: 'Oswald', sans-serif; }
 
-        /* FEED DE ALERTAS NEON */
         .naboa-section { 
             background: #05000f; 
-            border: 4px solid var(--led-magenta); 
+            border: 3px solid var(--led-magenta); 
             border-radius: 12px; 
-            padding: 20px; 
-            height: 350px; 
+            padding: 16px; 
+            height: 280px; 
             display: flex; 
             flex-direction: column; 
             box-sizing: border-box; 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,0,127,0.2); 
         }
-        .naboa-chat-box { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 10px; }
-        .naboa-chat-box::-webkit-scrollbar { width: 6px; }
-        .naboa-chat-box::-webkit-scrollbar-thumb { background: var(--led-magenta); border-radius: 10px; }
+        .naboa-chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         
         .naboa-msg { 
-            font-size: 15px; 
-            background: linear-gradient(90deg, rgba(255, 0, 127, 0.25) 0%, rgba(0,0,0,0.7) 100%); 
-            padding: 14px 18px; 
+            font-size: 13px; 
+            background: linear-gradient(90deg, rgba(255, 0, 127, 0.2) 0%, rgba(0,0,0,0.6) 100%); 
+            padding: 10px 14px; 
             border-radius: 6px; 
             border: 1px solid var(--led-magenta);
-            border-left: 6px solid var(--led-yellow);
-            display: flex; 
-            align-items: center; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            animation: textoNeonPulsante 2s infinite;
+            border-left: 5px solid var(--led-yellow);
+            animation: textoNeonPulsante 3s infinite linear;
             font-weight: bold;
         }
 
-        /* SEÇÃO DAS CARTELAS DOS COMPONENTES */
-        .participants-section { background: rgba(5, 0, 15, 0.95); padding: 20px; border-radius: 12px; border: 4px solid var(--led-yellow); max-height: 420px; overflow-y: auto; width: 100%; box-sizing: border-box; box-shadow: 0 15px 35px rgba(0,0,0,0.9); }
-        .participants-section::-webkit-scrollbar { width: 6px; }
-        .participants-section::-webkit-scrollbar-thumb { background: var(--led-yellow); border-radius: 10px; }
+        .participants-section { background: rgba(5, 0, 15, 0.95); padding: 16px; border-radius: 12px; border: 3px solid var(--led-yellow); max-height: 350px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        .participants-section::-webkit-scrollbar, .naboa-chat-box::-webkit-scrollbar { width: 4px; }
+        .participants-section::-webkit-scrollbar-thumb, .naboa-chat-box::-webkit-scrollbar-thumb { background: #33145a; border-radius: 4px; }
         
-        .fase-badge { background: var(--led-magenta); padding: 8px 24px; border-radius: 6px; font-size: 14px; font-weight: 900; border: 2px solid #fff; color: #fff; font-family: 'Oswald', sans-serif; letter-spacing: 1px; box-shadow: 0 0 15px var(--led-magenta-glow); text-shadow: 2px 2px 0 #000; }
+        .fase-badge { background: var(--led-magenta); padding: 6px 16px; border-radius: 6px; font-size: 12px; font-weight: 900; border: 1px solid #fff; color: #fff; font-family: 'Oswald', sans-serif; text-shadow: 1px 1px 0 #000; }
 
-        /* MINI SLOTS DAS CARTELAS */
         .mini-card-item {
             background: #0c0017;
-            padding: 10px; 
-            width: 88px; 
+            padding: 8px; 
+            width: 82px; 
             border-radius: 6px; 
-            border: 2px solid #1f003a;
-            transition: 0.2s;
-            transform-style: preserve-3d;
-        }
-        .mini-card-item:hover {
-            transform: scale(1.06) translateY(-2px);
-            border-color: var(--led-cyan);
-            box-shadow: 0 5px 15px var(--led-cyan-glow);
+            border: 1px solid #1f003a;
         }
 
+        /* CONFIGURAÇÃO EXCLUSIVA DE RESPONSIVIDADE (PC VS SMARTPHONE) */
         @media (min-width: 902px) {
             .game-layout { flex-direction: row; align-items: flex-start; }
-            .col-left { flex: 1.4; display: flex; flex-direction: column; gap: 24px; }
-            .col-right { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+            .col-left { flex: 1.5; display: flex; flex-direction: column; gap: 16px; }
+            .col-right { flex: 1; display: flex; flex-direction: column; gap: 16px; }
             .num-geral { font-size: 22px; }
-            .naboa-section { height: 350px; }
+            .naboa-section { height: 320px; }
             .participants-section { max-height: 420px; }
+        }
+
+        @media (max-width: 901px) {
+            .num-geral { font-size: 14px; padding: 2px 0; }
+            .txt-premio-valor { font-size: 38px; }
+            #bola-num { font-size: 58px; }
+            .ball-display { width: 110px; height: 110px; }
         }
     </style>
 </head>
@@ -306,7 +282,7 @@
 <div id="cadastro-overlay">
     <div class="cadastro-box">
         <h2>DADOS DE PREMIAÇÃO PIX</h2>
-        <p style="font-size: 13px; color: #a289b8; margin: 0 0 20px 0; text-align: center; line-height: 1.6;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
+        <p style="font-size: 12px; color: #a289b8; margin: 0 0 15px 0; text-align: center; line-height: 1.5;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
         <label style="font-size: 11px; font-weight: bold; color: var(--led-cyan); letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
         <input type="text" id="cad-whatsapp" placeholder="(41) 99999-9999">
         <label style="font-size: 11px; font-weight: bold; color: var(--led-cyan); letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
@@ -317,22 +293,21 @@
 
 <div class="audio-control">
     <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <div id="user-credits-display" style="font-size: 16px; font-weight: 900; color: var(--led-green); display: none; background: rgba(0,255,102,0.1); padding: 8px 20px; border-radius: 4px; border: 2px solid var(--led-green); font-family: 'Oswald', sans-serif; text-shadow: 0 0 10px rgba(0,255,102,0.4);">CRÉDITOS: R$ 0,00</div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div id="user-credits-display" style="font-size: 14px; font-weight: 900; color: var(--led-green); display: none; background: rgba(0,255,102,0.1); padding: 6px 14px; border-radius: 4px; border: 1px solid var(--led-green); font-family: 'Oswald', sans-serif;">CRÉDITOS: R$ 0,00</div>
         <div id="auth-status-area">
-            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: var(--led-yellow); color: #000; border: 2px solid #fff; padding: 11px 22px; border-radius: 6px; font-weight: 900; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'Oswald', sans-serif; box-shadow: 0 4px 15px var(--led-yellow-glow); text-transform: uppercase;">
-                <svg width="14" height="14" viewBox="0 0 18 18" style="fill: #000;"><path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.24h2.9c1.7-1.57 2.69-3.88 2.69-6.58z"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.81.54-1.85.87-3.06.87-2.35 0-4.34-1.59-5.05-3.73H.95v2.3C2.43 15.45 5.46 18 9 18z"/><path d="M3.95 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V5H.95C.35 6.2 0 7.57 0 9s.35 2.8 1.95 4l3-2.28z"/><path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.30c1.54 1.41 3.57 2.3 6 2.3 3.54 0 6.57-2.55 8.05-5.7l-3-2.28c-.71 2.14-2.7 3.73-5.05 3.73z"/></svg>
+            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: var(--led-yellow); color: #000; border: 1px solid #fff; padding: 8px 16px; border-radius: 6px; font-weight: 900; font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Oswald', sans-serif; text-transform: uppercase;">
                 Entrar com Google
             </button>
-            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 2px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 800; display: none; text-transform: uppercase;">Sair</button>
+            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 800; display: none;">Sair</button>
         </div>
     </div>
 </div>
 
 <div id="winner-overlay">
-    <div style="background:#090014; color:#fff; padding:50px; border-radius:16px; border:5px solid var(--led-yellow); max-width: 520px; width: 85%; box-shadow: 0 0 50px var(--led-yellow), 0 0 30px #000; text-align:center;">
-        <h1 style="font-size: 62px; margin:0; font-weight: 900; font-family: 'Oswald', sans-serif; color: var(--led-magenta); text-shadow: 0 0 20px var(--led-magenta-glow), 3px 3px 0 #000;" id="win-title-fase">BINGO!</h1>
-        <h2 id="winner-name" style="font-size: 38px; color:var(--led-yellow); margin: 18px 0 0 0; font-weight: 900; font-family: 'Oswald', sans-serif; text-shadow: 2px 2px 0 #000;">---</h2>
+    <div style="background:#090014; color:#fff; padding:40px; border-radius:16px; border:4px solid var(--led-yellow); max-width: 480px; width: 85%; box-shadow: 0 0 35px var(--led-yellow); text-align:center;">
+        <h1 style="font-size: 48px; margin:0; font-weight: 900; font-family: 'Oswald', sans-serif; color: var(--led-magenta); text-shadow: 2px 2px 0 #000;" id="win-title-fase">BINGO!</h1>
+        <h2 id="winner-name" style="font-size: 32px; color:var(--led-yellow); margin: 12px 0 0 0; font-weight: 900; font-family: 'Oswald', sans-serif; text-shadow: 1px 1px 0 #000;">---</h2>
     </div>
 </div>
 
@@ -341,21 +316,21 @@
         <div class="game-layout">
             
             <div class="col-left">
-                <div style="background: #05000a; border: 3px solid var(--led-magenta); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.8);">
+                <div style="background: #05000a; border: 2px solid var(--led-magenta); border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                     <div style="text-align: left;">
-                        <h4 id="txt-premio" style="color:var(--led-yellow); margin:0; font-size: 18px; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-shadow: 2px 2px 0 #000;">PREMIAÇÃO EM ANDAMENTO</h4>
-                        <div id="fase-rodada-txt" style="font-size: 13px; color: #76628c; margin-top: 2px; font-weight: bold; text-transform: uppercase;">AGUARDANDO BANCA</div>
+                        <h4 id="txt-premio" style="color:var(--led-yellow); margin:0; font-size: 15px; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px;">PREMIAÇÃO EM ANDAMENTO</h4>
+                        <div id="fase-rodada-txt" style="font-size: 11px; color: #76628c; margin-top: 2px; font-weight: bold; text-transform: uppercase;">AGUARDANDO BANCA</div>
                     </div>
                     <span class="fase-badge" id="badge-fase-jogo">FASE: 1ª LINHA</span>
                 </div>
                 
-                <div style="position: relative; background: #070012; border-radius: 16px; padding: 20px; border: 3px solid #1a0033; margin-top: 20px;">
+                <div style="position: relative; background: #070012; border-radius: 16px; padding: 16px; border: 1px solid #1a0033; margin-top: 16px;">
                     <div style="padding: 5px; text-align: center;">
-                        <img id="img-premio" src="" style="width:100%; max-height:190px; object-fit:contain; display:none; margin-bottom:20px; border-radius:12px; border: 3px solid var(--led-magenta); box-shadow: 0 0 20px var(--led-magenta-glow);">
+                        <img id="img-premio" src="" style="width:100%; max-height:170px; object-fit:contain; display:none; margin-bottom:16px; border-radius:12px; border: 2px solid var(--led-magenta);">
                     </div>
 
                     <div class="card-premio-grande">
-                        <label style="font-size: 13px; font-weight: 900; color: var(--led-magenta); letter-spacing: 1px; text-transform: uppercase; font-family: 'Oswald', sans-serif; text-shadow: 1px 1px 0 #000;">PRÊMIO DESTA FASE:</label>
+                        <label style="font-size: 11px; font-weight: 900; color: var(--led-magenta); letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Oswald', sans-serif;">PRÊMIO DESTA FASE:</label>
                         <div class="txt-premio-valor" id="txt-fase-premio-real">R$ 0,00</div>
                     </div>
                     
@@ -372,7 +347,7 @@
             <div class="col-right">
                 <div class="banca-section">
                     <div class="banca-status">
-                        <span id="label-banca" style="font-size:12px; color:var(--led-cyan); font-weight:900; text-transform:uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-shadow: 1px 1px 0 #000;">PRÓXIMA RODADA EM:</span>
+                        <span id="label-banca" style="font-size:11px; color:var(--led-cyan); font-weight:900; text-transform:uppercase; font-family: 'Oswald', sans-serif;">PRÓXIMA RODADA EM:</span>
                         <div id="cronometro-banca" class="timer-destaque">04:00</div>
                     </div>
 
@@ -387,21 +362,21 @@
                     </div>
 
                     <div class="banca-controles" id="painel-aba-credito" style="display: none;">
-                        <input type="number" id="recarga-valor" class="input-qtd" style="width: 100px;" value="10" min="10" max="1000">
-                        <button onclick="gerarCobrancaPix()" class="btn-recargar">Carregar Créditos</button>
+                        <input type="number" id="recarga-valor" class="input-qtd" style="width: 85px;" value="10" min="10" max="1000">
+                        <button onclick="gerarCobrancaPix()" class="btn-recargar">Recarregar</button>
                     </div>
                 </div>
 
-                <div class="naboa-section" style="margin-top: 20px;">
-                    <h4 style="color:var(--led-magenta); font-size:14px; margin:0 0 12px 0; font-weight: 900; text-transform:uppercase; font-family: 'Oswald', sans-serif; letter-spacing:0.8px; text-align: left; text-shadow: 1px 1px 0 #000;">📢 FEED DE ALERTA (TÁ NA BOA)</h4>
+                <div class="naboa-section" style="margin-top: 16px;">
+                    <h4 style="color:var(--led-magenta); font-size:13px; margin:0 0 10px 0; font-weight: 900; text-transform:uppercase; font-family: 'Oswald', sans-serif; text-align: left;">📢 FEED DE ALERTA (TÁ NA BOA)</h4>
                     <div class="naboa-chat-box" id="lista-na-boa">
-                        <div style="text-align:center; color:#443259; font-size:13px; padding-top:60px; font-weight: bold;">Aguardando início do sorteio...</div>
+                        <div style="text-align:center; color:#443259; font-size:12px; padding-top:40px; font-weight: bold;">Aguardando início do sorteio...</div>
                     </div>
                 </div>
 
-                <div class="participants-section" style="margin-top: 20px;">
-                    <h4 style="text-align:center; color:var(--led-green); font-size:14px; margin:0 0 12px 0; font-weight: 900; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; text-shadow: 1px 1px 0 #000;">CARTELAS NA MESA (<span id="player-count">0</span>)</h4>
-                    <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;"></div>
+                <div class="participants-section" style="margin-top: 16px;">
+                    <h4 style="text-align:center; color:var(--led-green); font-size:13px; margin:0 0 10px 0; font-weight: 900; font-family: 'Oswald', sans-serif; text-transform: uppercase;">CARTELAS NA MESA (<span id="player-count">0</span>)</h4>
+                    <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
                 </div>
             </div>
 
@@ -608,7 +583,7 @@
         if(v < 10 || v > 1000) return alert("Operação Inválida! O valor para recargas Pix deve ser entre R$ 10,00 e R$ 1.000,00.");
         
         let novoSaldo = meusCreditos + v;
-        await update(ref(db, `users/${auth.currentUser.uid}`), { creditos: novoSaldo });
+        await update(ref(db, `users/${auth.currentUser.uid}`), { credited: novoSaldo });
         alert(`PIX Identificado! R$ ${v.toFixed(2)} adicionados.`);
         recalcularCaixaRodada();
     };
@@ -695,7 +670,7 @@
             });
             
             if (!temAlguemNaBoa) {
-                painelNaBoa.innerHTML = `<div style="text-align:center; color:#443259; font-size:13px; padding-top:60px; font-weight: bold;">Buscando combinações premiadas...</div>`;
+                painelNaBoa.innerHTML = `<div style="text-align:center; color:#443259; font-size:12px; padding-top:40px; font-weight: bold;">Buscando combinações premiadas...</div>`;
             } else {
                 painelNaBoa.scrollTop = painelNaBoa.scrollHeight;
             }
