@@ -8,12 +8,11 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* CSS MANTIDO IGUAL AO SEU */
         :root { --bg: #050010; --led-magenta: #ff007f; --led-cyan: #00f0ff; --led-yellow: #fffb00; --led-green: #00ff66; }
         body { background: var(--bg); color: #fff; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
         #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #03000a; z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .cadastro-box { background: #0f001c; padding: 30px; border-radius: 8px; border: 3px solid var(--led-cyan); max-width: 400px; width: 85%; }
-        .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0 16px 0; background: #000; border: 2px solid var(--led-cyan); color: #fff; border-radius: 4px; box-sizing: border-box; }
+        .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 2px solid var(--led-cyan); color: #fff; border-radius: 4px; }
         .btn-salvar-cad { width: 100%; background: var(--led-green); color: #000; border: none; padding: 12px; border-radius: 4px; font-weight: 900; cursor: pointer; }
     </style>
 </head>
@@ -23,18 +22,34 @@
     <div class="cadastro-box">
         <h2>DADOS DE PREMIAÇÃO</h2>
         <input type="text" id="cad-whatsapp" placeholder="WhatsApp (DDD+Número)">
-        <input type="text" id="cad-cpf" placeholder="CPF">
+        <input type="text" id="cad-cpf" placeholder="CPF (Chave Pix)">
         <input type="text" id="cad-rua" placeholder="Rua e Número">
         <input type="text" id="cad-bairro" placeholder="Bairro">
-        <input type="text" id="cad-pix" placeholder="Sua Chave Pix">
+        <input type="text" id="cad-pix" placeholder="Chave Pix Completa">
         <button class="btn-salvar-cad" onclick="salvarCadastroPix()">CONFIRMAR DADOS E JOGAR</button>
     </div>
 </div>
 
 <script type="module">
-    // ... SUAS IMPORTAÇÕES FIREBASE ...
-    
-    // FUNÇÃO DE SALVAR DADOS ATUALIZADA
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAbDzmgd3QrRrx8R14dJSwjbN6fEFkR7pI", 
+        authDomain: "azar-c7f24.firebaseapp.com",
+        databaseURL: "https://azar-c7f24-default-rtdb.firebaseio.com", 
+        projectId: "azar-c7f24",
+        storageBucket: "azar-c7f24.firebasestorage.app",
+        messagingSenderId: "458222214312",
+        appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+
     window.salvarCadastroPix = async () => {
         const dados = {
             whatsapp: document.getElementById('cad-whatsapp').value.trim(),
@@ -49,38 +64,30 @@
         document.getElementById('cadastro-overlay').style.display = 'none';
     };
 
-    // LÓGICA DE LOGIN COM CHECAGEM DE DADOS (ORDEM CORRETA)
     onAuthStateChanged(auth, (user) => {
         if(user) {
-            document.getElementById('btn-login-topo').style.display = 'none';
             onValue(ref(db, `users/${user.uid}`), (sUser) => {
-                const dadosUser = sUser.val() || {};
-                // Se falta CPF (que agora é obrigatório), mostra o overlay
-                if(!dadosUser.cpf) {
-                    document.getElementById('cadastro-overlay').style.display = 'flex';
-                } else {
-                    document.getElementById('cadastro-overlay').style.display = 'none';
-                }
+                const dados = sUser.val() || {};
+                if(!dados.cpf) document.getElementById('cadastro-overlay').style.display = 'flex';
+                else document.getElementById('cadastro-overlay').style.display = 'none';
             });
         }
     });
 
-    // TRAVA DE SEGURANÇA NA VITÓRIA (BLINDAGEM)
-    // Dentro da sua função renderTudoUI, substitua a parte do if (avaliarVitoriaPorFase...) por isso:
-    /*
-    if (avaliarVitoriaPorFase(c, bolasGlobal, faseAtualDoJogo)) {
-        let caixaReal = totalPixRealAcumulado;
-        let pctFase = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
-        let valorPremio = (bancaFakeInjetadaDoBanco + caixaReal) * (pctFase / 100);
-
-        // A TRAVA DE OURO: Só libera ganhador real se o PIX REAL for >= (valorPremio * 2)
-        if (caixaReal >= (valorPremio * 2)) {
-            set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
-        } else {
-            console.log("Blindagem ativa: Caixa real insuficiente para sorteio real.");
+    // A LÓGICA DE BLINDAGEM NO SORTEIO
+    function renderTudoUI() {
+        // ... (seu código original de renderização) ...
+        // NO BLOCO DE VITÓRIA, TROQUE POR ISSO:
+        if (avaliarVitoriaPorFase(c, bolasGlobal, faseAtualDoJogo)) {
+            let caixaReal = totalPixRealAcumulado;
+            let valorPremio = (bancaFakeInjetadaDoBanco + caixaReal) * (pctFase / 100);
+            
+            // TRAVA: Só sorteia se caixa real for >= dobro do prêmio
+            if (caixaReal >= (valorPremio * 2)) {
+                set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+            }
         }
     }
-    */
 </script>
 </body>
 </html>
