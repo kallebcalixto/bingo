@@ -6,34 +6,399 @@
     <title>🎰 LAS VEGAS ARCADE - BINGO ROYALE 🎰</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- SCRIPT DO GERADOR AUTOMÁTICO DE QR CODE -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --bg: #050010; --led-magenta: #ff007f; --led-cyan: #00f0ff; --led-yellow: #fffb00; --led-green: #00ff66; }
-        body { background: var(--bg); color: #fff; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+        :root { 
+            --bg: #050010; 
+            --led-magenta: #ff007f;
+            --led-cyan: #00f0ff;
+            --led-yellow: #fffb00;
+            --led-green: #00ff66;
+            --green: var(--led-green);
+            --cyan: var(--led-cyan);
+            --orange: #ff6b00;
+        }
+        
+        body { 
+            background: var(--bg);
+            color: #fff; 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            overflow-x: hidden; 
+            overflow-y: auto; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body.has-bg::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 0, 16, 0.85);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .audio-control { 
+            background: #0d0022;
+            padding: 12px 20px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            border-bottom: 3px solid var(--led-cyan); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        #btn-audio { 
+            background: var(--led-magenta); 
+            color: #fff; 
+            border: 2px solid #fff; 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            font-size: 12px; 
+            cursor: pointer; 
+            font-family: 'Oswald', sans-serif;
+        }
+        #btn-audio.active { background: var(--led-green); color: #000; border-color: #000; }
+
+        .container { display: flex; flex-direction: column; gap: 16px; padding: 16px; box-sizing: border-box; max-width: 1480px; margin: 0 auto; }
+        .game-layout { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+        
+        .painel-geral { 
+            background: #000;
+            border: 4px solid var(--led-magenta);
+            border-radius: 8px; 
+            padding: 12px; 
+            display: grid; 
+            grid-template-columns: repeat(10, 1fr); 
+            gap: 6px; 
+        }
+        
+        .num-geral { 
+            background: #11051c; 
+            border: 1px solid #220b38;
+            border-radius: 4px; 
+            aspect-ratio: 1/1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 16px; 
+            font-weight: 900; 
+            color: #3d205c; 
+            font-family: 'Oswald', sans-serif;
+        }
+        
+        .num-geral.active { 
+            background: var(--led-cyan);
+            color: #000; 
+            border: 2px solid #fff;
+            z-index: 5;
+        }
+        
+        .ball-container { padding: 10px 0; text-align: center; }
+        .ball-display { 
+            background: var(--led-yellow);
+            width: 120px; 
+            height: 120px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto; 
+            border: 5px solid #fff;
+        }
+        
+        #bola-num { 
+            font-size: 64px; 
+            font-weight: 900; 
+            color: #000; 
+            font-family: 'Oswald', sans-serif;
+        }
+        
+        .marked { 
+            background: var(--led-green) !important; 
+            color: #000 !important; 
+            border: 2px solid #fff !important;
+            font-weight: 900 !important;
+        }
+
+        .card-premio-grande {
+            background: #140024;
+            border: 3px solid var(--led-yellow);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .txt-premio-valor {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--led-green);
+            font-family: 'Oswald', sans-serif;
+            margin: 2px 0 0 0;
+        }
+        
         #cadastro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #03000a; z-index: 20000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .cadastro-box { background: #0f001c; padding: 30px; border-radius: 8px; border: 3px solid var(--led-cyan); max-width: 400px; width: 85%; }
-        .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 2px solid var(--led-cyan); color: #fff; border-radius: 4px; }
-        .btn-salvar-cad { width: 100%; background: var(--led-green); color: #000; border: none; padding: 12px; border-radius: 4px; font-weight: 900; cursor: pointer; }
+        .cadastro-box h2 { margin: 0 0 15px 0; color: var(--led-cyan); font-family: 'Oswald', sans-serif; text-align: center; font-size: 26px; }
+        .cadastro-box input { width: 100%; padding: 12px; margin: 8px 0 16px 0; background: #000; border: 2px solid var(--led-cyan); color: #fff; border-radius: 4px; box-sizing: border-box; font-size: 16px; font-family: 'Oswald', sans-serif; }
+        .btn-salvar-cad { width: 100%; background: var(--led-green); color: #000; border: none; padding: 12px; border-radius: 4px; font-weight: 900; cursor: pointer; font-family: 'Oswald', sans-serif; font-size: 16px; }
+
+        #winner-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10001; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        
+        .banca-section { 
+            background: #0d001a; 
+            border-radius: 8px; 
+            padding: 16px; 
+            border: 3px solid var(--led-cyan); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+        .banca-status { background: #000; padding: 12px; border-radius: 6px; text-align: center; }
+        .timer-destaque { font-size: 38px; font-weight: 900; color: var(--led-cyan); font-family: 'Oswald', sans-serif; }
+        
+        .banca-abas { display: flex; gap: 8px; background: #000; padding: 4px; border-radius: 6px; }
+        .aba-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #5e4c73; cursor: pointer; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 13px; }
+        .aba-btn.active { background: var(--led-magenta); color: #fff; border-radius: 4px; }
+        
+        .banca-controles { display: flex; gap: 8px; align-items: center; }
+        .btn-comprar, .btn-recargar { color: #fff; border: 1px solid #fff; padding: 12px 16px; border-radius: 4px; font-weight: 900; cursor: pointer; flex: 1; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 14px; }
+        .btn-comprar { background: var(--led-green); color: #000; border: none; }
+        .btn-comprar:disabled { background: #1a1126; color: #443754; border: none; cursor: not-allowed; }
+        .btn-recargar { background: var(--led-cyan); color: #000; border: none; }
+        
+        .select-valores-mp {
+            width: 105px;
+            background: #000;
+            border: 2px solid #220044;
+            color: var(--led-yellow);
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 900;
+            font-size: 18px;
+            font-family: 'Oswald', sans-serif;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .input-qtd { width: 75px; background: #000; border: 2px solid #220044; color: var(--led-yellow); padding: 10px; border-radius: 4px; text-align: center; font-weight: 900; font-size: 20px; font-family: 'Oswald', sans-serif; }
+
+        .mp-pix-area {
+            background: #000;
+            border: 2px dashed var(--led-yellow);
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .mp-qrcode-container {
+            width: 180px;
+            height: 180px;
+            background: #fff;
+            padding: 6px;
+            border-radius: 4px;
+            margin: 0 auto 12px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mp-qrcode-container canvas, .mp-qrcode-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .mp-copia-cola-input {
+            width: 100%;
+            padding: 8px;
+            background: #11051c;
+            border: 1px solid var(--led-yellow);
+            color: #fff;
+            font-size: 11px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .naboa-section { 
+            background: #000; 
+            border: 3px solid var(--led-magenta); 
+            border-radius: 8px; 
+            padding: 16px; 
+            height: 260px; 
+            display: flex; 
+            flex-direction: column; 
+            box-sizing: border-box; 
+        }
+        .naboa-chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        
+        .naboa-msg { 
+            font-size: 13px; 
+            background: #110014; 
+            padding: 10px 14px; 
+            border-radius: 4px; 
+            border: 1px solid var(--led-magenta);
+            border-left: 5px solid var(--led-yellow);
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .participants-section { background: #05000f; padding: 16px; border-radius: 8px; border: 3px solid var(--led-yellow); max-height: 350px; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        
+        @media (min-width: 902px) {
+            .game-layout { flex-direction: row; align-items: flex-start; }
+            .col-left { flex: 1.5; display: flex; flex-direction: column; gap: 16px; }
+            .col-right { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+            .num-geral { font-size: 20px; }
+            .naboa-section { height: 320px; }
+            .participants-section { max-height: 420px; }
+        }
+
+        @media (max-width: 901px) {
+            .num-geral { font-size: 13px; padding: 1px 0; }
+            .txt-premio-valor { font-size: 36px; }
+            #bola-num { font-size: 54px; }
+            .ball-display { width: 100px; height: 100px; }
+            .container { padding: 10px; gap: 12px; }
+        }
     </style>
 </head>
 <body>
 
 <div id="cadastro-overlay">
     <div class="cadastro-box">
-        <h2>DADOS DE PREMIAÇÃO</h2>
-        <input type="text" id="cad-whatsapp" placeholder="WhatsApp (DDD+Número)">
-        <input type="text" id="cad-cpf" placeholder="CPF (Chave Pix)">
-        <input type="text" id="cad-rua" placeholder="Rua e Número">
-        <input type="text" id="cad-bairro" placeholder="Bairro">
-        <input type="text" id="cad-pix" placeholder="Chave Pix Completa">
-        <button class="btn-salvar-cad" onclick="salvarCadastroPix()">CONFIRMAR DADOS E JOGAR</button>
+        <h2>DADOS DE PREMIAÇÃO PIX</h2>
+        <p style="font-size: 12px; color: #a289b8; margin: 0 0 15px 0; text-align: center; line-height: 1.5;">Insira seus dados corretamente para que o sistema possa transferir seus prêmios de forma automática.</p>
+        <label style="font-size: 11px; font-weight: bold; color: var(--led-cyan); letter-spacing: 0.5px;">NÚMERO DO WHATSAPP:</label>
+        <input type="text" id="cad-whatsapp" placeholder="(41) 99999-9999">
+        <label style="font-size: 11px; font-weight: bold; color: var(--led-cyan); letter-spacing: 0.5px;">CPF (CHAVE PIX):</label>
+        <input type="text" id="cad-cpf" placeholder="000.000.000-00">
+        <button class="btn-salvar-cad" onclick="salvarCadastroPix()">Liberar Painel de Jogo</button>
+    </div>
+</div>
+
+<div class="audio-control">
+    <button id="btn-audio" onclick="toggleAudio()">LIGAR VOZ</button>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div id="user-credits-display" style="font-size: 14px; font-weight: 900; color: var(--led-green); display: none; background: rgba(0,255,102,0.1); padding: 6px 14px; border-radius: 4px; border: 1px solid var(--led-green); font-family: 'Oswald', sans-serif;">CRÉDITOS: R$ 0,00</div>
+        <div id="auth-status-area">
+            <button id="btn-login-topo" onclick="loginComGoogle()" style="background: var(--led-yellow); color: #000; border: 1px solid #fff; padding: 8px 16px; border-radius: 6px; font-weight: 900; font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Oswald', sans-serif; text-transform: uppercase;">
+                Entrar com Google
+            </button>
+            <button id="btn-logout" onclick="fazerLogout()" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 800; display: none;">Sair</button>
+        </div>
+    </div>
+</div>
+
+<div id="winner-overlay">
+    <div style="background:#090014; color:#fff; padding:40px; border-radius:16px; border:4px solid var(--led-yellow); max-width: 480px; width: 85%; text-align:center;">
+        <h1 style="font-size: 44px; margin:0; font-weight: 900; font-family: 'Oswald', sans-serif; color: var(--led-magenta);" id="win-title-fase">BINGO!</h1>
+        <h2 id="winner-name" style="font-size: 30px; color:var(--led-yellow); margin: 12px 0 0 0; font-weight: 900; font-family: 'Oswald', sans-serif;">---</h2>
+    </div>
+</div>
+
+<div class="container">
+    <div id="game-section">
+        <div class="game-layout">
+            
+            <div class="col-left">
+                <div style="background: #000; border: 2px solid var(--led-magenta); border-radius: 8px; padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="text-align: left;">
+                        <h4 id="txt-premio" style="color:var(--led-yellow); margin:0; font-size: 15px; font-weight: 900; text-transform: uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px;">PREMIAÇÃO EM ANDAMENTO</h4>
+                        <div id="fase-rodada-txt" style="font-size: 11px; color: #76628c; margin-top: 2px; font-weight: bold; text-transform: uppercase;">AGUARDANDO BANCA</div>
+                    </div>
+                    <span class="fase-badge" id="badge-fase-jogo">FASE: 1ª LINHA</span>
+                </div>
+                
+                <div style="position: relative; background: #000; border-radius: 12px; padding: 16px; border: 2px solid #1a0033; margin-top: 16px;">
+                    <div style="padding: 5px; text-align: center;">
+                        <img id="img-premio" src="" style="width:100%; max-height:160px; object-fit:contain; display:none; margin-bottom:16px; border-radius:8px; border: 2px solid var(--led-magenta);">
+                    </div>
+
+                    <div class="card-premio-grande">
+                        <label style="font-size: 11px; font-weight: 900; color: var(--led-magenta); letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Oswald', sans-serif;">PRÊMIO DESTA FASE:</label>
+                        <div class="txt-premio-valor" id="txt-fase-premio-real">R$ 0,00</div>
+                    </div>
+                    
+                    <div class="ball-container">
+                        <div class="ball-display" id="bola-display-3d">
+                            <div id="bola-num">--</div>
+                        </div>
+                    </div>
+
+                    <div id="tabela-90" class="painel-geral"></div>
+                </div>
+            </div>
+            
+            <div class="col-right">
+                <div class="banca-section">
+                    <div class="banca-status">
+                        <span id="label-banca" style="font-size:11px; color:var(--led-cyan); font-weight:900; text-transform:uppercase; font-family: 'Oswald', sans-serif;">PRÓXIMA RODADA EM:</span>
+                        <div id="cronometro-banca" class="timer-destaque">04:00</div>
+                    </div>
+
+                    <div class="banca-abas">
+                        <button class="aba-btn active" id="aba-compra" onclick="mudarAbaBanca('compra')">Comprar Cartelas</button>
+                        <button class="aba-btn" id="aba-credito" onclick="mudarAbaBanca('credito')">Carregar Pix</button>
+                    </div>
+
+                    <div class="banca-controles" id="painel-aba-compra">
+                        <input type="number" id="compre-qtd" class="input-qtd" value="1" min="1" max="100">
+                        <button id="btn-compre-acao" onclick="comprarCartelasBanca()" class="btn-comprar">Comprar (R$ 0,30/un)</button>
+                    </div>
+
+                    <div class="banca-controles" id="painel-aba-credito" style="display: none; flex-direction: column;">
+                        <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
+                            <select id="recarga-valor" class="select-valores-mp">
+                                <option value="0.10">R$ 0.10</option>
+                                <option value="20">R$ 20</option>
+                                <option value="30">R$ 30</option>
+                                <option value="50">R$ 50</option>
+                                <option value="70">R$ 70</option>
+                                <option value="100">R$ 100</option>
+                                <option value="500">R$ 500</option>
+                                <option value="1000">R$ 1000</option>
+                            </select>
+                            <button id="btn-gerar-pix-mp" onclick="gerarCobrancaPix()" class="btn-recargar">Gerar Pix</button>
+                        </div>
+                        
+                        <div id="area-pix-resultado" class="mp-pix-area" style="display: none; width: 100%;">
+                            <span style="font-size: 11px; color: var(--led-cyan); font-weight: bold; display: block; margin-bottom: 8px;">ESCANEE O QR CODE ABAIXO:</span>
+                            <div id="mp-qrcode-render" class="mp-qrcode-container"></div>
+                            
+                            <span style="font-size: 11px; color: var(--led-yellow); font-weight: bold; display: block; margin-bottom: 6px;">OU USE O COPIA E COLA:</span>
+                            <input type="text" id="mp-copia-cola" class="mp-copia-cola-input" readonly onclick="this.select()">
+                            <button onclick="copiarPixMP()" style="background: var(--led-yellow); border: none; color: #000; font-weight: 900; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; text-transform: uppercase; width: 100%;">Copiar Código Pix</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="naboa-section" style="margin-top: 16px;">
+                    <h4 style="color:var(--led-magenta); font-size:13px; margin:0 0 10px 0; font-weight: 900; text-transform:uppercase; font-family: 'Oswald', sans-serif; text-align: left;">📢 FEED DE ALERTA (TÁ NA BOA)</h4>
+                    <div class="naboa-chat-box" id="lista-na-boa">
+                        <div style="text-align:center; color:#443259; font-size:12px; padding-top:40px; font-weight: bold;">Aguardando início do sorteio...</div>
+                    </div>
+                </div>
+
+                <div class="participants-section" style="margin-top: 16px;">
+                    <h4 style="text-align:center; color:var(--led-green); font-size:13px; margin:0 0 10px 0; font-weight: 900; font-family: 'Oswald', sans-serif; text-transform: uppercase;">CARTELAS NA MESA (<span id="player-count">0</span>)</h4>
+                    <div id="lista-participantes" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, set, push, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = { 
         apiKey: "AIzaSyAbDzmgd3QrRrx8R14dJSwjbN6fEFkR7pI", 
@@ -44,50 +409,484 @@
         messagingSenderId: "458222214312",
         appId: "1:458222214312:web:e4fbee77b1589c165bf69d"
     };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+    
+    const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
+    
+    // 🌐 URL DO NOVO RENDER CORRIGIDA EXATAMENTE COMO NO SEU LOG RECENTE!
+    const MINHA_URL_RENDER_BACKEND = 'https://bingo-backend-novomercado.onrender.com';
 
-    window.salvarCadastroPix = async () => {
-        const dados = {
-            whatsapp: document.getElementById('cad-whatsapp').value.trim(),
-            cpf: document.getElementById('cad-cpf').value.trim(),
-            rua: document.getElementById('cad-rua').value.trim(),
-            bairro: document.getElementById('cad-bairro').value.trim(),
-            pix: document.getElementById('cad-pix').value.trim(),
-            nome: auth.currentUser.email.split('@')[0]
-        };
-        if(Object.values(dados).some(v => v === "")) return alert("Preencha todos os campos!");
-        await update(ref(db, `users/${auth.currentUser.uid}`), dados);
-        document.getElementById('cadastro-overlay').style.display = 'none';
+    let bolasGlobal = [], minhasCartelas = [], audioAtivo = false, rodadaAtiva = 1, ganhadorAtivo = null;
+    let estadoJogoGlobal = "espera", mestreDaRodada = false, meusCreditos = 0.00;
+    let faseAtualDoJogo = 1, bancaFakeInjetadaDoBanco = 0, totalPixRealAcumulado = 0;
+    let pctF1 = 10, pctF2 = 20, pctF3 = 30;
+
+    window.toggleAudio = () => { audioAtivo = !audioAtivo; document.getElementById('btn-audio').classList.toggle('active', audioAtivo); };
+    window.fazerLogout = () => { if(confirm("Deseja sair da sua conta?")) signOut(auth).then(() => location.reload()); };
+
+    window.mudarAbaBanca = (aba) => {
+        document.getElementById('aba-compra').classList.toggle('active', aba === 'compra');
+        document.getElementById('aba-credito').classList.toggle('active', aba === 'credito');
+        document.getElementById('painel-aba-compra').style.display = aba === 'compra' ? 'flex' : 'none';
+        document.getElementById('painel-aba-credito').style.display = aba === 'credito' ? 'flex' : 'none';
     };
 
-    onAuthStateChanged(auth, (user) => {
-        if(user) {
-            onValue(ref(db, `users/${user.uid}`), (sUser) => {
-                const dados = sUser.val() || {};
-                if(!dados.cpf) document.getElementById('cadastro-overlay').style.display = 'flex';
-                else document.getElementById('cadastro-overlay').style.display = 'none';
-            });
+    onValue(ref(db, 'jogo/config'), (snap) => {
+        const c = snap.val(); 
+        if(c) {
+            if (c.texto_premio) document.getElementById('txt-premio').innerText = c.texto_premio;
+            const img = document.getElementById('img-premio'); 
+            if(c.url_imagem && c.url_imagem.trim() !== "") { 
+                img.src = c.url_imagem; 
+                img.style.display = 'block'; 
+            } else {
+                img.style.display = 'none';
+            }
+
+            bancaFakeInjetadaDoBanco = c.banca_manual || 0;
+            
+            pctF1 = c.porcentagem_f1 !== undefined ? c.porcentagem_f1 : 10;
+            pctF2 = c.porcentagem_f2 !== undefined ? c.porcentagem_f2 : 20;
+            pctF3 = c.porcentagem_f3 !== undefined ? c.porcentagem_f3 : 30;
+
+            if(c.url_fundo && c.url_fundo.trim() !== "") {
+                document.body.style.backgroundImage = `url('${c.url_fundo}')`;
+                document.body.classList.add('has-bg');
+            } else {
+                document.body.style.backgroundImage = "";
+                document.body.classList.remove('has-bg');
+            }
+            recalcularPremiosUI();
         }
     });
 
-    // A LÓGICA DE BLINDAGEM NO SORTEIO
-    function renderTudoUI() {
-        // ... (seu código original de renderização) ...
-        // NO BLOCO DE VITÓRIA, TROQUE POR ISSO:
-        if (avaliarVitoriaPorFase(c, bolasGlobal, faseAtualDoJogo)) {
-            let caixaReal = totalPixRealAcumulado;
-            let valorPremio = (bancaFakeInjetadaDoBanco + caixaReal) * (pctFase / 100);
+    onValue(ref(db, 'users'), (snap) => {
+        let faturamentoPixReal = 0;
+        if(snap.exists()) {
+            snap.forEach(u => {
+                if(!u.key.startsWith('fake_user_')) {
+                    faturamentoPixReal += (u.val().cartelas || []).length * 0.30;
+                }
+            });
+        }
+        totalPixRealAcumulado = faturamentoPixReal;
+        recalcularPremiosUI();
+    });
+
+    onValue(ref(db, 'jogo/automacao'), (snap) => {
+        const dados = snap.val();
+        if(!dados) {
+            set(ref(db, 'jogo/automacao'), { estado: "espera", tempo_restante: 240, acumulado: 0, timestamp_controle: Date.now(), fase: 1 });
+            return;
+        }
+
+        estadoJogoGlobal = dados.estado;
+        faseAtualDoJogo = dados.fase || 1;
+        
+        const templatesNomes = ["1ª LINHA", "2ª LINHA", "CARTELA CHEIA"];
+        document.getElementById('badge-fase-jogo').innerText = `FASE: ${templatesNomes[faseAtualDoJogo - 1]}`;
+        
+        if (dados.estado !== "espera") {
+            document.getElementById('fase-rodada-txt').innerText = `BUSCANDO GANHADOR DA ${templatesNomes[faseAtualDoJogo - 1]}`;
+        } else {
+            document.getElementById('fase-rodada-txt').innerText = "ACEITANDO BILHETES";
+        }
+
+        const minutes = Math.floor(dados.tempo_restante / 60).toString().padStart(2, '0');
+        const seconds = (dados.tempo_restante % 60).toString().padStart(2, '0');
+        
+        if (dados.estado === "espera") {
+            document.getElementById('label-banca').innerText = "PRÓXIMA RODADA EM:";
+            document.getElementById('cronometro-banca').innerText = `${minutes}:${seconds}`;
+            document.getElementById('cronometro-banca').style.color = "var(--led-cyan)";
+            document.getElementById('btn-compre-acao').disabled = false;
+        } else {
+            document.getElementById('label-banca').innerText = "JOGO EM ANDAMENTO:";
+            document.getElementById('cronometro-banca').innerText = "SORTEANDO...";
+            document.getElementById('cronometro-banca').style.color = "var(--led-green)";
+            document.getElementById('btn-compre-acao').disabled = true;
+        }
+
+        recalcularPremiosUI();
+    });
+
+    function recalcularPremiosUI() {
+        let caixaGeralCalculo = bancaFakeInjetadaDoBanco + totalPixRealAcumulado;
+        const escolhaFator = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
+        document.getElementById('txt-fase-premio-real').innerText = `R$ ${(caixaGeralCalculo * (escolhaFator / 100)).toFixed(2)}`;
+    }
+
+    onValue(ref(db, 'jogo/ganhador_atual'), (snap) => {
+        ganhadorAtivo = snap.val();
+        document.getElementById('winner-overlay').style.display = ganhadorAtivo ? 'flex' : 'none';
+        if(ganhadorAtivo) { 
+            const templatesNomes = ["GANHADOR DA 1ª LINHA!", "GANHADOR DA 2ª LINHA!", "BINGO TOTAL! (CARTELA CHEIA)"];
+            document.getElementById('win-title-fase').innerText = templatesNomes[faseAtualDoJogo - 1];
+            document.getElementById('winner-name').innerText = ganhadorAtivo; 
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
+        }
+    });
+
+    onValue(ref(db, 'jogo/config/rodada_ativa'), (snap) => { rodadaAtiva = snap.val() || 1; renderTudoUI(); });
+
+    onValue(ref(db, 'jogo/bolas_sorteadas'), (snap) => {
+        const novas = snap.val() || []; const ultima = novas[novas.length-1];
+        if(novas.length > bolasGlobal.length && audioAtivo && ultima) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance("Número " + ultima)); }
+        
+        document.getElementById('bola-num').innerText = novas.length === 0 ? "--" : (ultima || "--");
+        bolasGlobal = novas;
+        document.querySelectorAll('.num-geral').forEach(el => el.classList.remove('active'));
+        bolasGlobal.forEach(n => document.getElementById(`n90-${n}`)?.classList.add('active'));
+        renderTudoUI();
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if(user) {
+            document.getElementById('btn-login-topo').style.display = 'none';
+            document.getElementById('user-credits-display').style.display = 'block';
+            onValue(ref(db, 'jogo/config/pode_deslogar'), (s) => { 
+                document.getElementById('btn-logout').style.display = s.val() ? 'block' : 'none'; 
+            });
             
-            // TRAVA: Só sorteia se caixa real for >= dobro do prêmio
-            if (caixaReal >= (valorPremio * 2)) {
-                set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+            onValue(ref(db, `users/${user.uid}`), (sUser) => {
+                const dadosUser = sUser.val() || {};
+                meusCreditos = dadosUser.creditos || 0.00;
+                document.getElementById('user-credits-display').innerText = `CRÉDITOS: R$ ${parseFloat(meusCreditos).toFixed(2)}`;
+                
+                if(!dadosUser.whatsapp || !dadosUser.cpf) {
+                    document.getElementById('cadastro-overlay').style.display = 'flex';
+                } else {
+                    document.getElementById('cadastro-overlay').style.display = 'none';
+                }
+                minhasCartelas = dadosUser.cartelas || []; 
+                renderTudoUI();
+            });
+        } else {
+            document.getElementById('btn-login-topo').style.display = 'flex';
+            document.getElementById('btn-logout').style.display = 'none';
+            document.getElementById('user-credits-display').style.display = 'none';
+            document.getElementById('cadastro-overlay').style.display = 'none';
+            minhasCartelas = []; 
+            renderTudoUI();
+        }
+    });
+
+    window.salvarCadastroPix = async () => {
+        const zap = document.getElementById('cad-whatsapp').value.trim();
+        const cpf = document.getElementById('cad-cpf').value.trim();
+        if(!zap || !cpf) return alert("Preencha todos os campos para habilitar sua carteira de jogo.");
+        
+        await update(ref(db, `users/${auth.currentUser.uid}`), {
+            whatsapp: zap,
+            cpf: cpf,
+            nome: auth.currentUser.email.split('@')[0],
+            creditos: meusCreditos || 0.00
+        });
+        document.getElementById('cadastro-overlay').style.display = 'none';
+    };
+
+    window.gerarCobrancaPix = async () => {
+        if(!auth.currentUser) return alert("Faça login com sua conta Google!");
+        
+        const btn = document.getElementById('btn-gerar-pix-mp');
+        const valorInput = parseFloat(document.getElementById('recarga-valor').value) || 10;
+        
+        btn.innerText = "GERANDO...";
+        btn.disabled = true;
+        document.getElementById('area-pix-resultado').style.display = 'none';
+        document.getElementById('mp-qrcode-render').innerHTML = ""; 
+
+        const urlLimpa = MINHA_URL_RENDER_BACKEND.endsWith('/') ? MINHA_URL_RENDER_BACKEND.slice(0, -1) : MINHA_URL_RENDER_BACKEND;
+
+        try {
+            const resposta = await fetch(`${urlLimpa}/criar-pix`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    uid: auth.currentUser.uid,
+                    valor: valorInput,
+                    email: auth.currentUser.email
+                })
+            });
+
+            const resultado = await resposta.json();
+            console.log("DADOS DO SERVIDOR:", resultado);
+
+            const stringPix = resultado.copiaCola || 
+                              resultado.copiacola || 
+                              resultado.point_of_interaction?.transaction_data?.qr_code || 
+                              (resultado.data && (resultado.data.copiaCola || resultado.data.qr_code));
+
+            if (stringPix) {
+                document.getElementById('mp-copia-cola').value = stringPix;
+                
+                new QRCode(document.getElementById("mp-qrcode-render"), {
+                    text: stringPix,
+                    width: 168,
+                    height: 168,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+
+                document.getElementById('area-pix-resultado').style.display = 'block';
+            } else {
+                console.error("Erro na varredura da resposta:", resultado);
+                alert("Erro do Servidor: " + JSON.stringify(resultado));
+            }
+        } catch (erro) {
+            console.error(erro);
+            alert("Erro ao conectar com o servidor de pagamento: " + erro.message);
+        } finally {
+            btn.innerText = "GERAR PIX";
+            btn.disabled = false;
+        }
+    };
+
+    window.copiarPixMP = () => {
+        const input = document.getElementById('mp-copia-cola');
+        input.select();
+        document.execCommand('copy');
+        alert("Código Pix copiado com sucesso! Abra o app do seu banco e use o 'Pix Copia e Cola'.");
+    };
+
+    window.comprarCartelasBanca = async () => {
+        if(!auth.currentUser) return alert("Faça login first!");
+        if(estadoJogoGlobal !== "espera") return alert("A banca está fechada para esta rodada.");
+
+        let qtd = parseInt(document.getElementById('compre-qtd').value) || 1;
+        if(qtd < 1) qtd = 1; if(qtd > 100) qtd = 100;
+
+        const custoTotal = qtd * 0.30;
+        if(meusCreditos < custoTotal) return alert(`Saldo Insuficiente!`);
+
+        const uRef = ref(db, `users/${auth.currentUser.uid}`);
+        let listaAtual = [...minhasCartelas];
+        
+        if((listaAtual.length + qtd) > 100) return alert(`Limite máximo de 100 cartelas.`);
+
+        for(let c=0; c<qtd; c++) {
+            let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
+            listaAtual.push(n.sort((a,b)=>a-b));
+        }
+
+        let saldoRestante = meusCreditos - custoTotal;
+        await update(uRef, { cartelas: listaAtual, creditos: saldoRestante });
+        alert(`Compra confirmada de ${qtd} cartelas!`);
+        recalcularCaixaRodada();
+    };
+
+    async function recalcularCaixaRodada() {
+        const snapUsers = await get(ref(db, 'users'));
+        let total = 0;
+        snapUsers.forEach(u => { if(!u.key.startsWith('fake_user_')) total += (u.val().cartelas || []).length; });
+        const snapAuto = await get(ref(db, 'jogo/automacao'));
+        let fakesCount = snapAuto.val()?.accumulado_fakes || 0;
+        await update(ref(db, 'jogo/automacao'), { acumulado: (total * 0.30) + fakesCount });
+    }
+
+    function renderTudoUI() {
+        get(ref(db, 'users')).then(snap => {
+            const div = document.getElementById('lista-participantes'); 
+            const painelNaBoa = document.getElementById('lista-na-boa');
+            
+            let htmlCards = "";
+            let htmlNaBoa = "";
+            let count = 0;
+            let temAlguemNaBoa = false;
+
+            snap.forEach(u => {
+                const d = u.val();
+                if(d.cartelas) {
+                    count++;
+                    d.cartelas.forEach((c, idx) => {
+                        const ns = c.map(n => `<div class="${bolasGlobal.includes(n)?'marked':''}" style="background:#000; font-size:10px; padding:4px 0; text-align:center; font-weight:800; border-radius:4px; border:1px solid rgba(255,255,255,0.05); color:#ccc;">${n}</div>`).join('');
+                        
+                        htmlCards += `
+                            <div class="mini-card-item" style="border:1px solid ${idx+1 === rodadaAtiva ? 'var(--led-cyan)' : '#1f003a'}; opacity:${idx+1 > rodadaAtiva ? '0.15' : '1'}">
+                                <span style="font-size:9px; color:var(--led-cyan); display:block; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:700; margin-bottom:4px;">${d.nome || 'User'} (#${idx+1})</span>
+                                <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:2px;">${ns}</div>
+                            </div>`;
+
+                        if (estadoJogoGlobal === "rodando" && idx+1 === rodadaAtiva) {
+                            let faltamBolas = calcularFaltantesPorFase(c, bolasGlobal, faseAtualDoJogo);
+                            if (faltamBolas === 1) {
+                                temAlguemNaBoa = true;
+                                htmlNaBoa += `
+                                    <div class="naboa-msg">
+                                        <span>⚡ CASINO ALERT: <strong>${d.nome || 'Jogador'}</strong> está por 1 bola!</span>
+                                    </div>`;
+                            }
+                        }
+
+                        if(!ganhadorAtivo && idx+1 === rodadaAtiva && auth.currentUser && u.key === auth.currentUser.uid) {
+                            if (avaliarVitoriaPorFase(c, bolasGlobal, faseAtualDoJogo)) {
+                                let caixaGeral = bancaFakeInjetadaDoBanco + totalPixRealAcumulado;
+                                let pctFase = faseAtualDoJogo === 1 ? pctF1 : (faseAtualDoJogo === 2 ? pctF2 : pctF3);
+                                let custoPremioVisual = caixaGeral * (pctFase / 100);
+
+                                if (totalPixRealAcumulado >= custoPremioVisual && custoPremioVisual > 0) {
+                                    set(ref(db, 'jogo/ganhador_atual'), auth.currentUser.email.split('@')[0]);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            
+            div.innerHTML = htmlCards;
+            
+            if (!temAlguemNaBoa) {
+                painelNaBoa.innerHTML = `<div style="text-align:center; color:#443259; font-size:13px; padding-top:40px; font-weight: bold;">Buscando combinações premiadas...</div>`;
+            } else {
+                painelNaBoa.innerHTML = htmlNaBoa;
+                painelNaBoa.scrollTop = painelNaBoa.scrollHeight;
+            }
+            document.getElementById('player-count').innerText = count;
+        });
+    }
+
+    function calcularFaltantesPorFase(cartela, bolas, fase) {
+        let f1 = cartela.slice(0, 5), f2 = cartela.slice(5, 10), f3 = cartela.slice(10, 15);
+        let nF1 = f1.filter(n => !bolas.includes(n)).length;
+        let nF2 = f2.filter(n => !bolas.includes(n)).length;
+        let nF3 = f3.filter(n => !bolas.includes(n)).length;
+
+        if (fase === 1) return Math.min(nF1, nF2, nF3);
+        if (fase === 2) {
+            let arr = [nF1, nF2, nF3].sort((a,b)=>a-b);
+            return arr[0] + arr[1];
+        }
+        if (fase === 3) return cartela.filter(n => !bolas.includes(n)).length;
+        return 99;
+    }
+
+    function avaliarVitoriaPorFase(cartela, bolas, fase) {
+        let f1 = cartela.slice(0, 5), f2 = cartela.slice(5, 10), f3 = cartela.slice(10, 15);
+        let check1 = f1.every(n => bolas.includes(n)), check2 = f2.every(n => bolas.includes(n)), check3 = f3.every(n => bolas.includes(n));
+        let linhasConcluidas = (check1 ? 1 : 0) + (check2 ? 1 : 0) + (check3 ? 1 : 0);
+        
+        if (fase === 1) return linhasConcluidas >= 1;
+        if (fase === 2) return linhasConcluidas >= 2;
+        if (fase === 3) return linhasConcluidas === 3;
+        return false;
+    }
+
+    async function injetarJogadoresFakes() {
+        const prefixosEmailsFakes = [
+            "thiago.silva88", "marisa_colombo", "lucas.kbs", "fernandinha_pr", "carlos_edu",
+            "gabi.martins", "rodrigo.santos", "anapaula.m", "jeferson_pix", "paulo.bet",
+            "renata.silveira", "marcos_antonio", "amanda_curitiba", "diego.mendes", "juliana.f",
+            "bruninho_92", "patricia_m", "leandro.rock", "camila.vendas", "rafael_bet",
+            "aline.santos", "gustavo_lima", "leticia_pr", "felipe.melo", "sabrina.moraes",
+            "douglas_m", "tatiane.silva", "vitor_mendes", "monica_cwb", "fabricio_pr",
+            "vanessa.l", "anderson_silva", "larissa.moraes", "danilo_cwb", "eduardo_bet",
+            "priscila_m", "marcelo.silva", "jessica_l", "renan_mendes", "carol_santos",
+            "alexandre_pr", "debora.m", "otavio.silva", "samara_cwb", "igor_mendes",
+            "natalia_s", "hugo_silva", "beatriz.m", "thiago_bet", "vanessa_cwb",
+            "luciana_m", "ricardo.santos", "elaine.silva", "matheus_pr", "claudia_m",
+            "bruno.mendes", "amanda.silva", "robson_cwb", "simone_pr", "adriano.s",
+            "kelly_moraes", "wellington_s", "daniela.f", "guilherme_pr", "gabriel.m",
+            "cristiane_s", "roberto_cwb", "aline_moraes", "valdir_silva", "regina_m"
+        ];
+
+        let totalCartelasFakes = 0; const updatesFakes = {};
+        for(let i=0; i<75; i++) {
+            let qtdFake = Math.floor(Math.random() * 5) + 1; totalCartelasFakes += qtdFake;
+            let cartelasFake = [];
+            for(let c=0; c<qtdFake; c++) {
+                let n = []; while(n.length < 15) { let r = Math.floor(Math.random()*90)+1; if(!n.includes(r)) n.push(r); }
+                cartelasFake.push(n.sort((a,b)=>a-b));
+            }
+            
+            let emailFake = prefixosEmailsFakes[i] || `user.automato${i}`;
+            let celFake = `(41) 99${Math.floor(Math.random()*90+100)}-${Math.floor(Math.random()*9000+1000)}`;
+            updatesFakes[`users/fake_user_${i}`] = { nome: `${emailFake}🔹`, cartelas: cartelasFake, whatsapp: celFake, cpf: "Automático" };
+        }
+        await update(ref(db, '/'), updatesFakes); return totalCartelasFakes;
+    }
+
+    async function processarCicloDoJogo() {
+        const snap = await get(ref(db, 'jogo/automacao')); let dados = snap.val(); if(!dados) return;
+
+        if (!mestreDaRodada) {
+            if (Date.now() - (dados.timestamp_controle || 0) > 4000) mestreDaRodada = true;
+            else return;
+        }
+        await update(ref(db, 'jogo/automacao'), { timestamp_controle: Date.now() });
+
+        if(dados.estado === "espera") {
+            let t = dados.tempo_restante - 1;
+            if(t <= 0) {
+                await update(ref(db, 'jogo/automacao'), { estado: "rodando", tempo_restante: 0, fase: 1 });
+                window.tempoInternoBolas = 0;
+            } else {
+                await update(ref(db, 'jogo/automacao'), { tempo_restante: t });
+            }
+        } else if(dados.estado === "rodando") {
+            if(!window.tempoInternoBolas) window.tempoInternoBolas = 0;
+            window.tempoInternoBolas++;
+            
+            if(window.tempoInternoBolas >= 5) {
+                window.tempoInternoBolas = 0;
+                
+                if(!ganhadorAtivo) {
+                    const snapBolas = await get(ref(db, 'jogo/bolas_sorteadas')); let list = snapBolas.val() || [];
+                    if(list.length >= 90) return;
+
+                    let n; do { n = Math.floor(Math.random() * 90) + 1; } while(list.includes(n));
+                    list.push(n);
+
+                    await set(ref(db, 'jogo/bolas_sorteadas'), list);
+
+                    const snapUsers = await get(ref(db, 'users'));
+                    snapUsers.forEach(u => {
+                        if(!ganhadorAtivo && u.key.startsWith('fake_user_')) {
+                            const cartelas = u.val().cartelas || [];
+                            if(cartelas[rodadaAtiva - 1] && avaliarVitoriaPorFase(cartelas[rodadaAtiva - 1], list, faseAtualDoJogo)) {
+                                set(ref(db, 'jogo/ganhador_atual'), u.val().nome + " (Sorte Grande)");
+                            }
+                        }
+                    });
+                } else {
+                    mestreDaRodada = false;
+                    setTimeout(async () => {
+                        if(faseAtualDoJogo < 3) {
+                            let novaFase = faseAtualDoJogo + 1;
+                            await set(ref(db, 'jogo/ganhador_atual'), null);
+                            await update(ref(db, 'jogo/automacao'), { fase: novaFase });
+                        } else {
+                            const users = await get(ref(db, 'users')); const limpaUpdates = {};
+                            users.forEach(u => {
+                                if(u.key.startsWith('fake_user_')) limpaUpdates[`users/${u.key}`] = null;
+                                else limpaUpdates[`users/${u.key}/cartelas`] = null; 
+                            });
+                            await update(ref(db, '/'), limpaUpdates);
+                            await set(ref(db, 'jogo/bolas_sorteadas'), []);
+                            await set(ref(db, 'jogo/ganhador_atual'), null);
+                            
+                            let fakesCartelasCount = await injetarJogadoresFakes();
+                            let faturamentoFakes = fakesCartelasCount * 0.30;
+                            
+                            await update(ref(db, 'jogo/automacao'), {
+                                estado: "espera", tempo_restante: 240, acumulado: faturamentoFakes, acumulado_fakes: faturamentoFakes, fase: 1
+                            });
+                        }
+                    }, 8000);
+                }
             }
         }
     }
+
+    setInterval(processarCicloDoJogo, 1000);
+
+    window.loginComGoogle = () => {
+        signInWithPopup(auth, googleProvider)
+            .then(() => alert("Conectado com sucesso através do Google!"))
+            .catch((e) => alert("Erro ao autenticar: " + e.message));
+    };
+
+    const tab90 = document.getElementById('tabela-90'); for(let i=1; i<=90; i++) { tab90.innerHTML += `<div id="n90-${i}" class="num-geral">${i}</div>`; }
 </script>
 </body>
 </html>
