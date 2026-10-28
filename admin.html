@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Admin - Cadastrar Médicos</title>
+  <title>Painel Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; }
@@ -15,18 +15,17 @@
     label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; }
     input, select { width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
     .btn { background: #10b981; color: white; border: none; padding: 0.9rem; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer; font-size: 1rem; margin-top: 1rem; }
-    .btn:hover { background: #059669; }
     .hidden { display: none !important; }
-    .error-msg { color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem; display: none; }
   </style>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
       authDomain: "bipolar-6f00a.firebaseapp.com",
+      databaseURL: "https://bipolar-6f00a-default-rtdb.firebaseio.com",
       projectId: "bipolar-6f00a",
       storageBucket: "bipolar-6f00a.firebasestorage.app",
       messagingSenderId: "380485953198",
@@ -34,116 +33,76 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const rtdb = getDatabase(app);
 
-    // Palavra-passe configurada para o painel admin
     const ADMIN_PASSWORD = "Sa200783";
 
     window.checkPassword = (e) => {
       e.preventDefault();
-      const inputPass = document.getElementById('admin-password').value;
-      const errorEl = document.getElementById('pass-error');
-
-      if (inputPass === ADMIN_PASSWORD) {
+      if (document.getElementById('admin-pass').value === ADMIN_PASSWORD) {
         document.getElementById('view-auth').classList.add('hidden');
         document.getElementById('view-form').classList.remove('hidden');
-        errorEl.style.display = 'none';
       } else {
-        errorEl.style.display = 'block';
+        alert("Senha incorreta!");
       }
     };
 
-    window.addDoctor = async (e) => {
+    window.addDoctor = (e) => {
       e.preventDefault();
       const name = document.getElementById('doc-name').value.trim();
       const specialty = document.getElementById('doc-spec').value.trim();
       const crm = document.getElementById('doc-crm').value.trim();
-      const uf = document.getElementById('doc-uf').value;
       const photo = document.getElementById('doc-photo').value.trim();
-      const whatsapp = document.getElementById('doc-whatsapp').value.trim();
 
-      const docId = "doc_" + Date.now();
-      const doctorData = {
-        uid: docId,
+      const newDocRef = push(ref(rtdb, 'doctors'));
+      set(newDocRef, {
+        uid: newDocRef.key,
         name: name,
         specialty: specialty,
-        crm: `${crm}/${uf}`,
+        crm: crm,
         photo: photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff`,
-        whatsapp: whatsapp,
-        createdAt: new Date().toISOString()
-      };
+        isOnline: true
+      });
 
-      try {
-        await setDoc(doc(db, "doctors", docId), doctorData);
-        alert("Médico cadastrado com sucesso! Ele já está visível na página principal.");
-        document.getElementById('doctor-form').reset();
-      } catch (err) {
-        alert("Erro ao salvar no Firebase: " + err.message);
-      }
+      alert("Médico publicado!");
+      document.getElementById('doctor-form').reset();
     };
   </script>
 </head>
 <body>
 
   <div class="card">
-    <!-- Tela de Login por Palavra-Passe -->
-    <div id="view-auth" style="text-align: center;">
+    <div id="view-auth">
       <h2>Painel Administrativo</h2>
-      <p style="margin-bottom: 1.5rem; color: #64748b;">Introduza a palavra-passe para aceder ao cadastro de médicos.</p>
-
       <form onsubmit="checkPassword(event)">
         <div class="form-group">
-          <label>Palavra-passe de Acesso</label>
-          <input type="password" id="admin-password" placeholder="Digite a palavra-passe..." required>
-          <div id="pass-error" class="error-msg">Palavra-passe incorreta. Tente novamente.</div>
+          <label>Senha de Acesso</label>
+          <input type="password" id="admin-pass" required placeholder="******">
         </div>
-        <button type="submit" class="btn" style="background:#2563eb;">Entrar no Painel</button>
+        <button type="submit" class="btn" style="background:#2563eb;">Entrar</button>
       </form>
     </div>
 
-    <!-- Formulário de Cadastro de Médicos Reais -->
     <div id="view-form" class="hidden">
-      <h2>⚙️ Cadastrar Novo Médico Real</h2>
-      <p style="margin-bottom: 1.5rem; color: #64748b;">Preencha os dados abaixo para publicar diretamente no site principal:</p>
-      
+      <h2>Cadastrar Novo Médico</h2>
       <form id="doctor-form" onsubmit="addDoctor(event)">
         <div class="form-group">
-          <label>Nome Completo do Médico *</label>
-          <input type="text" id="doc-name" placeholder="Ex: Dr. Carlos Silva" required>
+          <label>Nome Completo</label>
+          <input type="text" id="doc-name" required placeholder="Dr. Carlos Silva">
         </div>
-
         <div class="form-group">
-          <label>Especialidade / Área *</label>
-          <input type="text" id="doc-spec" placeholder="Ex: Psiquiatria & Acolhimento" required>
+          <label>Especialidade</label>
+          <input type="text" id="doc-spec" required placeholder="Psiquiatria">
         </div>
-
         <div class="form-group">
-          <label>CRM *</label>
-          <input type="text" id="doc-crm" placeholder="Ex: 12345" required>
+          <label>CRM</label>
+          <input type="text" id="doc-crm" required placeholder="12345/PR">
         </div>
-
         <div class="form-group">
-          <label>Estado (UF) *</label>
-          <select id="doc-uf">
-            <option value="PR">Paraná (PR)</option>
-            <option value="SP">São Paulo (SP)</option>
-            <option value="RJ">Rio de Janeiro (RJ)</option>
-            <option value="SC">Santa Catarina (SC)</option>
-            <option value="RS">Rio Grande do Sul (RS)</option>
-          </select>
+          <label>URL da Foto (Opcional)</label>
+          <input type="url" id="doc-photo" placeholder="https://...">
         </div>
-
-        <div class="form-group">
-          <label>Link da Foto (URL da Imagem) - Opcional</label>
-          <input type="url" id="doc-photo" placeholder="https://site.com/foto.jpg">
-        </div>
-
-        <div class="form-group">
-          <label>WhatsApp para Contato (Opcional)</label>
-          <input type="text" id="doc-whatsapp" placeholder="(41) 99999-9999">
-        </div>
-
-        <button type="submit" class="btn">Publicar Médico no Site</button>
+        <button type="submit" class="btn">Publicar Médico</button>
       </form>
     </div>
   </div>
