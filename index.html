@@ -85,7 +85,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, addDoc, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
@@ -128,7 +128,6 @@
     window.loginWithGoogle = () => signInWithPopup(auth, googleProvider);
     window.logout = () => signOut(auth);
 
-    // Busca no Firebase os médicos cadastrados pelo admin.html
     async function loadDoctors() {
       const doctorsContainer = document.getElementById('doctors-list');
       doctorsContainer.innerHTML = "<p>Carregando médicos voluntários...</p>";
@@ -179,16 +178,22 @@
       if (!text || !currentRoomId || !currentUser) return;
 
       input.value = "";
-      await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-        text: text,
-        senderId: currentUser.uid,
-        senderName: currentUser.displayName || "Usuário",
-        timestamp: new Date().toISOString()
-      });
+      try {
+        await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
+          text: text,
+          senderId: currentUser.uid,
+          senderName: currentUser.displayName || "Usuário",
+          timestamp: new Date().toISOString()
+        });
+      } catch (err) {
+        alert("Erro ao enviar mensagem: " + err.message);
+      }
     };
 
     function listenChatMessages(roomId) {
       const messagesContainer = document.getElementById('chat-messages');
+      messagesContainer.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>A carregar mensagens...</p>";
+      
       const messagesRef = collection(db, "rooms", roomId, "messages");
       const q = query(messagesRef, orderBy("timestamp", "asc"));
 
@@ -196,6 +201,12 @@
 
       unsubscribeChat = onSnapshot(q, (snapshot) => {
         messagesContainer.innerHTML = "";
+        
+        if (snapshot.empty) {
+          messagesContainer.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>Seja o primeiro a enviar uma mensagem acolhedora!</p>";
+          return;
+        }
+
         snapshot.forEach((docSnap) => {
           const msg = docSnap.data();
           const isSelf = msg.senderId === currentUser.uid;
@@ -211,6 +222,9 @@
           messagesContainer.appendChild(div);
         });
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, (err) => {
+        console.error("Erro no chat:", err);
+        messagesContainer.innerHTML = "<p style='text-align:center; color:#ef4444;'>Erro ao carregar mensagens.</p>";
       });
     }
 
