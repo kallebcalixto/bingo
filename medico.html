@@ -45,6 +45,7 @@
 
     let currentDoctor = null;
 
+    // Quando o Firebase valida a conta, entra direto sem bloquear
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const docRef = doc(db, "doctors", user.uid);
@@ -53,7 +54,7 @@
         if (docSnap.exists()) {
           currentDoctor = { id: user.uid, ...docSnap.data() };
         } else {
-          // Cria o médico automaticamente no banco se for o primeiro acesso
+          // Cria o médico automaticamente se for o primeiro acesso
           const docName = user.displayName || user.email.split('@')[0];
           currentDoctor = {
             uid: user.uid,
@@ -85,7 +86,7 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        alert("Erro no login: Verifique e-mail e palavra-passe.");
+        alert("Erro no login: Verifique se o e-mail e a senha estão corretos.");
       }
     };
 
