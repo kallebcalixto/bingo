@@ -19,7 +19,6 @@
     .btn-danger { background: var(--danger); }
     .hidden { display: none !important; }
     
-    /* Toggle Status Online/Offline */
     .status-box { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; }
     .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
     .online { background: var(--secondary); }
@@ -29,7 +28,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, onSnapshot, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
@@ -48,21 +47,27 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // O ID do documento na coleção "doctors" deve ser o UID do Firebase Auth ou e-mail
         const docRef = doc(db, "doctors", user.uid);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           currentDoctor = { id: user.uid, ...docSnap.data() };
-          document.getElementById('view-auth').classList.add('hidden');
-          document.getElementById('view-panel').classList.remove('hidden');
-          document.getElementById('doc-welcome-name').textContent = currentDoctor.name;
-          updateStatusUI(currentDoctor.isOnline);
-          loadScheduleSlots();
         } else {
-          alert("Conta não cadastrada como Médico no sistema.");
-          signOut(auth);
+          // Se for o primeiro acesso do médico cadastrado pelo Firebase Auth, cria a base inicial para ele
+          currentDoctor = {
+            id: user.uid,
+            name: user.email.split('@')[0],
+            isOnline: true,
+            createdAt: new Date().toISOString()
+          };
+          await setDoc(docRef, currentDoctor, { merge: true });
         }
+
+        document.getElementById('view-auth').classList.add('hidden');
+        document.getElementById('view-panel').classList.remove('hidden');
+        document.getElementById('doc-welcome-name').textContent = currentDoctor.name;
+        updateStatusUI(currentDoctor.isOnline);
+        loadScheduleSlots();
       } else {
         document.getElementById('view-auth').classList.remove('hidden');
         document.getElementById('view-panel').classList.add('hidden');
@@ -200,7 +205,6 @@
         <button onclick="logout()" style="background:none; border:none; color:#64748b; cursor:pointer; text-decoration:underline;">Sair</button>
       </div>
 
-      <!-- Caixa Status Online/Offline -->
       <div class="status-box">
         <div>
           <span id="status-dot" class="status-indicator offline"></span>
