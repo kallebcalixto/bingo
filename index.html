@@ -177,18 +177,30 @@
 
     let currentUser = null;
 
-    // Lista de Médicos Fictícios para preencher a plataforma visualmente
-    const fakeDoctors = [
-      { name: "Dra. Camila Silveira", specialty: "Psiquiatria & Acolhimento", crm: "CRM 43210/PR", photo: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200" },
-      { name: "Dr. Roberto Mendes", specialty: "Psicologia Clínia e Familiar", crm: "CRP 08/9876", photo: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200" },
-      { name: "Dra. Juliana Andrade", specialty: "Clínica Geral & Saúde Mental", crm: "CRM 31209/SP", photo: "https://images.unsplash.com/photo-1594824813566-88855ce78341?auto=format&fit=crop&q=80&w=200" },
-      { name: "Dr. Lucas Ferraz", specialty: "Terapeuta Familiar & Casal", crm: "CRT 54321/PR", photo: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200" }
-    ];
+    // Função para semear o Firebase com médicos fictícios diretamente no Firestore
+    async function seedInitialDoctors() {
+      const q = query(collection(db, "users"), where("isDoctor", "==", true));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        const initialDoctors = [
+          { uid: "fake_doc_1", name: "Camila Silveira", specialty: "Psiquiatria & Acolhimento", crm: "43210/PR", isDoctor: true, role: "Médico Voluntário", photo: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200", createdAt: new Date().toISOString() },
+          { uid: "fake_doc_2", name: "Roberto Mendes", specialty: "Psicologia Clínica e Familiar", crm: "08/9876", isDoctor: true, role: "Médico Voluntário", photo: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200", createdAt: new Date().toISOString() },
+          { uid: "fake_doc_3", name: "Juliana Andrade", specialty: "Clínica Geral & Saúde Mental", crm: "31209/SP", isDoctor: true, role: "Médico Voluntário", photo: "https://images.unsplash.com/photo-1594824813566-88855ce78341?auto=format&fit=crop&q=80&w=200", createdAt: new Date().toISOString() },
+          { uid: "fake_doc_4", name: "Lucas Ferraz", specialty: "Terapeuta Familiar & Casal", crm: "54321/PR", isDoctor: true, role: "Médico Voluntário", photo: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200", createdAt: new Date().toISOString() }
+        ];
+
+        for (const docData of initialDoctors) {
+          await setDoc(doc(db, "users", docData.uid), docData);
+        }
+      }
+    }
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
         try {
+          await seedInitialDoctors(); // Garante a criação dos médicos fictícios no Firebase
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             showDashboard(userDoc.data());
@@ -284,46 +296,42 @@
       loadDoctors();
     }
 
+    // Carrega TODOS os médicos cadastrados diretamente da coleção "users" do Firebase Firestore
     async function loadDoctors() {
       const doctorsContainer = document.getElementById('doctors-list');
+      doctorsContainer.innerHTML = "<p>Carregando voluntários do Firebase...</p>";
       let html = "";
 
-      // Exibe primeiro os médicos fictícios cadastrados como demonstração
-      fakeDoctors.forEach(doc => {
-        html += `
-          <div class="doctor-card">
-            <img src="${doc.photo}" class="doctor-avatar" alt="${doc.name}">
-            <div class="doctor-name">${doc.name}</div>
-            <div class="doctor-spec">${doc.specialty}</div>
-            <div class="doctor-crm">${doc.crm}</div>
-            <span class="badge-volunteer">ATENDIMENTO GRATUITO</span>
-            <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="alert('Solicitação de conversa enviada para ${doc.name}')">Iniciar Dúvida Privada</button>
-          </div>
-        `;
-      });
-
-      // Busca médicos reais cadastrados no Firebase Firestore
       try {
         const q = query(collection(db, "users"), where("isDoctor", "==", true));
         const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          doctorsContainer.innerHTML = "<p>Nenhum profissional cadastrado no momento.</p>";
+          return;
+        }
+
         querySnapshot.forEach((docSnap) => {
           const docData = docSnap.data();
+          const photoUrl = docData.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(docData.name)}&background=2563eb&color=fff`;
+          
           html += `
             <div class="doctor-card">
-              <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(docData.name)}&background=2563eb&color=fff" class="doctor-avatar" alt="${docData.name}">
+              <img src="${photoUrl}" class="doctor-avatar" alt="${docData.name}">
               <div class="doctor-name">Dr(a). ${docData.name}</div>
               <div class="doctor-spec">${docData.specialty}</div>
               <div class="doctor-crm">CRM/Credencial: ${docData.crm}</div>
               <span class="badge-volunteer">ATENDIMENTO GRATUITO</span>
-              <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="alert('Mensagem enviada com sucesso!')">Iniciar Dúvida Privada</button>
+              <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="alert('Solicitação enviada para Dr(a). ${docData.name}')">Iniciar Dúvida Privada</button>
             </div>
           `;
         });
-      } catch (err) {
-        console.log("Erro ao buscar profissionais do banco:", err);
-      }
 
-      doctorsContainer.innerHTML = html;
+        doctorsContainer.innerHTML = html;
+      } catch (err) {
+        console.error("Erro ao buscar médicos do Firebase:", err);
+        doctorsContainer.innerHTML = "<p>Erro ao carregar lista de profissionais.</p>";
+      }
     }
   </script>
 </head>
