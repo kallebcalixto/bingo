@@ -123,7 +123,40 @@
     }
     .doctor-badge { background: #dcfce7; color: #166534; }
 
-    /* Lista de Médicos / Profissionais */
+    /* Estilos da Sala de Chat */
+    .chat-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      height: 320px;
+      overflow-y: auto;
+      padding: 1rem;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .chat-message {
+      background: var(--surface);
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      max-width: 80%;
+    }
+    .chat-message.self {
+      align-self: flex-end;
+      background: #dbeafe;
+      border-color: #bfdbfe;
+    }
+    .chat-author { font-size: 0.75rem; font-weight: 700; color: var(--primary); margin-bottom: 0.25rem; }
+    .chat-text { font-size: 0.95rem; color: var(--text); }
+    .chat-time { font-size: 0.65rem; color: var(--text-muted); text-align: right; margin-top: 0.25rem; }
+
+    .chat-input-group { display: flex; gap: 0.5rem; }
+    .chat-input-group input { flex: 1; }
+
+    /* Lista de Médicos */
     .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
     .doctor-card {
       background: var(--surface);
@@ -150,7 +183,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where, addDoc, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
@@ -171,13 +204,16 @@
     const viewRoleSelection = document.getElementById('view-role-selection');
     const viewDoctorForm = document.getElementById('view-doctor-form');
     const viewDashboard = document.getElementById('view-dashboard');
+    const viewChat = document.getElementById('view-chat');
+
     const userNav = document.getElementById('user-nav');
     const userNameSpan = document.getElementById('user-name');
     const userRoleSpan = document.getElementById('user-role');
 
     let currentUser = null;
+    let currentRoomId = null;
+    let unsubscribeChat = null;
 
-    // Função para semear o Firebase com médicos fictícios diretamente no Firestore
     async function seedInitialDoctors() {
       const q = query(collection(db, "users"), where("isDoctor", "==", true));
       const snapshot = await getDocs(q);
@@ -200,7 +236,7 @@
       if (user) {
         currentUser = user;
         try {
-          await seedInitialDoctors(); // Garante a criação dos médicos fictícios no Firebase
+          await seedInitialDoctors();
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             showDashboard(userDoc.data());
@@ -276,10 +312,84 @@
       } catch (err) { alert("Erro ao salvar cadastro: " + err.message); }
     };
 
+    window.openChatRoom = (roomId, roomName) => {
+      currentRoomId = roomId;
+      document.getElementById('chat-room-title').textContent = roomName;
+      showScreen(viewChat);
+      listenChatMessages(roomId);
+    };
+
+    window.backToDashboard = () => {
+      if (unsubscribeChat) unsubscribeChat();
+      showScreen(viewDashboard);
+    };
+
+    window.sendMessage = async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text || !currentRoomId || !currentUser) return;
+
+      input.value = "";
+      try {
+        await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
+          text: text,
+          senderId: currentUser.uid,
+          senderName: currentUser.displayName || "Usuário",
+          timestamp: new Date().toISOString()
+        });
+      } catch (err) {
+        alert("Erro ao enviar mensagem: " + err.message);
+      }
+    };
+
+    function listenChatMessages(roomId) {
+      const messagesContainer = document.getElementById('chat-messages');
+      messagesContainer.innerHTML = "<p style='text-align:center;'>Carregando mensagens...</p>";
+
+      const messagesRef = collection(db, "rooms", roomId, "messages");
+      const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+      if (unsubscribeChat) unsubscribeChat();
+
+      unsubscribeChat = onSnapshot(q, (snapshot) => {
+        messagesContainer.innerHTML = "";
+        if (snapshot.empty) {
+          messagesContainer.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>Seja o primeiro a enviar uma mensagem acolhedora!</p>";
+          return;
+        }
+
+        snapshot.forEach((docSnap) => {
+          const msg = docSnap.data();
+          const isSelf = msg.senderId === currentUser.uid;
+          const date = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          const div = document.createElement('div');
+          div.className = `chat-message ${isSelf ? 'self' : ''}`;
+          div.innerHTML = `
+            <div class="chat-author">${msg.senderName}</div>
+            <div class="chat-text">${msg.text}</div>
+            <div class="chat-time">${date}</div>
+          `;
+          messagesContainer.appendChild(div);
+        });
+
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, (error) => {
+        console.error("Erro nas mensagens:", error);
+        messagesContainer.innerHTML = "<p style='text-align:center;'>Envie uma mensagem para iniciar o chat!</p>";
+      });
+    }
+
+    window.startPrivateDoctorChat = (docUid, docName) => {
+      const privateRoomId = [currentUser.uid, docUid].sort().join("_");
+      openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
+    };
+
     window.logout = () => signOut(auth);
 
     function showScreen(screen) {
-      [viewAuth, viewRoleSelection, viewDoctorForm, viewDashboard].forEach(s => s.classList.add('hidden'));
+      [viewAuth, viewRoleSelection, viewDoctorForm, viewDashboard, viewChat].forEach(s => s.classList.add('hidden'));
       screen.classList.remove('hidden');
     }
 
@@ -296,7 +406,6 @@
       loadDoctors();
     }
 
-    // Carrega TODOS os médicos cadastrados diretamente da coleção "users" do Firebase Firestore
     async function loadDoctors() {
       const doctorsContainer = document.getElementById('doctors-list');
       doctorsContainer.innerHTML = "<p>Carregando voluntários do Firebase...</p>";
@@ -322,7 +431,7 @@
               <div class="doctor-spec">${docData.specialty}</div>
               <div class="doctor-crm">CRM/Credencial: ${docData.crm}</div>
               <span class="badge-volunteer">ATENDIMENTO GRATUITO</span>
-              <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="alert('Solicitação enviada para Dr(a). ${docData.name}')">Iniciar Dúvida Privada</button>
+              <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="startPrivateDoctorChat('${docData.uid}', '${docData.name}')">Iniciar Dúvida Privada</button>
             </div>
           `;
         });
@@ -425,8 +534,8 @@
       <p>Conecte-se com pessoas que compartilham da mesma vivência ou tire dúvidas diretamente com voluntários.</p>
       
       <div class="btn-grid" style="margin-bottom: 2rem;">
-        <button class="btn" onclick="alert('Bem-vindo à sala de conversa geral!')">💬 Sala Geral de Apoio</button>
-        <button class="btn" style="background:#7c3aed;" onclick="alert('Bem-vindo ao espaço reservado de casais!')">👩‍❤️‍👨 Espaço Esposos & Esposas</button>
+        <button class="btn" onclick="openChatRoom('geral', '💬 Sala Geral de Apoio')">💬 Sala Geral de Apoio</button>
+        <button class="btn" style="background:#7c3aed;" onclick="openChatRoom('casais', '👩‍❤️‍👨 Espaço Esposos & Esposas')">👩‍❤️‍👨 Espaço Esposos & Esposas</button>
       </div>
 
       <hr style="border:0; border-top:1px solid var(--border); margin:2rem 0;">
@@ -435,6 +544,21 @@
       <p>Selecione um profissional para tirar dúvidas de forma privativa e segura:</p>
 
       <div id="doctors-list" class="doctor-grid"></div>
+    </div>
+
+    <!-- Tela 5: Sala de Bate-Papo em Tempo Real -->
+    <div id="view-chat" class="card hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 id="chat-room-title" style="margin:0;">Sala de Apoio</h2>
+        <button onclick="backToDashboard()" class="btn" style="width:auto; padding:0.5rem 1rem; background:var(--text-muted);">← Voltar</button>
+      </div>
+      
+      <div id="chat-messages" class="chat-box"></div>
+
+      <form onsubmit="sendMessage(event)" class="chat-input-group">
+        <input type="text" id="chat-input" placeholder="Escreva sua mensagem com respeito e acolhimento..." required>
+        <button type="submit" class="btn" style="width:auto; padding:0 1.5rem;">Enviar</button>
+      </form>
     </div>
 
   </div>
