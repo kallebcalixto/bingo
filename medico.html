@@ -53,14 +53,18 @@
         if (docSnap.exists()) {
           currentDoctor = { id: user.uid, ...docSnap.data() };
         } else {
-          // Se for o primeiro acesso do médico cadastrado pelo Firebase Auth, cria a base inicial para ele
+          // Cria o médico automaticamente no banco se for o primeiro acesso
+          const docName = user.displayName || user.email.split('@')[0];
           currentDoctor = {
-            id: user.uid,
-            name: user.email.split('@')[0],
+            uid: user.uid,
+            name: docName,
+            specialty: "Médico / Profissional de Saúde",
+            crm: "Voluntário Cadastrado",
+            photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(docName)}&background=2563eb&color=fff`,
             isOnline: true,
             createdAt: new Date().toISOString()
           };
-          await setDoc(docRef, currentDoctor, { merge: true });
+          await setDoc(docRef, currentDoctor);
         }
 
         document.getElementById('view-auth').classList.add('hidden');
@@ -81,7 +85,7 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        alert("Erro de acesso: " + err.message);
+        alert("Erro no login: Verifique e-mail e palavra-passe.");
       }
     };
 
@@ -154,9 +158,6 @@
           div.innerHTML = `
             <div>
               <strong>📅 ${slot.date}</strong> às <strong>⏰ ${slot.time}</strong>
-              <span style="font-size:0.8rem; margin-left:10px; color:${slot.booked ? '#ef4444' : '#10b981'}; font-weight:bold;">
-                ${slot.booked ? 'RESERVADO/AGENDADO' : 'DISPONÍVEL'}
-              </span>
             </div>
             <button onclick="deleteSlot('${docSnap.id}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Excluir</button>
           `;
@@ -177,10 +178,9 @@
 <body>
 
   <div class="card">
-    <!-- Tela de Login do Médico -->
     <div id="view-auth">
-      <h2>Acesso do Médico / Terapeuta</h2>
-      <p style="margin-bottom:1.5rem; color:#64748b;">Acesse com o e-mail e palavra-passe fornecidos pela administração.</p>
+      <h2>Acesso do Médico / Voluntário</h2>
+      <p style="margin-bottom:1.5rem; color:#64748b;">Insira o e-mail e a palavra-passe criados no Firebase.</p>
       
       <form onsubmit="loginDoctor(event)">
         <div class="form-group">
@@ -195,7 +195,6 @@
       </form>
     </div>
 
-    <!-- Painel de Controle do Médico -->
     <div id="view-panel" class="hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
         <div>
@@ -215,8 +214,8 @@
 
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
-      <h3>📅 Cadastrar Horários Disponíveis para Agendamento</h3>
-      <p style="color:#64748b; font-size:0.85rem; margin-bottom:1rem;">Defina os dias e horas que estará disponível para responder pacientes:</p>
+      <h3>📅 Cadastrar Horários Disponíveis para Atendimento</h3>
+      <p style="color:#64748b; font-size:0.85rem; margin-bottom:1rem;">Defina os dias e horas que estará disponível para os pacientes:</p>
 
       <form id="schedule-form" onsubmit="addScheduleSlot(event)" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
         <div>
