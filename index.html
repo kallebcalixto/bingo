@@ -3,90 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rede Solidária - Acolhimento e Saúde</title>
+  <title>Rede Solidária - Acolhimento</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --surface: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --radius: 16px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-    }
-
+    :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-
-    header {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 50; padding: 1rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-
-    .logo { font-size: 1.25rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
-    .logo-heart { color: #ef4444; }
-
+    body { background: var(--bg); color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
     .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-
-    .card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 2.5rem;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      margin-bottom: 2rem;
-    }
-
-    h2 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.75rem; }
-    p { color: var(--text-muted); line-height: 1.6; margin-bottom: 1.75rem; }
-
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 0.75rem;
-      background-color: var(--primary); color: white; padding: 0.9rem 1.75rem;
-      border: none; border-radius: 12px; font-weight: 600; font-size: 1rem;
-      cursor: pointer; text-decoration: none; width: 100%;
-    }
-    .btn:hover { background-color: var(--primary-hover); }
-
-    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-    @media (max-width: 640px) { .btn-grid { grid-template-columns: 1fr; } }
-
+    .card { background: var(--surface); border-radius: 16px; padding: 2rem; border: 1px solid var(--border); margin-bottom: 2rem; }
+    .btn { background: var(--primary); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .hidden { display: none !important; }
-
-    .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
-    .doctor-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-      padding: 1.25rem; display: flex; flex-direction: column; align-items: center; text-align: center;
-    }
-    .doctor-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; border: 2px solid var(--primary); }
-    .doctor-name { font-weight: 700; color: var(--text); font-size: 1.05rem; }
-    .doctor-spec { color: var(--primary); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; }
-    .doctor-crm { font-size: 0.8rem; color: var(--text-muted); background: #f1f5f9; padding: 0.2rem 0.6rem; border-radius: 6px; }
-
-    .chat-box { border: 1px solid var(--border); border-radius: 12px; height: 320px; overflow-y: auto; padding: 1rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
-    .chat-message { background: var(--surface); padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid var(--border); max-width: 80%; }
-    .chat-message.self { align-self: flex-end; background: #dbeafe; border-color: #bfdbfe; }
-    .chat-author { font-size: 0.75rem; font-weight: 700; color: var(--primary); margin-bottom: 0.25rem; }
-    .chat-text { font-size: 0.95rem; }
-    .chat-time { font-size: 0.65rem; color: var(--text-muted); text-align: right; margin-top: 0.25rem; }
-    .chat-input-group { display: flex; gap: 0.5rem; }
-    .chat-input-group input { flex: 1; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; }
+    .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .doctor-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; }
+    .doctor-avatar { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; }
+    .chat-box { border: 1px solid var(--border); border-radius: 8px; height: 300px; overflow-y: auto; padding: 1rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+    .chat-msg { background: white; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); max-width: 80%; }
+    .chat-msg.self { align-self: flex-end; background: #dbeafe; }
   </style>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
       authDomain: "bipolar-6f00a.firebaseapp.com",
+      databaseURL: "https://bipolar-6f00a-default-rtdb.firebaseio.com",
       projectId: "bipolar-6f00a",
       storageBucket: "bipolar-6f00a.firebasestorage.app",
       messagingSenderId: "380485953198",
@@ -95,30 +41,23 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const rtdb = getDatabase(app);
     const googleProvider = new GoogleAuthProvider();
-
-    const viewAuth = document.getElementById('view-auth');
-    const viewDashboard = document.getElementById('view-dashboard');
-    const viewChat = document.getElementById('view-chat');
-    const userNav = document.getElementById('user-nav');
-    const userNameSpan = document.getElementById('user-name');
 
     let currentUser = null;
     let currentRoomId = null;
-    let unsubscribeChat = null;
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
-        userNameSpan.textContent = user.displayName;
-        userNav.classList.remove('hidden');
-        showScreen(viewDashboard);
+        document.getElementById('user-name').textContent = user.displayName;
+        document.getElementById('user-nav').classList.remove('hidden');
+        showScreen(document.getElementById('view-dashboard'));
         loadDoctors();
       } else {
         currentUser = null;
-        userNav.classList.add('hidden');
-        showScreen(viewAuth);
+        document.getElementById('user-nav').classList.add('hidden');
+        showScreen(document.getElementById('view-auth'));
       }
     });
 
@@ -126,126 +65,105 @@
     window.logout = () => signOut(auth);
 
     function loadDoctors() {
-      const doctorsContainer = document.getElementById('doctors-list');
-      
-      onSnapshot(collection(db, "doctors"), (querySnapshot) => {
-        if (querySnapshot.empty) {
-          doctorsContainer.innerHTML = "<p style='grid-column: 1/-1; text-align:center;'>Nenhum médico cadastrado no momento.</p>";
+      const container = document.getElementById('doctors-list');
+      onValue(ref(rtdb, 'doctors'), (snapshot) => {
+        container.innerHTML = "";
+        if (!snapshot.exists()) {
+          container.innerHTML = "<p style='grid-column: 1/-1;'>Nenhum médico voluntário no momento.</p>";
           return;
         }
 
-        let html = "";
-        querySnapshot.forEach((docSnap) => {
-          const docData = docSnap.data();
+        snapshot.forEach((childSnap) => {
+          const docData = childSnap.val();
+          const docId = childSnap.key;
           const isOnline = docData.isOnline;
 
-          html += `
-            <div class="doctor-card">
-              <div style="position:relative;">
-                <img src="${docData.photo}" class="doctor-avatar" alt="${docData.name}">
-                <span style="position:absolute; bottom:10px; right:5px; width:14px; height:14px; border-radius:50%; border:2px solid white; background-color:${isOnline ? '#10b981' : '#94a3b8'};"></span>
-              </div>
-              <div class="doctor-name">Dr(a). ${docData.name}</div>
-              <div class="doctor-spec">${docData.specialty}</div>
-              <div class="doctor-crm">CRM: ${docData.crm}</div>
-              
-              <div style="margin-top:0.5rem; font-size:0.8rem; font-weight:bold; color:${isOnline ? '#10b981' : '#64748b'};">
-                ● ${isOnline ? 'ONLINE AGORA' : 'OFFLINE'}
-              </div>
-
-              <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="startPrivateDoctorChat('${docSnap.id}', '${docData.name}')">Conversar no Chat</button>
-              <button class="btn" style="margin-top:0.3rem; padding:0.5rem; font-size:0.85rem; background:#7c3aed;" onclick="showDoctorSchedules('${docSnap.id}', '${docData.name}')">📅 Ver Horários</button>
+          const div = document.createElement('div');
+          div.className = "doctor-card";
+          div.innerHTML = `
+            <img src="${docData.photo}" class="doctor-avatar">
+            <div style="font-weight:700;">${docData.name}</div>
+            <div style="color:var(--primary); font-size:0.85rem;">${docData.specialty}</div>
+            <div style="font-size:0.8rem; color:#64748b; margin-bottom:0.5rem;">CRM: ${docData.crm}</div>
+            <div style="font-size:0.8rem; font-weight:bold; color:${isOnline ? '#10b981' : '#94a3b8'}; margin-bottom:0.5rem;">
+              ● ${isOnline ? 'ONLINE AGORA' : 'OFFLINE'}
             </div>
+            <button class="btn" style="padding:0.4rem; font-size:0.85rem;" onclick="openChatRoom('${docId}', '${docData.name}')">Iniciar Chat</button>
+            <button class="btn" style="padding:0.4rem; font-size:0.85rem; background:#7c3aed; margin-top:0.3rem;" onclick="showSchedules('${docId}', '${docData.name}')">📅 Horários</button>
           `;
+          container.appendChild(div);
         });
-        doctorsContainer.innerHTML = html;
       });
     }
 
-    window.showDoctorSchedules = async (docId, docName) => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "doctors", docId, "schedules"));
-        if (querySnapshot.empty) {
-          alert(`Dr(a). ${docName} ainda não cadastrou horários de atendimento.`);
+    window.showSchedules = (docId, docName) => {
+      get(ref(rtdb, `doctors/${docId}/schedules`)).then((snapshot) => {
+        if (!snapshot.exists()) {
+          alert(`Dr(a). ${docName} ainda não possui horários cadastrados.`);
           return;
         }
-
-        let scheduleText = `Horários de atendimento com Dr(a). ${docName}:\n\n`;
-        querySnapshot.forEach(docSnap => {
-          const s = docSnap.data();
-          scheduleText += `• Data: ${s.date} às ${s.time}\n`;
+        let txt = `Horários de ${docName}:\n\n`;
+        snapshot.forEach(snap => {
+          const s = snap.val();
+          txt += `• Data: ${s.date} às ${s.time}\n`;
         });
-        alert(scheduleText);
-      } catch (err) {
-        alert("Erro ao buscar horários: " + err.message);
-      }
+        alert(txt);
+      });
     };
 
     window.openChatRoom = (roomId, roomName) => {
       currentRoomId = roomId;
-      document.getElementById('chat-room-title').textContent = roomName;
-      showScreen(viewChat);
-      listenChatMessages(roomId);
+      document.getElementById('chat-title').textContent = roomName;
+      showScreen(document.getElementById('view-chat'));
+      listenChat(roomId);
     };
 
-    window.backToDashboard = () => {
-      if (unsubscribeChat) unsubscribeChat();
-      showScreen(viewDashboard);
-    };
+    window.backToDashboard = () => showScreen(document.getElementById('view-dashboard'));
 
-    window.sendMessage = async (e) => {
+    window.sendMessage = (e) => {
       e.preventDefault();
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
       if (!text || !currentRoomId || !currentUser) return;
 
       input.value = "";
-      try {
-        await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-          text: text,
-          senderId: currentUser.uid,
-          senderName: currentUser.displayName || "Usuário",
-          timestamp: new Date().toISOString()
-        });
-      } catch (err) {
-        alert("Erro ao enviar mensagem: " + err.message);
-      }
+      push(ref(rtdb, `rooms/${currentRoomId}/messages`), {
+        text: text,
+        senderId: currentUser.uid,
+        senderName: currentUser.displayName || "Usuário",
+        timestamp: Date.now()
+      });
     };
 
-    function listenChatMessages(roomId) {
-      const messagesContainer = document.getElementById('chat-messages');
-      const messagesRef = collection(db, "rooms", roomId, "messages");
-      const q = query(messagesRef, orderBy("timestamp", "asc"));
+    function listenChat(roomId) {
+      const container = document.getElementById('chat-messages');
+      onValue(ref(rtdb, `rooms/${roomId}/messages`), (snapshot) => {
+        container.innerHTML = "";
+        if (!snapshot.exists()) {
+          container.innerHTML = "<p style='text-align:center; color:#64748b;'>Envie uma mensagem...</p>";
+          return;
+        }
 
-      if (unsubscribeChat) unsubscribeChat();
-
-      unsubscribeChat = onSnapshot(q, (snapshot) => {
-        messagesContainer.innerHTML = "";
-        snapshot.forEach((docSnap) => {
-          const msg = docSnap.data();
+        snapshot.forEach((childSnap) => {
+          const msg = childSnap.val();
           const isSelf = msg.senderId === currentUser.uid;
-          const date = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
           const div = document.createElement('div');
-          div.className = `chat-message ${isSelf ? 'self' : ''}`;
+          div.className = `chat-msg ${isSelf ? 'self' : ''}`;
           div.innerHTML = `
-            <div class="chat-author">${msg.senderName}</div>
-            <div class="chat-text">${msg.text}</div>
-            <div class="chat-time">${date}</div>
+            <div style="font-size:0.75rem; font-weight:bold; color:var(--primary);">${msg.senderName}</div>
+            <div>${msg.text}</div>
+            <div style="font-size:0.65rem; color:#64748b; text-align:right;">${time}</div>
           `;
-          messagesContainer.appendChild(div);
+          container.appendChild(div);
         });
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        container.scrollTop = container.scrollHeight;
       });
     }
 
-    window.startPrivateDoctorChat = (docUid, docName) => {
-      const privateRoomId = [currentUser.uid, docUid].sort().join("_");
-      openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
-    };
-
     function showScreen(screen) {
-      [viewAuth, viewDashboard, viewChat].forEach(s => s.classList.add('hidden'));
+      [document.getElementById('view-auth'), document.getElementById('view-dashboard'), document.getElementById('view-chat')].forEach(s => s.classList.add('hidden'));
       screen.classList.remove('hidden');
     }
   </script>
@@ -253,47 +171,42 @@
 <body>
 
   <header>
-    <div class="logo"><span class="logo-heart">♥</span> Rede Solidária de Apoio</div>
+    <div class="logo">♥ Rede Solidária</div>
     <div id="user-nav" class="hidden" style="display:flex; align-items:center; gap:1rem;">
-      <span id="user-name" style="font-weight:600;"></span> 
-      <button onclick="logout()" style="background:none; border:none; color:var(--text-muted); font-weight:600; cursor:pointer;">Sair</button>
+      <span id="user-name" style="font-weight:600;"></span>
+      <button onclick="logout()" style="background:none; border:none; color:#64748b; cursor:pointer;">Sair</button>
     </div>
   </header>
 
   <div class="container">
     <div id="view-auth" class="card" style="text-align:center;">
-      <h2>Um espaço seguro de acolhimento e orientação</h2>
-      <p>Conectamos pacientes, esposos, esposas e familiares a profissionais de saúde.</p>
-      <button onclick="loginWithGoogle()" class="btn" style="max-width:300px; margin:0 auto;">Entrar com o Google</button>
+      <h2>Rede de Apoio</h2>
+      <p style="margin-bottom:1.5rem; color:#64748b;">Acolhimento e orientação profissional.</p>
+      <button onclick="loginWithGoogle()" class="btn" style="max-width:250px; margin:0 auto;">Entrar com o Google</button>
     </div>
 
     <div id="view-dashboard" class="card hidden">
-      <h2>Comunidade & Salas de Apoio</h2>
-      <p>Escolha uma sala para conversar ou tirar dúvidas:</p>
-      
-      <div class="btn-grid" style="margin-bottom: 2rem;">
-        <button class="btn" onclick="openChatRoom('geral', '💬 Sala Geral de Apoio')">💬 Sala Geral de Apoio</button>
-        <button class="btn" style="background:#7c3aed;" onclick="openChatRoom('casais', '👩‍❤️‍👨 Espaço Esposos & Esposas')">👩‍❤️‍👨 Espaço Esposos & Esposas</button>
+      <h2>Salas Gerais de Apoio</h2>
+      <div class="btn-grid" style="margin-bottom: 1.5rem;">
+        <button class="btn" onclick="openChatRoom('geral', '💬 Sala Geral')">💬 Sala Geral</button>
+        <button class="btn" style="background:#7c3aed;" onclick="openChatRoom('casais', '👩‍❤️‍👨 Espaço Casais')">👩‍❤️‍👨 Espaço Casais</button>
       </div>
 
-      <hr style="border:0; border-top:1px solid var(--border); margin:2rem 0;">
+      <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
-      <h2>Profissionais Voluntários Cadastrados</h2>
-      <p>Selecione um profissional para tirar dúvidas de forma privativa e segura:</p>
+      <h2>Médicos Voluntários</h2>
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
     <div id="view-chat" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <h2 id="chat-room-title" style="margin:0;">Sala de Apoio</h2>
-        <button onclick="backToDashboard()" class="btn" style="width:auto; padding:0.5rem 1rem; background:var(--text-muted);">← Voltar</button>
+        <h2 id="chat-title">Chat</h2>
+        <button onclick="backToDashboard()" class="btn" style="width:auto; padding:0.4rem 1rem; background:#64748b;">← Voltar</button>
       </div>
-      
       <div id="chat-messages" class="chat-box"></div>
-
-      <form onsubmit="sendMessage(event)" class="chat-input-group">
-        <input type="text" id="chat-input" placeholder="Escreva sua mensagem..." required>
-        <button type="submit" class="btn" style="width:auto; padding:0 1.5rem;">Enviar</button>
+      <form onsubmit="sendMessage(event)" style="display:flex; gap:0.5rem;">
+        <input type="text" id="chat-input" placeholder="Digite sua mensagem..." style="flex:1; padding:0.8rem; border:1px solid var(--border); border-radius:8px;" required>
+        <button type="submit" class="btn" style="width:auto;">Enviar</button>
       </form>
     </div>
   </div>
