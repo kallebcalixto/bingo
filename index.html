@@ -50,13 +50,13 @@
     .doctor-item:last-child { border-bottom: none; }
   </style>
 
-  <!-- SDKs do Firebase v9 Modular via CDN -->
+  <!-- SDKs do Firebase v9 via CDN -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    // Suas credenciais do Firebase configuradas
+    // Configuração do seu Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
       authDomain: "bipolar-6f00a.firebaseapp.com",
@@ -73,7 +73,7 @@
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // Referências dos Elementos
+    // Elementos da Interface
     const viewAuth = document.getElementById('view-auth');
     const viewRoleSelection = document.getElementById('view-role-selection');
     const viewDoctorForm = document.getElementById('view-doctor-form');
@@ -89,12 +89,16 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        
-        if (userDoc.exists()) {
-          showDashboard(userDoc.data());
-        } else {
-          showScreen(viewRoleSelection);
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            showDashboard(userDoc.data());
+          } else {
+            showScreen(viewRoleSelection);
+          }
+        } catch (err) {
+          console.error("Erro ao carregar dados:", err);
+          alert("Erro de conexão com o banco de dados: " + err.message);
         }
       } else {
         currentUser = null;
@@ -103,16 +107,19 @@
       }
     });
 
-    // Ações
+    // Função de Login via Google
     window.loginWithGoogle = async () => {
       try {
         await signInWithPopup(auth, googleProvider);
       } catch (error) {
-        alert("Erro ao autenticar no Google: " + error.message);
+        alert("Erro ao autenticar com o Google: " + error.message);
       }
     };
 
+    // Escolha do perfil inicial
     window.selectRole = async (role) => {
+      if (!currentUser) return;
+
       if (role === 'comunidade') {
         const userData = {
           uid: currentUser.uid,
@@ -122,15 +129,22 @@
           isDoctor: false,
           createdAt: new Date().toISOString()
         };
-        await setDoc(doc(db, "users", currentUser.uid), userData);
-        showDashboard(userData);
+        try {
+          await setDoc(doc(db, "users", currentUser.uid), userData);
+          showDashboard(userData);
+        } catch (err) {
+          alert("Erro ao salvar o perfil: " + err.message);
+        }
       } else if (role === 'medico') {
         showScreen(viewDoctorForm);
       }
     };
 
+    // Cadastro completo de médicos voluntários
     window.registerDoctor = async (e) => {
       e.preventDefault();
+      if (!currentUser) return;
+
       const crm = document.getElementById('doc-crm').value.trim();
       const uf = document.getElementById('doc-uf').value;
       const specialty = document.getElementById('doc-specialty').value.trim();
@@ -153,19 +167,26 @@
         createdAt: new Date().toISOString()
       };
 
-      await setDoc(doc(db, "users", currentUser.uid), userData);
-      showDashboard(userData);
+      try {
+        await setDoc(doc(db, "users", currentUser.uid), userData);
+        showDashboard(userData);
+      } catch (err) {
+        alert("Erro ao salvar cadastro de médico: " + err.message);
+      }
     };
 
+    // Logout
     window.logout = () => {
       signOut(auth);
     };
 
+    // Troca de telas
     function showScreen(screen) {
       [viewAuth, viewRoleSelection, viewDoctorForm, viewDashboard].forEach(s => s.classList.add('hidden'));
       screen.classList.remove('hidden');
     }
 
+    // Exibir Painel do Usuário
     async function showDashboard(userData) {
       userNameSpan.textContent = userData.name;
       userRoleSpan.textContent = userData.role;
@@ -180,6 +201,7 @@
       loadDoctors();
     }
 
+    // Carregar lista de médicos cadastrados
     async function loadDoctors() {
       const doctorsContainer = document.getElementById('doctors-list');
       doctorsContainer.innerHTML = "<p>Carregando médicos voluntários...</p>";
