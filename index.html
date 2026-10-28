@@ -178,7 +178,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where, addDoc, onSnapshot, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, getDocs, addDoc, onSnapshot, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
@@ -190,7 +190,7 @@
       measurementId: "G-V5S25W0948"
     };
 
-    // DIGITE O SEU E-MAIL DO GOOGLE AQUI PARA ACESSAR O PAINEL DE ADMINISTRADOR
+    // ALTERE AQUI PARA O SEU E-MAIL DO GOOGLE PARA ACESSAR O PAINEL DE ADMIN
     const ADMIN_EMAIL = "seuemail@gmail.com"; 
 
     const app = initializeApp(firebaseConfig);
@@ -240,7 +240,7 @@
       }
     };
 
-    // Cadastro de Médico feito Pelo Administrador
+    // Cadastro exclusivo de Médicos Reais pelo Administrador
     window.addRealDoctor = async (e) => {
       e.preventDefault();
       if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
@@ -271,7 +271,7 @@
 
       try {
         await setDoc(doc(db, "doctors", docId), doctorData);
-        alert("Médico cadastrado com sucesso!");
+        alert("Médico cadastrado e publicado com sucesso!");
         document.getElementById('admin-doc-form').reset();
         loadDoctors();
       } catch (err) {
@@ -395,7 +395,7 @@
         const querySnapshot = await getDocs(collection(db, "doctors"));
 
         if (querySnapshot.empty) {
-          doctorsContainer.innerHTML = "<p style='grid-column: 1/-1; text-align:center;'>Nenhum médico cadastrado no momento.</p>";
+          doctorsContainer.innerHTML = "<p style='grid-column: 1/-1; text-align:center;'>Nenhum médico voluntário publicado ainda. Adicione o primeiro no painel acima!</p>";
           return;
         }
 
@@ -412,7 +412,7 @@
               <span class="badge-volunteer">ATENDIMENTO GRATUITO</span>
               
               <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="startPrivateDoctorChat('${docData.uid}', '${docData.name}')">Iniciar Dúvida Privada</button>
-              ${isAdmin ? `<button onclick="removeDoctor('${docData.uid}')" style="background:none; border:none; color:#ef4444; font-size:0.75rem; margin-top:0.5rem; cursor:pointer;">Remover Médico</button>` : ''}
+              ${isAdmin ? `<button onclick="removeDoctor('${docData.uid}')" style="background:none; border:none; color:#ef4444; font-size:0.75rem; margin-top:0.5rem; cursor:pointer; font-weight:600;">[Remover Médico]</button>` : ''}
             </div>
           `;
         });
@@ -457,8 +457,8 @@
       
       <!-- PAINEL EXCLUSIVO DO ADMINISTRADOR PARA CADASTRAR MÉDICOS REAIS -->
       <div id="admin-section" class="admin-section hidden">
-        <h3 style="color:var(--primary); margin-bottom:0.5rem;">⚙️ Cadastrar Médico Real no Sistema</h3>
-        <p style="font-size:0.9rem; margin-bottom:1rem;">Preencha os dados abaixo para publicar um profissional voluntário na rede:</p>
+        <h3 style="color:var(--primary); margin-bottom:0.5rem;">⚙️ Cadastrar Médico Real no Sistema (Apenas você vê esta opção)</h3>
+        <p style="font-size:0.9rem; margin-bottom:1rem;">Preencha os dados abaixo para publicar um profissional voluntário para toda a comunidade:</p>
         
         <form id="admin-doc-form" onsubmit="addRealDoctor(event)">
           <div class="btn-grid">
@@ -491,7 +491,7 @@
 
           <div class="btn-grid">
             <div class="form-group">
-              <label>Link da Foto (URL do perfil) - Opcional</label>
+              <label>Link da Foto (URL da imagem) - Opcional</label>
               <input type="url" id="admin-doc-photo" placeholder="https://link-da-imagem.com/foto.jpg">
             </div>
             <div class="form-group">
@@ -500,7 +500,7 @@
             </div>
           </div>
 
-          <button type="submit" class="btn btn-success" style="margin-top:0.5rem;">Cadastrar e Publicar Médico</button>
+          <button type="submit" class="btn btn-success" style="margin-top:0.5rem;">Publicar Médico na Plataforma</button>
         </form>
       </div>
 
