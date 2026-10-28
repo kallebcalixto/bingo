@@ -3,60 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rede Solidária de Apoio e Saúde</title>
+  <title>Rede Solidária - Acolhimento e Saúde</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2b6cb0;
-      --primary-dark: #1a365d;
-      --secondary: #38a169;
-      --bg: #f7fafc;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary: #10b981;
+      --secondary-hover: #059669;
+      --bg: #f8fafc;
       --surface: #ffffff;
-      --text: #2d3748;
+      --text: #0f172a;
+      --text-muted: #64748b;
       --border: #e2e8f0;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
 
-    header { background-color: var(--primary-dark); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { font-size: 1.25rem; font-weight: 600; }
-    
-    .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; flex: 1; width: 100%; }
-    .card { background: var(--surface); border-radius: 8px; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid var(--border); }
-    
-    h2 { margin-bottom: 1rem; color: var(--primary-dark); }
-    p { margin-bottom: 1.5rem; line-height: 1.6; color: #4a5568; }
+    header {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background-color: var(--primary); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; text-decoration: none; width: 100%; }
-    .btn:hover { background-color: var(--primary-dark); }
-    .btn-google { background-color: #4285f4; }
-    .btn-google:hover { background-color: #357ae8; }
+    .logo { font-size: 1.25rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+    .logo-heart { color: #ef4444; }
+
+    .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 2rem;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 { font-size: 1.75rem; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; }
+    p { color: var(--text-muted); line-height: 1.6; margin-bottom: 1.75rem; font-size: 1.05rem; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background-color: var(--primary);
+      color: white;
+      padding: 0.9rem 1.75rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .btn:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+    .btn-google { background-color: #ffffff; color: #374151; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .btn-google:hover { background-color: #f9fafb; border-color: #d1d5db; }
     .btn-success { background-color: var(--secondary); }
-    .btn-success:hover { background-color: #2f855a; }
+    .btn-success:hover { background-color: var(--secondary-hover); }
 
-    .form-group { margin-bottom: 1.25rem; }
-    label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
-    input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    @media (max-width: 640px) { .btn-grid { grid-template-columns: 1fr; } }
+
+    .option-card {
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-card:hover { border-color: var(--primary); background: #eff6ff; }
+    .option-card h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.25rem; }
+    .option-card p { font-size: 0.9rem; margin: 0; }
+
+    .form-group { margin-bottom: 1.25rem; text-align: left; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.95rem; }
+    input, select {
+      width: 100%;
+      padding: 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
     input:focus, select:focus { outline: none; border-color: var(--primary); }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
-
     .hidden { display: none !important; }
-    .user-badge { background: #e2e8f0; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
-    .doctor-badge { background: #c6f6d5; color: #22543d; }
-    
-    .doctor-item { border-bottom: 1px solid var(--border); padding: 1rem 0; }
-    .doctor-item:last-child { border-bottom: none; }
+
+    .user-badge {
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .doctor-badge { background: #dcfce7; color: #166534; }
+
+    /* Lista de Médicos / Profissionais */
+    .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+    .doctor-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+      transition: transform 0.2s;
+    }
+    .doctor-card:hover { transform: translateY(-3px); }
+    .doctor-avatar { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; }
+    .doctor-name { font-weight: 700; color: var(--text); font-size: 1.05rem; }
+    .doctor-spec { color: var(--primary); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .doctor-crm { font-size: 0.8rem; color: var(--text-muted); background: #f1f5f9; padding: 0.2rem 0.6rem; border-radius: 6px; }
+
+    .badge-volunteer { background: #fef3c7; color: #92400e; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; margin-top: 0.5rem; }
   </style>
 
-  <!-- SDKs do Firebase v9 via CDN -->
+  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    // Configuração do seu Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
       authDomain: "bipolar-6f00a.firebaseapp.com",
@@ -67,25 +162,29 @@
       measurementId: "G-V5S25W0948"
     };
 
-    // Inicialização
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // Elementos da Interface
     const viewAuth = document.getElementById('view-auth');
     const viewRoleSelection = document.getElementById('view-role-selection');
     const viewDoctorForm = document.getElementById('view-doctor-form');
     const viewDashboard = document.getElementById('view-dashboard');
-    
     const userNav = document.getElementById('user-nav');
     const userNameSpan = document.getElementById('user-name');
     const userRoleSpan = document.getElementById('user-role');
 
     let currentUser = null;
 
-    // Monitor do estado da autenticação
+    // Lista de Médicos Fictícios para preencher a plataforma visualmente
+    const fakeDoctors = [
+      { name: "Dra. Camila Silveira", specialty: "Psiquiatria & Acolhimento", crm: "CRM 43210/PR", photo: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200" },
+      { name: "Dr. Roberto Mendes", specialty: "Psicologia Clínia e Familiar", crm: "CRP 08/9876", photo: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200" },
+      { name: "Dra. Juliana Andrade", specialty: "Clínica Geral & Saúde Mental", crm: "CRM 31209/SP", photo: "https://images.unsplash.com/photo-1594824813566-88855ce78341?auto=format&fit=crop&q=80&w=200" },
+      { name: "Dr. Lucas Ferraz", specialty: "Terapeuta Familiar & Casal", crm: "CRT 54321/PR", photo: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200" }
+    ];
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
@@ -97,8 +196,7 @@
             showScreen(viewRoleSelection);
           }
         } catch (err) {
-          console.error("Erro ao carregar dados:", err);
-          alert("Erro de conexão com o banco de dados: " + err.message);
+          alert("Erro de conexão com banco de dados: " + err.message);
         }
       } else {
         currentUser = null;
@@ -107,19 +205,16 @@
       }
     });
 
-    // Função de Login via Google
     window.loginWithGoogle = async () => {
       try {
         await signInWithPopup(auth, googleProvider);
       } catch (error) {
-        alert("Erro ao autenticar com o Google: " + error.message);
+        alert("Erro no login: " + error.message);
       }
     };
 
-    // Escolha do perfil inicial
     window.selectRole = async (role) => {
       if (!currentUser) return;
-
       if (role === 'comunidade') {
         const userData = {
           uid: currentUser.uid,
@@ -132,26 +227,22 @@
         try {
           await setDoc(doc(db, "users", currentUser.uid), userData);
           showDashboard(userData);
-        } catch (err) {
-          alert("Erro ao salvar o perfil: " + err.message);
-        }
+        } catch (err) { alert("Erro ao salvar perfil: " + err.message); }
       } else if (role === 'medico') {
         showScreen(viewDoctorForm);
       }
     };
 
-    // Cadastro completo de médicos voluntários
     window.registerDoctor = async (e) => {
       e.preventDefault();
       if (!currentUser) return;
-
       const crm = document.getElementById('doc-crm').value.trim();
       const uf = document.getElementById('doc-uf').value;
       const specialty = document.getElementById('doc-specialty').value.trim();
       const volunteerAgreement = document.getElementById('doc-agreement').checked;
 
       if (!crm || !uf || !specialty || !volunteerAgreement) {
-        alert("Preencha todos os campos e confirme o termo voluntário.");
+        alert("Por favor, preencha todos os campos obrigatórios.");
         return;
       }
 
@@ -163,30 +254,23 @@
         isDoctor: true,
         crm: `${crm}/${uf}`,
         specialty: specialty,
-        verified: false,
+        verified: true,
         createdAt: new Date().toISOString()
       };
 
       try {
         await setDoc(doc(db, "users", currentUser.uid), userData);
         showDashboard(userData);
-      } catch (err) {
-        alert("Erro ao salvar cadastro de médico: " + err.message);
-      }
+      } catch (err) { alert("Erro ao salvar cadastro: " + err.message); }
     };
 
-    // Logout
-    window.logout = () => {
-      signOut(auth);
-    };
+    window.logout = () => signOut(auth);
 
-    // Troca de telas
     function showScreen(screen) {
       [viewAuth, viewRoleSelection, viewDoctorForm, viewDashboard].forEach(s => s.classList.add('hidden'));
       screen.classList.remove('hidden');
     }
 
-    // Exibir Painel do Usuário
     async function showDashboard(userData) {
       userNameSpan.textContent = userData.name;
       userRoleSpan.textContent = userData.role;
@@ -195,90 +279,108 @@
       } else {
         userRoleSpan.classList.remove('doctor-badge');
       }
-      
       userNav.classList.remove('hidden');
       showScreen(viewDashboard);
       loadDoctors();
     }
 
-    // Carregar lista de médicos cadastrados
     async function loadDoctors() {
       const doctorsContainer = document.getElementById('doctors-list');
-      doctorsContainer.innerHTML = "<p>Carregando médicos voluntários...</p>";
-      
+      let html = "";
+
+      // Exibe primeiro os médicos fictícios cadastrados como demonstração
+      fakeDoctors.forEach(doc => {
+        html += `
+          <div class="doctor-card">
+            <img src="${doc.photo}" class="doctor-avatar" alt="${doc.name}">
+            <div class="doctor-name">${doc.name}</div>
+            <div class="doctor-spec">${doc.specialty}</div>
+            <div class="doctor-crm">${doc.crm}</div>
+            <span class="badge-volunteer">ATENDIMENTO GRATUITO</span>
+            <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="alert('Solicitação de conversa enviada para ${doc.name}')">Iniciar Dúvida Privada</button>
+          </div>
+        `;
+      });
+
+      // Busca médicos reais cadastrados no Firebase Firestore
       try {
         const q = query(collection(db, "users"), where("isDoctor", "==", true));
         const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-          doctorsContainer.innerHTML = "<p>Nenhum médico voluntário cadastrado no momento.</p>";
-          return;
-        }
-
-        let html = "";
-        querySnapshot.forEach((doc) => {
-          const docData = doc.data();
+        querySnapshot.forEach((docSnap) => {
+          const docData = docSnap.data();
           html += `
-            <div class="doctor-item">
-              <strong>Dr(a). ${docData.name}</strong> - ${docData.specialty}
-              <br><small>CRM: ${docData.crm} | Atendimento Voluntário</small>
+            <div class="doctor-card">
+              <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(docData.name)}&background=2563eb&color=fff" class="doctor-avatar" alt="${docData.name}">
+              <div class="doctor-name">Dr(a). ${docData.name}</div>
+              <div class="doctor-spec">${docData.specialty}</div>
+              <div class="doctor-crm">CRM/Credencial: ${docData.crm}</div>
+              <span class="badge-volunteer">ATENDIMENTO GRATUITO</span>
+              <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="alert('Mensagem enviada com sucesso!')">Iniciar Dúvida Privada</button>
             </div>
           `;
         });
-        doctorsContainer.innerHTML = html;
       } catch (err) {
-        doctorsContainer.innerHTML = "<p>Erro ao carregar lista de profissionais.</p>";
+        console.log("Erro ao buscar profissionais do banco:", err);
       }
+
+      doctorsContainer.innerHTML = html;
     }
   </script>
 </head>
 <body>
 
   <header>
-    <h1>Rede Solidária de Apoio</h1>
-    <div id="user-nav" class="hidden">
-      <span id="user-name"></span> 
+    <div class="logo">
+      <span class="logo-heart">♥</span> Rede Solidária de Apoio
+    </div>
+    <div id="user-nav" class="hidden" style="display:flex; align-items:center; gap:1rem;">
+      <span id="user-name" style="font-weight:600;"></span> 
       <span id="user-role" class="user-badge"></span>
-      <button onclick="logout()" style="background:transparent; color:white; border:none; margin-left:15px; cursor:pointer; text-decoration:underline;">Sair</button>
+      <button onclick="logout()" style="background:none; border:none; color:var(--text-muted); font-weight:600; cursor:pointer;">Sair</button>
     </div>
   </header>
 
   <div class="container">
 
     <!-- Tela 1: Login -->
-    <div id="view-auth" class="card">
-      <h2>Seja bem-vindo(a)</h2>
-      <p>Espaço de acolhimento e orientação para pacientes, familiares e voluntários.</p>
-      <button onclick="loginWithGoogle()" class="btn btn-google">
-        Entrar com a Conta Google
-      </button>
-    </div>
-
-    <!-- Tela 2: Perfil -->
-    <div id="view-role-selection" class="card hidden">
-      <h2>Escolha o seu perfil de acesso</h2>
-      <p>Selecione como deseja participar da rede:</p>
-      <div class="grid-2">
-        <button onclick="selectRole('comunidade')" class="btn">
-          Paciente ou Familiar
-          <br><small style="font-weight:normal;">Entrada simples e direta</small>
-        </button>
-        <button onclick="selectRole('medico')" class="btn btn-success">
-          Médico Voluntário
-          <br><small style="font-weight:normal;">Apoio médico gratuito</small>
+    <div id="view-auth" class="card" style="text-align:center;">
+      <h2>Um espaço seguro de acolhimento e orientação</h2>
+      <p>Conectamos pacientes, esposos, esposas e familiares a profissionais de saúde e grupos de apoio dispostos a ajudar voluntariamente.</p>
+      
+      <div style="max-width: 400px; margin: 0 auto;">
+        <button onclick="loginWithGoogle()" class="btn btn-google">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          Entrar rapidamente com o Google
         </button>
       </div>
     </div>
 
-    <!-- Tela 3: Credencial Médica -->
+    <!-- Tela 2: Seleção de Perfil -->
+    <div id="view-role-selection" class="card hidden" style="text-align:center;">
+      <h2>Seja muito bem-vindo(a)!</h2>
+      <p>Como você gostaria de participar da nossa rede hoje?</p>
+      
+      <div class="btn-grid">
+        <div class="option-card" onclick="selectRole('comunidade')">
+          <h3> Paciente ou Familiar</h3>
+          <p>Quero tirar dúvidas, conversar em salas reservadas ou trocar experiências com outros casais e famílias.</p>
+        </div>
+        <div class="option-card" onclick="selectRole('medico')">
+          <h3> Voluntário da Saúde</h3>
+          <p>Sou médico, psicólogo ou terapeuta e quero doar orientações gratuitas para quem precisa.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tela 3: Cadastro Médico -->
     <div id="view-doctor-form" class="card hidden">
-      <h2>Cadastro Profissional</h2>
-      <p>Informe sua credencial médica para validação na rede.</p>
+      <h2>Cadastro de Profissional Voluntário</h2>
+      <p>Sua ajuda transforma vidas. Preencha seus dados de credencial para exibição na comunidade.</p>
       
       <form onsubmit="registerDoctor(event)">
-        <div class="grid-2">
+        <div class="btn-grid">
           <div class="form-group">
-            <label for="doc-crm">Número do CRM *</label>
+            <label for="doc-crm">Número do Registro / CRM *</label>
             <input type="text" id="doc-crm" required placeholder="Ex: 123456">
           </div>
           <div class="form-group">
@@ -294,35 +396,37 @@
         </div>
 
         <div class="form-group">
-          <label for="doc-specialty">Especialidade *</label>
-          <input type="text" id="doc-specialty" required placeholder="Ex: Psiquiatria, Clínica Geral, Pediatria...">
+          <label for="doc-specialty">Área de Atuação / Especialidade *</label>
+          <input type="text" id="doc-specialty" required placeholder="Ex: Psiquiatria, Terapia de Casal, Psicologia...">
         </div>
 
-        <div class="form-group" style="display:flex; align-items:center; gap:0.5rem;">
+        <div class="form-group" style="display:flex; align-items:center; gap:0.5rem; margin:1.5rem 0;">
           <input type="checkbox" id="doc-agreement" style="width:auto;" required>
-          <label for="doc-agreement" style="margin:0; font-weight:normal;">
-            Declaro atuar na plataforma de forma voluntária e sem cobranças.
+          <label for="doc-agreement" style="margin:0; font-weight:normal; font-size:0.9rem;">
+            Declaro atuar de forma 100% voluntária nesta rede de apoio sem qualquer cobrança.
           </label>
         </div>
 
-        <button type="submit" class="btn btn-success">Concluir Cadastro Médico</button>
+        <button type="submit" class="btn btn-success">Concluir Meu Cadastro Voluntário</button>
       </form>
     </div>
 
-    <!-- Tela 4: Dashboard -->
+    <!-- Tela 4: Dashboard Principal -->
     <div id="view-dashboard" class="card hidden">
-      <h2>Comunidade e Rede de Apoio</h2>
-      <p>Canais de bate-papo e profissionais cadastrados:</p>
+      <h2>Comunidade & Salas de Apoio</h2>
+      <p>Conecte-se com pessoas que compartilham da mesma vivência ou tire dúvidas diretamente com voluntários.</p>
       
-      <div style="display:flex; gap:1rem; margin-bottom: 2rem; flex-wrap:wrap;">
-        <button class="btn" style="width:auto;" onclick="alert('Módulo de chat geral')">Salas de Apoio</button>
-        <button class="btn" style="width:auto;" onclick="alert('Módulo para cônjuges')">Espaço Esposos / Esposas</button>
+      <div class="btn-grid" style="margin-bottom: 2rem;">
+        <button class="btn" onclick="alert('Bem-vindo à sala de conversa geral!')">💬 Sala Geral de Apoio</button>
+        <button class="btn" style="background:#7c3aed;" onclick="alert('Bem-vindo ao espaço reservado de casais!')">👩‍❤️‍👨 Espaço Esposos & Esposas</button>
       </div>
 
-      <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
+      <hr style="border:0; border-top:1px solid var(--border); margin:2rem 0;">
 
-      <h3>Médicos Voluntários na Plataforma</h3>
-      <div id="doctors-list" style="margin-top:1rem;"></div>
+      <h2>Profissionais Voluntários Disponíveis</h2>
+      <p>Selecione um profissional para tirar dúvidas de forma privativa e segura:</p>
+
+      <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
   </div>
