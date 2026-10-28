@@ -86,19 +86,6 @@
     .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
     @media (max-width: 640px) { .btn-grid { grid-template-columns: 1fr; } }
 
-    .option-card {
-      background: #f8fafc;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 1.5rem;
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .option-card:hover { border-color: var(--primary); background: #eff6ff; }
-    .option-card h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.25rem; }
-    .option-card p { font-size: 0.9rem; margin: 0; }
-
     .form-group { margin-bottom: 1.25rem; text-align: left; }
     label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.95rem; }
     input, select {
@@ -121,7 +108,6 @@
       font-size: 0.85rem;
       font-weight: 600;
     }
-    .doctor-badge { background: #dcfce7; color: #166534; }
 
     /* Estilos do Chat */
     .chat-box {
@@ -171,7 +157,7 @@
       transition: transform 0.2s;
     }
     .doctor-card:hover { transform: translateY(-3px); }
-    .doctor-avatar { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; }
+    .doctor-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; border: 2px solid var(--primary); }
     .doctor-name { font-weight: 700; color: var(--text); font-size: 1.05rem; }
     .doctor-spec { color: var(--primary); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; }
     .doctor-crm { font-size: 0.8rem; color: var(--text-muted); background: #f1f5f9; padding: 0.2rem 0.6rem; border-radius: 6px; }
@@ -180,22 +166,11 @@
 
     /* Painel Admin */
     .admin-section {
-      background: #fef2f2;
-      border: 1px solid #fca5a5;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       padding: 1.5rem;
       border-radius: 12px;
       margin-bottom: 2rem;
-    }
-    .admin-item {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-top: 0.75rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
     }
   </style>
 
@@ -203,7 +178,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where, addDoc, onSnapshot, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, where, addDoc, onSnapshot, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
@@ -215,7 +190,7 @@
       measurementId: "G-V5S25W0948"
     };
 
-    // COLOQUE SEU E-MAIL DO GOOGLE AQUI PARA ACESSAR O PAINEL DE APROVAÇÃO
+    // DIGITE O SEU E-MAIL DO GOOGLE AQUI PARA ACESSAR O PAINEL DE ADMINISTRADOR
     const ADMIN_EMAIL = "seuemail@gmail.com"; 
 
     const app = initializeApp(firebaseConfig);
@@ -224,9 +199,6 @@
     const googleProvider = new GoogleAuthProvider();
 
     const viewAuth = document.getElementById('view-auth');
-    const viewRoleSelection = document.getElementById('view-role-selection');
-    const viewDoctorForm = document.getElementById('view-doctor-form');
-    const viewPendingDoctor = document.getElementById('view-pending-doctor');
     const viewDashboard = document.getElementById('view-dashboard');
     const viewChat = document.getElementById('view-chat');
 
@@ -241,24 +213,18 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            if (userData.isDoctor && userData.status === 'pending') {
-              showScreen(viewPendingDoctor);
-              userNav.classList.remove('hidden');
-              userNameSpan.textContent = userData.name;
-              userRoleSpan.textContent = "Aguardando Aprovação";
-            } else {
-              showDashboard(userData);
-            }
-          } else {
-            showScreen(viewRoleSelection);
-          }
-        } catch (err) {
-          alert("Erro de conexão: " + err.message);
-        }
+        const isAdmin = user.email === ADMIN_EMAIL;
+
+        const userData = {
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          role: isAdmin ? 'Administrador' : 'Usuário',
+          createdAt: new Date().toISOString()
+        };
+
+        await setDoc(doc(db, "users", user.uid), userData, { merge: true });
+        showDashboard(userData);
       } else {
         currentUser = null;
         userNav.classList.add('hidden');
@@ -274,57 +240,54 @@
       }
     };
 
-    window.selectRole = async (role) => {
-      if (!currentUser) return;
-      if (role === 'comunidade') {
-        const userData = {
-          uid: currentUser.uid,
-          name: currentUser.displayName,
-          email: currentUser.email,
-          role: 'Paciente / Familiar',
-          isDoctor: false,
-          createdAt: new Date().toISOString()
-        };
-        try {
-          await setDoc(doc(db, "users", currentUser.uid), userData);
-          showDashboard(userData);
-        } catch (err) { alert("Erro ao salvar perfil: " + err.message); }
-      } else if (role === 'medico') {
-        showScreen(viewDoctorForm);
-      }
-    };
-
-    window.registerDoctor = async (e) => {
+    // Cadastro de Médico feito Pelo Administrador
+    window.addRealDoctor = async (e) => {
       e.preventDefault();
-      if (!currentUser) return;
-      const crm = document.getElementById('doc-crm').value.trim();
-      const uf = document.getElementById('doc-uf').value;
-      const specialty = document.getElementById('doc-specialty').value.trim();
-      const whatsapp = document.getElementById('doc-whatsapp').value.trim();
-      const volunteerAgreement = document.getElementById('doc-agreement').checked;
+      if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
 
-      if (!crm || !uf || !specialty || !whatsapp || !volunteerAgreement) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
+      const name = document.getElementById('admin-doc-name').value.trim();
+      const specialty = document.getElementById('admin-doc-spec').value.trim();
+      const crm = document.getElementById('admin-doc-crm').value.trim();
+      const uf = document.getElementById('admin-doc-uf').value;
+      const photo = document.getElementById('admin-doc-photo').value.trim();
+      const whatsapp = document.getElementById('admin-doc-whatsapp').value.trim();
+
+      if (!name || !specialty || !crm) {
+        alert("Preencha os campos obrigatórios (Nome, Especialidade e CRM).");
         return;
       }
 
-      const userData = {
-        uid: currentUser.uid,
-        name: currentUser.displayName,
-        email: currentUser.email,
-        role: 'Médico Voluntário',
-        isDoctor: true,
-        crm: `${crm}/${uf}`,
+      const docId = "doc_" + Date.now();
+      const doctorData = {
+        uid: docId,
+        name: name,
         specialty: specialty,
+        crm: `${crm}/${uf}`,
+        photo: photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff`,
         whatsapp: whatsapp,
-        status: 'pending', // Fica pendente até você aprovar
+        isDoctor: true,
         createdAt: new Date().toISOString()
       };
 
       try {
-        await setDoc(doc(db, "users", currentUser.uid), userData);
-        showScreen(viewPendingDoctor);
-      } catch (err) { alert("Erro ao enviar cadastro: " + err.message); }
+        await setDoc(doc(db, "doctors", docId), doctorData);
+        alert("Médico cadastrado com sucesso!");
+        document.getElementById('admin-doc-form').reset();
+        loadDoctors();
+      } catch (err) {
+        alert("Erro ao cadastrar médico: " + err.message);
+      }
+    };
+
+    window.removeDoctor = async (docId) => {
+      if (confirm("Tem certeza que deseja remover este médico?")) {
+        try {
+          await deleteDoc(doc(db, "doctors", docId));
+          loadDoctors();
+        } catch (err) {
+          alert("Erro ao remover: " + err.message);
+        }
+      }
     };
 
     window.openChatRoom = (roomId, roomName) => {
@@ -370,7 +333,7 @@
       unsubscribeChat = onSnapshot(q, (snapshot) => {
         messagesContainer.innerHTML = "";
         if (snapshot.empty) {
-          messagesContainer.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>Seja o primeiro a enviar uma mensagem acolhedora!</p>";
+          messagesContainer.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>Seja o primeiro a enviar uma mensagem!</p>";
           return;
         }
 
@@ -400,116 +363,63 @@
       openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
     };
 
-    window.approveDoctor = async (docUid) => {
-      try {
-        await updateDoc(doc(db, "users", docUid), { status: 'approved' });
-        alert("Médico aprovado com sucesso! Ele agora aparecerá na plataforma.");
-        loadDashboardData();
-      } catch (err) {
-        alert("Erro ao aprovar médico: " + err.message);
-      }
-    };
-
     window.logout = () => signOut(auth);
 
     function showScreen(screen) {
-      [viewAuth, viewRoleSelection, viewDoctorForm, viewPendingDoctor, viewDashboard, viewChat].forEach(s => s.classList.add('hidden'));
+      [viewAuth, viewDashboard, viewChat].forEach(s => s.classList.add('hidden'));
       screen.classList.remove('hidden');
     }
 
     async function showDashboard(userData) {
       userNameSpan.textContent = userData.name;
       userRoleSpan.textContent = userData.role;
-      if (userData.isDoctor) userRoleSpan.classList.add('doctor-badge');
       userNav.classList.remove('hidden');
-      showScreen(viewDashboard);
-      loadDashboardData();
-    }
 
-    async function loadDashboardData() {
-      // 1. Painel de Administração para Você (Apenas Visível para o E-mail de Admin)
-      const adminContainer = document.getElementById('admin-container');
-      if (currentUser && currentUser.email === ADMIN_EMAIL) {
-        adminContainer.classList.remove('hidden');
-        loadPendingDoctors();
+      const adminSection = document.getElementById('admin-section');
+      if (currentUser.email === ADMIN_EMAIL) {
+        adminSection.classList.remove('hidden');
       } else {
-        adminContainer.classList.add('hidden');
+        adminSection.classList.add('hidden');
       }
 
-      // 2. Carrega Somente os Médicos Aprovados para a Comunidade
-      loadApprovedDoctors();
+      showScreen(viewDashboard);
+      loadDoctors();
     }
 
-    async function loadPendingDoctors() {
-      const pendingList = document.getElementById('admin-pending-list');
-      pendingList.innerHTML = "<p>Buscando solicitações...</p>";
-
-      try {
-        const q = query(collection(db, "users"), where("isDoctor", "==", true), where("status", "==", "pending"));
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-          pendingList.innerHTML = "<p style='font-size:0.9rem; color:#b91c1c;'>Nenhum cadastro pendente de aprovação.</p>";
-          return;
-        }
-
-        let html = "";
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          const cleanPhone = data.whatsapp.replace(/\D/g, '');
-          html += `
-            <div class="admin-item">
-              <div>
-                <strong>${data.name}</strong> (${data.specialty})
-                <br><small>CRM: ${data.crm} | E-mail: ${data.email}</small>
-                <br><small>WhatsApp: <strong>${data.whatsapp}</strong></small>
-              </div>
-              <div style="display:flex; gap:0.5rem;">
-                <a href="https://wa.me/55${cleanPhone}?text=Olá%20Dr(a).%20${encodeURIComponent(data.name)},%20recebemos%20sua%20solicitação%20na%20Rede%20Solidária." target="_blank" class="btn" style="background:#25d366; padding:0.4rem 0.8rem; font-size:0.85rem; width:auto;">Chamar no Whats</a>
-                <button onclick="approveDoctor('${data.uid}')" class="btn btn-success" style="padding:0.4rem 0.8rem; font-size:0.85rem; width:auto;">Aprovar Cadastro</button>
-              </div>
-            </div>
-          `;
-        });
-        pendingList.innerHTML = html;
-      } catch (err) {
-        pendingList.innerHTML = "<p>Erro ao carregar cadastros pendentes.</p>";
-      }
-    }
-
-    async function loadApprovedDoctors() {
+    async function loadDoctors() {
       const doctorsContainer = document.getElementById('doctors-list');
-      doctorsContainer.innerHTML = "<p>Carregando voluntários da rede...</p>";
+      doctorsContainer.innerHTML = "<p>Carregando médicos voluntários...</p>";
       let html = "";
 
       try {
-        const q = query(collection(db, "users"), where("isDoctor", "==", true), where("status", "==", "approved"));
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(collection(db, "doctors"));
 
         if (querySnapshot.empty) {
-          doctorsContainer.innerHTML = "<p style='grid-column: 1/-1; text-align:center;'>Nenhum médico voluntário ativo no momento. Novas aprovações em breve!</p>";
+          doctorsContainer.innerHTML = "<p style='grid-column: 1/-1; text-align:center;'>Nenhum médico cadastrado no momento.</p>";
           return;
         }
 
+        const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
+
         querySnapshot.forEach((docSnap) => {
           const docData = docSnap.data();
-          const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(docData.name)}&background=2563eb&color=fff`;
-          
           html += `
             <div class="doctor-card">
-              <img src="${photoUrl}" class="doctor-avatar" alt="${docData.name}">
+              <img src="${docData.photo}" class="doctor-avatar" alt="${docData.name}">
               <div class="doctor-name">Dr(a). ${docData.name}</div>
               <div class="doctor-spec">${docData.specialty}</div>
-              <div class="doctor-crm">CRM/Credencial: ${docData.crm}</div>
+              <div class="doctor-crm">CRM: ${docData.crm}</div>
               <span class="badge-volunteer">ATENDIMENTO GRATUITO</span>
+              
               <button class="btn" style="margin-top:0.75rem; padding:0.5rem; font-size:0.85rem;" onclick="startPrivateDoctorChat('${docData.uid}', '${docData.name}')">Iniciar Dúvida Privada</button>
+              ${isAdmin ? `<button onclick="removeDoctor('${docData.uid}')" style="background:none; border:none; color:#ef4444; font-size:0.75rem; margin-top:0.5rem; cursor:pointer;">Remover Médico</button>` : ''}
             </div>
           `;
         });
 
         doctorsContainer.innerHTML = html;
       } catch (err) {
-        doctorsContainer.innerHTML = "<p>Erro ao carregar profissionais.</p>";
+        doctorsContainer.innerHTML = "<p>Erro ao carregar lista de profissionais.</p>";
       }
     }
   </script>
@@ -542,83 +452,56 @@
       </div>
     </div>
 
-    <!-- Tela 2: Seleção de Perfil -->
-    <div id="view-role-selection" class="card hidden" style="text-align:center;">
-      <h2>Seja muito bem-vindo(a)!</h2>
-      <p>Como você gostaria de participar da nossa rede hoje?</p>
-      
-      <div class="btn-grid">
-        <div class="option-card" onclick="selectRole('comunidade')">
-          <h3> Paciente ou Familiar</h3>
-          <p>Quero tirar dúvidas, conversar em salas reservadas ou trocar experiências com outros casais e famílias.</p>
-        </div>
-        <div class="option-card" onclick="selectRole('medico')">
-          <h3> Voluntário da Saúde</h3>
-          <p>Sou médico, psicólogo ou terapeuta e quero doar orientações gratuitas para quem precisa.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tela 3: Cadastro Médico -->
-    <div id="view-doctor-form" class="card hidden">
-      <h2>Solicitação de Cadastro Profissional</h2>
-      <p>Preencha os seus dados de registro e contato para verificação e liberação do seu perfil.</p>
-      
-      <form onsubmit="registerDoctor(event)">
-        <div class="btn-grid">
-          <div class="form-group">
-            <label for="doc-crm">Número do Registro / CRM *</label>
-            <input type="text" id="doc-crm" required placeholder="Ex: 123456">
-          </div>
-          <div class="form-group">
-            <label for="doc-uf">Estado (UF) *</label>
-            <select id="doc-uf" required>
-              <option value="PR">Paraná (PR)</option>
-              <option value="SP">São Paulo (SP)</option>
-              <option value="RJ">Rio de Janeiro (RJ)</option>
-              <option value="SC">Santa Catarina (SC)</option>
-              <option value="RS">Rio Grande do Sul (RS)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="btn-grid">
-          <div class="form-group">
-            <label for="doc-specialty">Especialidade / Área *</label>
-            <input type="text" id="doc-specialty" required placeholder="Ex: Psiquiatria, Terapia de Casal...">
-          </div>
-          <div class="form-group">
-            <label for="doc-whatsapp">WhatsApp para Contato Direto *</label>
-            <input type="text" id="doc-whatsapp" required placeholder="Ex: (41) 99999-9999">
-          </div>
-        </div>
-
-        <div class="form-group" style="display:flex; align-items:center; gap:0.5rem; margin:1.5rem 0;">
-          <input type="checkbox" id="doc-agreement" style="width:auto;" required>
-          <label for="doc-agreement" style="margin:0; font-weight:normal; font-size:0.9rem;">
-            Declaro atuar de forma 100% voluntária nesta rede de apoio sem qualquer cobrança.
-          </label>
-        </div>
-
-        <button type="submit" class="btn btn-success">Enviar Solicitação para Análise</button>
-      </form>
-    </div>
-
-    <!-- Tela AVISO: Médico Pendente de Aprovação -->
-    <div id="view-pending-doctor" class="card hidden" style="text-align:center;">
-      <h2 style="color:#d97706;">Solicitação Enviada com Sucesso! ⌛</h2>
-      <p>Agradecemos imensamente a sua disposição em ajudar! Por questões de segurança dos pacientes, o administrador entrará em contato com você via WhatsApp para verificar suas credenciais antes de liberar o seu perfil público.</p>
-      <button onclick="logout()" class="btn" style="background:var(--text-muted); max-width:200px; margin:0 auto;">Sair por enquanto</button>
-    </div>
-
-    <!-- Tela 4: Dashboard Principal -->
+    <!-- Tela 2: Dashboard Principal -->
     <div id="view-dashboard" class="card hidden">
       
-      <!-- PAINEL ADMINISTRADOR (SÓ VOCÊ VÊ QUANDO LOGAR COM SEU E-MAIL) -->
-      <div id="admin-container" class="admin-section hidden">
-        <h3 style="color:#991b1b; margin-bottom:0.5rem;">⚙️ Painel de Moderação (Visível apenas para você)</h3>
-        <p style="font-size:0.9rem; margin-bottom:0.5rem;">Confira abaixo os médicos que solicitaram cadastro. Clique no botão do WhatsApp para falar com eles e liberar o perfil:</p>
-        <div id="admin-pending-list"></div>
+      <!-- PAINEL EXCLUSIVO DO ADMINISTRADOR PARA CADASTRAR MÉDICOS REAIS -->
+      <div id="admin-section" class="admin-section hidden">
+        <h3 style="color:var(--primary); margin-bottom:0.5rem;">⚙️ Cadastrar Médico Real no Sistema</h3>
+        <p style="font-size:0.9rem; margin-bottom:1rem;">Preencha os dados abaixo para publicar um profissional voluntário na rede:</p>
+        
+        <form id="admin-doc-form" onsubmit="addRealDoctor(event)">
+          <div class="btn-grid">
+            <div class="form-group">
+              <label>Nome do Médico *</label>
+              <input type="text" id="admin-doc-name" placeholder="Ex: Dr. Carlos Silva" required>
+            </div>
+            <div class="form-group">
+              <label>Especialidade *</label>
+              <input type="text" id="admin-doc-spec" placeholder="Ex: Psiquiatria & Acolhimento" required>
+            </div>
+          </div>
+
+          <div class="btn-grid">
+            <div class="form-group">
+              <label>Número do CRM *</label>
+              <input type="text" id="admin-doc-crm" placeholder="Ex: 12345" required>
+            </div>
+            <div class="form-group">
+              <label>Estado (UF)</label>
+              <select id="admin-doc-uf">
+                <option value="PR">Paraná (PR)</option>
+                <option value="SP">São Paulo (SP)</option>
+                <option value="RJ">Rio de Janeiro (RJ)</option>
+                <option value="SC">Santa Catarina (SC)</option>
+                <option value="RS">Rio Grande do Sul (RS)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btn-grid">
+            <div class="form-group">
+              <label>Link da Foto (URL do perfil) - Opcional</label>
+              <input type="url" id="admin-doc-photo" placeholder="https://link-da-imagem.com/foto.jpg">
+            </div>
+            <div class="form-group">
+              <label>WhatsApp do Médico (Opcional)</label>
+              <input type="text" id="admin-doc-whatsapp" placeholder="(41) 99999-9999">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success" style="margin-top:0.5rem;">Cadastrar e Publicar Médico</button>
+        </form>
       </div>
 
       <h2>Comunidade & Salas de Apoio</h2>
@@ -631,13 +514,13 @@
 
       <hr style="border:0; border-top:1px solid var(--border); margin:2rem 0;">
 
-      <h2>Profissionais Voluntários Aprovados</h2>
-      <p>Selecione um profissional verificado para tirar dúvidas de forma privativa e segura:</p>
+      <h2>Profissionais Voluntários Cadastrados</h2>
+      <p>Selecione um profissional para tirar dúvidas de forma privativa e segura:</p>
 
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
-    <!-- Tela 5: Sala de Bate-Papo em Tempo Real -->
+    <!-- Tela 3: Sala de Bate-Papo em Tempo Real -->
     <div id="view-chat" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h2 id="chat-room-title" style="margin:0;">Sala de Apoio</h2>
