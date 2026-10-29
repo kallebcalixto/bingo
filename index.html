@@ -24,7 +24,33 @@
     .chat-msg { background: white; padding: 0.6rem 0.9rem; border-radius: 8px; border: 1px solid var(--border); max-width: 80%; line-height: 1.4; }
     .chat-msg.self { align-self: flex-end; background: #dbeafe; }
     
-    /* Banner informativo do topo do Chat Geral */
+    /* Alerta Geral em Destaque Grande */
+    .disclaimer-banner {
+      background: #fef2f2;
+      border: 2px solid #fca5a5;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      color: #991b1b;
+      text-align: center;
+    }
+    .disclaimer-banner h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #b91c1c;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .disclaimer-banner p {
+      font-size: 0.95rem;
+      color: #7f1d1d;
+      line-height: 1.5;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    /* Banner da Sala Geral */
     .room-notice {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
@@ -33,7 +59,7 @@
       margin-bottom: 1.25rem;
       color: #1e40af;
     }
-    .room-notice h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; color: #1e3a8a; display: flex; align-items: center; gap: 0.4rem; }
+    .room-notice h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; color: #1e3a8a; }
     .room-notice p { font-size: 0.88rem; color: #1e40af; line-height: 1.4; margin: 0; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
@@ -286,6 +312,13 @@
     </div>
 
     <div id="view-dashboard" class="card hidden">
+      
+      <!-- AVISO LEGAL E DE AJUDA VOLUNTÁRIA BEM GRANDE -->
+      <div class="disclaimer-banner">
+        <h3>⚠️ AVISO IMPORTANTE SOBRE OS ATENDIMENTOS</h3>
+        <p>Esta plataforma tem fins <strong>estritamente de acolhimento e suporte voluntário</strong>. Os médicos e psiquiatras voluntários <strong>NÃO emitem receitas, diagnósticos formais ou prescrições de medicamentos</strong> por este canal. Em casos de urgência ou emergência de saúde mental, busque atendimento imediato no CAPS ou UPA de sua região.</p>
+      </div>
+
       <h2>Salas Gerais de Apoio</h2>
       <div class="btn-grid" style="margin-bottom: 1.5rem;">
         <button class="btn" onclick="openChatRoom('geral', '💬 Sala Geral de Apoio & Depoimentos')">💬 Sala Geral de Depoimentos</button>
@@ -295,7 +328,7 @@
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
       <h2>Médicos Voluntários Cadastrados</h2>
-      <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Agende um horário para liberar a sua consulta privada com o profissional:</p>
+      <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Agende um horário para liberar a sua consulta privada de suporte com o profissional:</p>
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
@@ -305,15 +338,14 @@
         <button onclick="backToDashboard()" class="btn" style="width:auto; padding:0.4rem 1rem; background:#64748b;">← Voltar para o Painel</button>
       </div>
 
-      <!-- Banner explicativo exclusivo da Sala Geral/Comunitária -->
       <div id="room-notice-box" class="room-notice">
         <h4>📢 Espaço Comunitário de Acolhimento & Depoimentos</h4>
-        <p>Esta sala é um espaço aberto para trocar experiências, relatar depoimentos de vida e interagir livremente com outros membros. <strong>Os médicos voluntários não participam destas salas públicas.</strong> Para suporte profissional individual, agende uma consulta privada com os médicos na página principal.</p>
+        <p>Esta sala é um espaço aberto para trocar experiências, relatar depoimentos de vida e interagir livremente com outros membros. <strong>Os médicos voluntários não participam destas salas públicas.</strong> Para suporte profissional individual, agende uma consulta privada na página principal.</p>
       </div>
 
       <div id="chat-messages" class="chat-box"></div>
       <form onsubmit="sendMessage(event)" style="display:flex; gap:0.5rem;">
-        <input type="text" id="chat-input" placeholder="Escreva seu depoimento ou mensagem..." style="flex:1; padding:0.8rem; border:1px solid var(--border); border-radius:8px;" required>
+        <input type="text" id="chat-input" placeholder="Escreva sua mensagem..." style="flex:1; padding:0.8rem; border:1px solid var(--border); border-radius:8px;" required>
         <button type="submit" class="btn" style="width:auto;">Enviar</button>
       </form>
     </div>
