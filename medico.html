@@ -28,7 +28,6 @@
     .chat-msg { background: white; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); max-width: 80%; }
     .chat-msg.self { align-self: flex-end; background: #dbeafe; }
     .patient-card { padding: 0.8rem; background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-    .patient-card:hover { background: #e2e8f0; }
   </style>
 
   <script type="module">
@@ -115,7 +114,7 @@
       }
     }
 
-    // Horários
+    // Gerenciamento de Horários
     window.addSchedule = (e) => {
       e.preventDefault();
       const date = document.getElementById('slot-date').value;
@@ -124,7 +123,8 @@
       push(ref(rtdb, `doctors/${currentDoctor.key}/schedules`), {
         date: date,
         time: time,
-        booked: false
+        booked: false,
+        status: 'available'
       });
       document.getElementById('schedule-form').reset();
     };
@@ -140,11 +140,19 @@
 
         snapshot.forEach((childSnap) => {
           const item = childSnap.val();
-          const key = childSnap.key;
+          const slotKey = childSnap.key;
           const isBooked = item.booked;
 
           const div = document.createElement('div');
           div.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:0.6rem 0.8rem; border-radius:8px; margin-top:0.4rem; border:1px solid #e2e8f0;";
+          
+          let actionHtml = `<button onclick="deleteSchedule('${slotKey}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Excluir</button>`;
+          if (isBooked && item.status !== 'finished') {
+            actionHtml = `
+              <button class="btn btn-danger" style="width:auto; padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="finishConsultation('${slotKey}')">Finalizar Consulta</button>
+            `;
+          }
+
           div.innerHTML = `
             <div>
               📅 ${item.date} às ⏰ ${item.time}
@@ -152,15 +160,26 @@
                 ${isBooked ? `(RESERVADO POR: ${item.patientName})` : '(DISPONÍVEL)'}
               </span>
             </div>
-            <button onclick="deleteSchedule('${key}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Excluir</button>
+            ${actionHtml}
           `;
           container.appendChild(div);
         });
       });
     }
 
-    window.deleteSchedule = (key) => {
-      remove(ref(rtdb, `doctors/${currentDoctor.key}/schedules/${key}`));
+    // Finaliza a consulta e desativa o acesso do paciente ao chat privado
+    window.finishConsultation = async (slotKey) => {
+      if (confirm("Deseja encerrar esta consulta? O acesso do paciente ao chat privado será encerrado.")) {
+        await update(ref(rtdb, `doctors/${currentDoctor.key}/schedules/${slotKey}`), {
+          status: 'finished',
+          booked: false
+        });
+        alert("Consulta finalizada com sucesso!");
+      }
+    };
+
+    window.deleteSchedule = (slotKey) => {
+      remove(ref(rtdb, `doctors/${currentDoctor.key}/schedules/${slotKey}`));
     };
 
     function loadPatientMessages(emailKey) {
@@ -179,7 +198,7 @@
           if (roomId.includes(emailKey)) {
             totalChats++;
             const messages = roomSnap.child('messages').val();
-            let lastMsg = "Nova dúvida recebida";
+            let lastMsg = "Consulta iniciada";
             let patientName = "Paciente";
 
             if (messages) {
@@ -196,7 +215,7 @@
                 <strong>💬 ${patientName}</strong>
                 <div style="font-size:0.85rem; color:#64748b; margin-top:0.2rem;">"${lastMsg}"</div>
               </div>
-              <button class="btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="openPatientChat('${roomId}')">Responder</button>
+              <button class="btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="openPatientChat('${roomId}')">Entrar no Chat</button>
             `;
             container.appendChild(div);
           }
@@ -288,7 +307,7 @@
 
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
-      <h3>📅 Meus Horários Disponíveis</h3>
+      <h3>📅 Meus Horários & Consultas</h3>
       <form id="schedule-form" onsubmit="addSchedule(event)" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:0.5rem; margin-bottom:1rem;">
         <div>
           <label>Data</label>
@@ -305,11 +324,11 @@
 
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
-      <h3>💬 Mensagens Recebidas dos Pacientes</h3>
+      <h3>💬 Atendimentos e Mensagens dos Pacientes</h3>
       <div id="patient-list" style="margin-top:0.5rem; margin-bottom:1rem;"></div>
 
       <div id="chat-container" class="hidden">
-        <h4>Caixa de Resposta:</h4>
+        <h4>Caixa de Consulta Privada:</h4>
         <div id="chat-messages" class="chat-box"></div>
         <form onsubmit="replyMessage(event)" style="display:flex; gap:0.5rem;">
           <input type="text" id="chat-input" placeholder="Digite sua resposta..." style="flex:1; padding:0.8rem; border:1px solid var(--border); border-radius:8px;" required>
