@@ -6,7 +6,7 @@
   <title>Rede Solidária - Acolhimento e Apoio</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; }
+    :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --success: #10b981; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; }
     header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
@@ -16,18 +16,23 @@
     .btn { background: var(--primary); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
     .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .hidden { display: none !important; }
-    .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
     .doctor-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; }
     .doctor-avatar { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; }
     .chat-box { border: 1px solid var(--border); border-radius: 8px; height: 300px; overflow-y: auto; padding: 1rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
     .chat-msg { background: white; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); max-width: 80%; }
     .chat-msg.self { align-self: flex-end; background: #dbeafe; }
+    
+    /* Modal de Agendamento */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: white; border-radius: 16px; padding: 1.5rem; max-width: 450px; width: 90%; }
+    .schedule-item { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 0.75rem; border-radius: 8px; margin-top: 0.5rem; border: 1px solid var(--border); }
   </style>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, onValue, push, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
@@ -47,7 +52,6 @@
     let currentUser = null;
     let currentRoomId = null;
 
-    // Força a persistência local da sessão no navegador
     setPersistence(auth, browserLocalPersistence);
 
     onAuthStateChanged(auth, (user) => {
@@ -65,11 +69,7 @@
     });
 
     window.loginWithGoogle = async () => {
-      try {
-        await signInWithPopup(auth, googleProvider);
-      } catch (err) {
-        alert("Erro na autenticação: " + err.message);
-      }
+      try { await signInWithPopup(auth, googleProvider); } catch (err) { alert("Erro: " + err.message); }
     };
 
     window.logout = () => signOut(auth);
@@ -79,7 +79,7 @@
       onValue(ref(rtdb, 'doctors'), (snapshot) => {
         container.innerHTML = "";
         if (!snapshot.exists()) {
-          container.innerHTML = "<p style='grid-column: 1/-1; color:#64748b;'>Nenhum médico voluntário disponível no momento.</p>";
+          container.innerHTML = "<p style='grid-column: 1/-1; color:#64748b;'>Nenhum médico voluntário no momento.</p>";
           return;
         }
 
@@ -98,32 +98,70 @@
             <div style="font-size:0.8rem; font-weight:bold; color:${isOnline ? '#10b981' : '#94a3b8'}; margin-bottom:0.5rem;">
               ● ${isOnline ? 'ONLINE AGORA' : 'OFFLINE'}
             </div>
-            <button class="btn" style="padding:0.4rem; font-size:0.85rem;" onclick="startDoctorChat('${docKey}', '${docData.name}')">Iniciar Dúvida Privada</button>
-            <button class="btn" style="padding:0.4rem; font-size:0.85rem; background:#7c3aed; margin-top:0.3rem;" onclick="showSchedules('${docKey}', '${docData.name}')">📅 Ver Horários</button>
+            <button class="btn" style="background:#7c3aed;" onclick="openScheduleModal('${docKey}', '${docData.name}')">📅 Agendar Atendimento</button>
           `;
           container.appendChild(div);
         });
       });
     }
 
-    window.startDoctorChat = (docKey, docName) => {
-      const privateRoomId = `private_${docKey}_${currentUser.uid}`;
-      openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
-    };
-
-    window.showSchedules = (docKey, docName) => {
-      get(ref(rtdb, `doctors/${docKey}/schedules`)).then((snapshot) => {
+    // Modal de escolha de horário
+    window.openScheduleModal = (docKey, docName) => {
+      document.getElementById('modal-doc-name').textContent = docName;
+      document.getElementById('schedule-modal').classList.remove('hidden');
+      
+      const container = document.getElementById('modal-slots-list');
+      onValue(ref(rtdb, `doctors/${docKey}/schedules`), (snapshot) => {
+        container.innerHTML = "";
         if (!snapshot.exists()) {
-          alert(`Dr(a). ${docName} ainda não possui horários cadastrados.`);
+          container.innerHTML = "<p style='color:#64748b; font-size:0.9rem;'>Sem horários disponíveis no momento.</p>";
           return;
         }
-        let txt = `Horários de ${docName}:\n\n`;
-        snapshot.forEach(snap => {
-          const s = snap.val();
-          txt += `• Data: ${s.date} às ${s.time}\n`;
+
+        let hasSlots = false;
+        snapshot.forEach((childSnap) => {
+          const slot = childSnap.val();
+          const slotKey = childSnap.key;
+
+          // Exibe apenas os horários que ainda NÃO foram reservados
+          if (!slot.booked) {
+            hasSlots = true;
+            const div = document.createElement('div');
+            div.className = "schedule-item";
+            div.innerHTML = `
+              <div>📅 ${slot.date} às ⏰ ${slot.time}</div>
+              <button class="btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; background:var(--success);" onclick="bookAndStartChat('${docKey}', '${slotKey}', '${docName}', '${slot.date}', '${slot.time}')">Agendar & Abrir Chat</button>
+            `;
+            container.appendChild(div);
+          }
         });
-        alert(txt);
+
+        if (!hasSlots) {
+          container.innerHTML = "<p style='color:#64748b; font-size:0.9rem;'>Todos os horários deste médico já foram preenchidos.</p>";
+        }
       });
+    };
+
+    window.closeScheduleModal = () => document.getElementById('schedule-modal').classList.add('hidden');
+
+    // Reserva o horário e libera o chat privado
+    window.bookAndStartChat = async (docKey, slotKey, docName, date, time) => {
+      try {
+        // Marca o horário como reservado no banco
+        await update(ref(rtdb, `doctors/${docKey}/schedules/${slotKey}`), {
+          booked: true,
+          patientUid: currentUser.uid,
+          patientName: currentUser.displayName || "Paciente"
+        });
+
+        closeScheduleModal();
+        alert(`Atendimento agendado para ${date} às ${time}! O chat privado foi liberado.`);
+
+        const privateRoomId = `private_${docKey}_${currentUser.uid}`;
+        openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
+      } catch (err) {
+        alert("Erro ao agendar: " + err.message);
+      }
     };
 
     window.openChatRoom = (roomId, roomName) => {
@@ -196,7 +234,7 @@
   <div class="container">
     <div id="view-auth" class="card" style="text-align:center;">
       <h2>Acolhimento e Suporte da Comunidade</h2>
-      <p style="margin-bottom:1.5rem; color:#64748b;">Acesse com a sua conta Google para participar dos grupos ou tirar dúvidas com profissionais.</p>
+      <p style="margin-bottom:1.5rem; color:#64748b;">Acesse com a sua conta Google para agendar atendimentos ou participar dos grupos.</p>
       <button onclick="loginWithGoogle()" class="btn" style="max-width:280px; margin:0 auto;">Entrar com o Google</button>
     </div>
 
@@ -210,6 +248,7 @@
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
       <h2>Médicos Voluntários Cadastrados</h2>
+      <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Escolha um profissional e agende um horário para liberar a conversa privada:</p>
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
@@ -223,6 +262,18 @@
         <input type="text" id="chat-input" placeholder="Digite sua mensagem..." style="flex:1; padding:0.8rem; border:1px solid var(--border); border-radius:8px;" required>
         <button type="submit" class="btn" style="width:auto;">Enviar</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal de Agendamento -->
+  <div id="schedule-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h3 style="color:var(--primary);">Horários de <span id="modal-doc-name"></span></h3>
+        <button onclick="closeScheduleModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">Selecione um horário disponível para liberar a conversa privada:</p>
+      <div id="modal-slots-list"></div>
     </div>
   </div>
 
