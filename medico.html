@@ -54,7 +54,6 @@
           if (data) {
             currentDoctor = { uid: user.uid, ...data };
           } else {
-            // Cria automáticamente se não existir no Realtime Database
             const name = user.displayName || user.email.split('@')[0];
             currentDoctor = {
               uid: user.uid,
@@ -86,7 +85,7 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        alert("Erro ao entrar: Verifique e-mail e senha.");
+        alert("Erro ao entrar: Verifique o e-mail e a palavra-passe.");
       }
     };
 
@@ -168,7 +167,7 @@
           <input type="email" id="login-email" required placeholder="medico@email.com">
         </div>
         <div class="form-group">
-          <label>Senha</label>
+          <label>Palavra-passe</label>
           <input type="password" id="login-password" required placeholder="******">
         </div>
         <button type="submit" class="btn">Entrar</button>
@@ -204,7 +203,7 @@
         <button type="submit" class="btn btn-success" style="grid-column: 1 / -1;">Adicionar Horário</button>
       </form>
 
-      <h4>Meus Horários:</h4>
+      <h4>Meus Horários Cadastrados:</h4>
       <div id="slots-list" style="margin-top:0.5rem;"></div>
     </div>
   </div>
