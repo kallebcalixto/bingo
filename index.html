@@ -14,6 +14,7 @@
     .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
     .card { background: var(--surface); border-radius: 16px; padding: 2rem; border: 1px solid var(--border); margin-bottom: 2rem; }
     .btn { background: var(--primary); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
+    .btn-success { background: var(--success); }
     .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .hidden { display: none !important; }
     .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
@@ -23,7 +24,6 @@
     .chat-msg { background: white; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); max-width: 80%; }
     .chat-msg.self { align-self: flex-end; background: #dbeafe; }
     
-    /* Modal de Agendamento */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
     .modal { background: white; border-radius: 16px; padding: 1.5rem; max-width: 450px; width: 90%; }
     .schedule-item { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 0.75rem; border-radius: 8px; margin-top: 0.5rem; border: 1px solid var(--border); }
@@ -88,8 +88,36 @@
           const docKey = childSnap.key;
           const isOnline = docData.isOnline;
 
+          // Verifica se o usuário atual tem agendamento ativo com este médico
+          let hasActiveBooking = false;
+          let activeSlotText = "";
+
+          if (docData.schedules) {
+            Object.values(docData.schedules).forEach(slot => {
+              if (slot.booked && slot.patientUid === currentUser.uid && slot.status !== 'finished') {
+                hasActiveBooking = true;
+                activeSlotText = `${slot.date} às ${slot.time}`;
+              }
+            });
+          }
+
           const div = document.createElement('div');
           div.className = "doctor-card";
+          
+          let actionButtonHtml = "";
+          if (hasActiveBooking) {
+            actionButtonHtml = `
+              <div style="background:#dcfce7; color:#166534; font-weight:bold; padding:0.4rem; border-radius:6px; font-size:0.8rem; margin-bottom:0.5rem;">
+                Agendado para: ${activeSlotText}
+              </div>
+              <button class="btn btn-success" onclick="openDoctorChat('${docKey}', '${docData.name}')">💬 Entrar na Consulta Privada</button>
+            `;
+          } else {
+            actionButtonHtml = `
+              <button class="btn" style="background:#7c3aed;" onclick="openScheduleModal('${docKey}', '${docData.name}')">📅 Agendar Consulta</button>
+            `;
+          }
+
           div.innerHTML = `
             <img src="${docData.photo}" class="doctor-avatar">
             <div style="font-weight:700;">${docData.name}</div>
@@ -98,14 +126,13 @@
             <div style="font-size:0.8rem; font-weight:bold; color:${isOnline ? '#10b981' : '#94a3b8'}; margin-bottom:0.5rem;">
               ● ${isOnline ? 'ONLINE AGORA' : 'OFFLINE'}
             </div>
-            <button class="btn" style="background:#7c3aed;" onclick="openScheduleModal('${docKey}', '${docData.name}')">📅 Agendar Atendimento</button>
+            ${actionButtonHtml}
           `;
           container.appendChild(div);
         });
       });
     }
 
-    // Modal de escolha de horário
     window.openScheduleModal = (docKey, docName) => {
       document.getElementById('modal-doc-name').textContent = docName;
       document.getElementById('schedule-modal').classList.remove('hidden');
@@ -123,14 +150,13 @@
           const slot = childSnap.val();
           const slotKey = childSnap.key;
 
-          // Exibe apenas os horários que ainda NÃO foram reservados
-          if (!slot.booked) {
+          if (!slot.booked && slot.status !== 'finished') {
             hasSlots = true;
             const div = document.createElement('div');
             div.className = "schedule-item";
             div.innerHTML = `
               <div>📅 ${slot.date} às ⏰ ${slot.time}</div>
-              <button class="btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem; background:var(--success);" onclick="bookAndStartChat('${docKey}', '${slotKey}', '${docName}', '${slot.date}', '${slot.time}')">Agendar & Abrir Chat</button>
+              <button class="btn btn-success" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="bookAndStartChat('${docKey}', '${slotKey}', '${docName}', '${slot.date}', '${slot.time}')">Confirmar & Agendar</button>
             `;
             container.appendChild(div);
           }
@@ -144,24 +170,26 @@
 
     window.closeScheduleModal = () => document.getElementById('schedule-modal').classList.add('hidden');
 
-    // Reserva o horário e libera o chat privado
     window.bookAndStartChat = async (docKey, slotKey, docName, date, time) => {
       try {
-        // Marca o horário como reservado no banco
         await update(ref(rtdb, `doctors/${docKey}/schedules/${slotKey}`), {
           booked: true,
+          status: 'active',
           patientUid: currentUser.uid,
           patientName: currentUser.displayName || "Paciente"
         });
 
         closeScheduleModal();
-        alert(`Atendimento agendado para ${date} às ${time}! O chat privado foi liberado.`);
-
-        const privateRoomId = `private_${docKey}_${currentUser.uid}`;
-        openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
+        alert(`Atendimento agendado para ${date} às ${time}! O botão de Consulta Privada está liberado.`);
+        openDoctorChat(docKey, docName);
       } catch (err) {
         alert("Erro ao agendar: " + err.message);
       }
+    };
+
+    window.openDoctorChat = (docKey, docName) => {
+      const privateRoomId = `private_${docKey}_${currentUser.uid}`;
+      openChatRoom(privateRoomId, `Consulta Privada com Dr(a). ${docName}`);
     };
 
     window.openChatRoom = (roomId, roomName) => {
@@ -193,7 +221,7 @@
       onValue(ref(rtdb, `rooms/${roomId}/messages`), (snapshot) => {
         container.innerHTML = "";
         if (!snapshot.exists()) {
-          container.innerHTML = "<p style='text-align:center; color:#64748b;'>Envie uma mensagem...</p>";
+          container.innerHTML = "<p style='text-align:center; color:#64748b;'>Inicie a conversa...</p>";
           return;
         }
 
@@ -248,14 +276,14 @@
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
       <h2>Médicos Voluntários Cadastrados</h2>
-      <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Escolha um profissional e agende um horário para liberar a conversa privada:</p>
+      <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Agende um horário para liberar a sua consulta privada com o profissional:</p>
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
     <div id="view-chat" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h2 id="chat-title">Chat</h2>
-        <button onclick="backToDashboard()" class="btn" style="width:auto; padding:0.4rem 1rem; background:#64748b;">← Voltar</button>
+        <button onclick="backToDashboard()" class="btn" style="width:auto; padding:0.4rem 1rem; background:#64748b;">← Voltar para o Painel</button>
       </div>
       <div id="chat-messages" class="chat-box"></div>
       <form onsubmit="sendMessage(event)" style="display:flex; gap:0.5rem;">
@@ -265,14 +293,13 @@
     </div>
   </div>
 
-  <!-- Modal de Agendamento -->
   <div id="schedule-modal" class="modal-overlay hidden">
     <div class="modal">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h3 style="color:var(--primary);">Horários de <span id="modal-doc-name"></span></h3>
         <button onclick="closeScheduleModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
       </div>
-      <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">Selecione um horário disponível para liberar a conversa privada:</p>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">Selecione um horário disponível para liberar o botão de consulta privada:</p>
       <div id="modal-slots-list"></div>
     </div>
   </div>
