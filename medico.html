@@ -34,7 +34,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getDatabase, ref, set, update, onValue, push, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, set, update, onValue, push, remove, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
@@ -53,37 +53,27 @@
     let currentDoctor = null;
     let activeRoomId = null;
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         const emailKey = user.email.toLowerCase().replace(/[^a-zA-Z0-9]/g, "_");
         const docRef = ref(rtdb, 'doctors/' + emailKey);
 
-        onValue(docRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data) {
-            currentDoctor = { key: emailKey, ...data };
-          } else {
-            // Se ainda não tiver sido cadastrado via Admin, usa o nome do e-mail temporariamente
-            const name = user.displayName || user.email.split('@')[0];
-            currentDoctor = {
-              key: emailKey,
-              email: user.email,
-              name: name,
-              specialty: "Médico Voluntário",
-              crm: "Pendente",
-              isOnline: true,
-              photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff`
-            };
-            set(docRef, currentDoctor);
-          }
+        // Verifica se a conta FOI CADASTRADA NO ADMIN previamente
+        const snapshot = await get(docRef);
 
+        if (snapshot.exists()) {
+          currentDoctor = { key: emailKey, ...snapshot.val() };
           document.getElementById('view-auth').classList.add('hidden');
           document.getElementById('view-panel').classList.remove('hidden');
           document.getElementById('doc-welcome-name').textContent = currentDoctor.name;
           updateStatusUI(currentDoctor.isOnline);
           loadSchedules(emailKey);
           loadPatientMessages(emailKey);
-        });
+        } else {
+          // Se NÃO foi cadastrada no admin, nega o acesso e faz logout imediatamente
+          alert("Esta conta não possui cadastro como médico voluntário. Cadastre-a primeiro no Painel Admin.");
+          signOut(auth);
+        }
       } else {
         document.getElementById('view-auth').classList.remove('hidden');
         document.getElementById('view-panel').classList.add('hidden');
@@ -97,7 +87,7 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        alert("Erro no login: Verifique se o e-mail e a palavra-passe estão corretos.");
+        alert("Erro no login: E-mail ou senha incorretos.");
       }
     };
 
@@ -105,11 +95,13 @@
       if (!currentDoctor) return;
       const newStatus = !currentDoctor.isOnline;
       update(ref(rtdb, 'doctors/' + currentDoctor.key), { isOnline: newStatus });
+      currentDoctor.isOnline = newStatus;
+      updateStatusUI(newStatus);
     };
 
     function updateStatusUI(isOnline) {
       const dot = document.getElementById('status-dot');
-      const text = document.getElementById('status-text');
+      text = document.getElementById('status-text');
       const btn = document.getElementById('btn-toggle');
 
       if (isOnline) {
@@ -125,7 +117,7 @@
       }
     }
 
-    // Gerenciamento de Horários
+    // Horários
     window.addSchedule = (e) => {
       e.preventDefault();
       const date = document.getElementById('slot-date').value;
@@ -162,7 +154,7 @@
       remove(ref(rtdb, `doctors/${currentDoctor.key}/schedules/${key}`));
     };
 
-    // Monitora e exibe em tempo real os pacientes que enviaram mensagens
+    // Mensagens de Pacientes
     function loadPatientMessages(emailKey) {
       const container = document.getElementById('patient-list');
       onValue(ref(rtdb, 'rooms'), (snapshot) => {
@@ -176,7 +168,6 @@
         snapshot.forEach((roomSnap) => {
           const roomId = roomSnap.key;
 
-          // Filtra apenas salas direcionadas para este médico
           if (roomId.includes(emailKey)) {
             totalChats++;
             const messages = roomSnap.child('messages').val();
