@@ -182,22 +182,23 @@
     let currentRoomId = null;
     let currentActiveSlot = null;
 
-    setPersistence(auth, browserLocalPersistence);
-
-    // Captura o retorno do redirecionamento
-    getRedirectResult(auth).catch((err) => {
-      if (err.code !== 'auth/cancelled-popup-request') {
+    // Configura a persistência local antes de escutar a sessão
+    setPersistence(auth, browserLocalPersistence).then(() => {
+      // Processa o resultado do redirecionamento
+      getRedirectResult(auth).then((result) => {
+        if (result && result.user) {
+          currentUser = result.user;
+          setupUserView(result.user);
+        }
+      }).catch((err) => {
         console.error("Erro no retorno da autenticação:", err);
-      }
+      });
     });
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
-        document.getElementById('user-name').textContent = user.displayName || "Usuário";
-        document.getElementById('user-nav').classList.remove('hidden');
-        showScreen(document.getElementById('view-dashboard'));
-        loadDoctors();
+        setupUserView(user);
       } else {
         currentUser = null;
         document.getElementById('user-nav').classList.add('hidden');
@@ -205,14 +206,18 @@
       }
     });
 
-    // Login via Redirecionamento (Compatível com iPhone e iOS Safari)
+    function setupUserView(user) {
+      document.getElementById('user-name').textContent = user.displayName || "Usuário";
+      document.getElementById('user-nav').classList.remove('hidden');
+      showScreen(document.getElementById('view-dashboard'));
+      loadDoctors();
+    }
+
     window.loginWithGoogle = async () => {
       try {
         await signInWithRedirect(auth, googleProvider);
       } catch (err) {
-        if (err.code !== 'auth/cancelled-popup-request') {
-          alert("Erro ao autenticar: " + err.message);
-        }
+        alert("Erro ao iniciar login: " + err.message);
       }
     };
 
