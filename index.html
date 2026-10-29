@@ -75,7 +75,7 @@
 
         snapshot.forEach((childSnap) => {
           const docData = childSnap.val();
-          const docId = childSnap.key;
+          const docKey = childSnap.key;
           const isOnline = docData.isOnline;
 
           const div = document.createElement('div');
@@ -88,16 +88,22 @@
             <div style="font-size:0.8rem; font-weight:bold; color:${isOnline ? '#10b981' : '#94a3b8'}; margin-bottom:0.5rem;">
               ● ${isOnline ? 'ONLINE AGORA' : 'OFFLINE'}
             </div>
-            <button class="btn" style="padding:0.4rem; font-size:0.85rem;" onclick="openChatRoom('${docId}', '${docData.name}')">Iniciar Chat</button>
-            <button class="btn" style="padding:0.4rem; font-size:0.85rem; background:#7c3aed; margin-top:0.3rem;" onclick="showSchedules('${docId}', '${docData.name}')">📅 Horários</button>
+            <button class="btn" style="padding:0.4rem; font-size:0.85rem;" onclick="startDoctorChat('${docKey}', '${docData.name}')">Iniciar Dúvida Privada</button>
+            <button class="btn" style="padding:0.4rem; font-size:0.85rem; background:#7c3aed; margin-top:0.3rem;" onclick="showSchedules('${docKey}', '${docData.name}')">📅 Horários</button>
           `;
           container.appendChild(div);
         });
       });
     }
 
-    window.showSchedules = (docId, docName) => {
-      get(ref(rtdb, `doctors/${docId}/schedules`)).then((snapshot) => {
+    window.startDoctorChat = (docKey, docName) => {
+      // Cria um ID único combinando a chave do médico com o UID do paciente logado
+      const privateRoomId = `private_${docKey}_${currentUser.uid}`;
+      openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
+    };
+
+    window.showSchedules = (docKey, docName) => {
+      get(ref(rtdb, `doctors/${docKey}/schedules`)).then((snapshot) => {
         if (!snapshot.exists()) {
           alert(`Dr(a). ${docName} ainda não possui horários cadastrados.`);
           return;
