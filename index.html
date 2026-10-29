@@ -3,46 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rede Solidária - Acolhimento e Apoio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>TAB Acolhimento & Suporte Voluntário</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --success: #10b981; }
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #10b981;
+      --accent: #7c3aed;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg); color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; }
-    header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
-    .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
-    .card { background: var(--surface); border-radius: 16px; padding: 2rem; border: 1px solid var(--border); margin-bottom: 2rem; }
-    .btn { background: var(--primary); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
-    .btn-success { background: var(--success); }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Header Elegante com Sombra */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+    .brand { display: flex; align-items: center; gap: 0.6rem; }
+    .brand-icon {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+    .brand-title { font-size: 1.35rem; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+    .brand-title span { color: var(--primary); }
+    
+    .container { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; width: 100%; }
+    
+    /* Cards Modernos */
+    .card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      margin-bottom: 2rem;
+    }
+    
+    .btn {
+      background: var(--primary);
+      color: white;
+      padding: 0.9rem 1.6rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 99, 235, 0.2); }
+    .btn-success { background: var(--secondary); }
+    .btn-success:hover { background: #059669; box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2); }
     .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .hidden { display: none !important; }
-    .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .doctor-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; }
-    .doctor-avatar { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; }
-    .chat-box { border: 1px solid var(--border); border-radius: 8px; height: 320px; overflow-y: auto; padding: 1rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
-    .chat-msg { background: white; padding: 0.6rem 0.9rem; border-radius: 8px; border: 1px solid var(--border); max-width: 80%; line-height: 1.4; }
-    .chat-msg.self { align-self: flex-end; background: #dbeafe; }
     
+    /* Banner de Boas-Vindas e Acolhimento */
+    .hero-banner {
+      background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+      border: 1px solid #c7d2fe;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .hero-banner h2 { font-size: 1.4rem; font-weight: 800; color: #1e3a8a; margin-bottom: 0.4rem; }
+    .hero-banner p { color: #3730a3; font-size: 0.95rem; line-height: 1.5; }
+
+    /* Alerta de Responsabilidade Grande */
     .disclaimer-banner {
       background: #fef2f2;
       border: 2px solid #fca5a5;
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 1.25rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
       color: #991b1b;
       text-align: center;
     }
-    .disclaimer-banner h3 { font-size: 1.15rem; font-weight: 800; color: #b91c1c; margin-bottom: 0.4rem; text-transform: uppercase; }
-    .disclaimer-banner p { font-size: 0.95rem; color: #7f1d1d; line-height: 1.5; margin: 0; font-weight: 500; }
+    .disclaimer-banner h3 { font-size: 1.05rem; font-weight: 800; color: #b91c1c; margin-bottom: 0.4rem; text-transform: uppercase; }
+    .disclaimer-banner p { font-size: 0.9rem; color: #7f1d1d; line-height: 1.5; margin: 0; font-weight: 500; }
 
-    .room-notice { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; color: #1e40af; }
-    .room-notice h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; color: #1e3a8a; }
-    .room-notice p { font-size: 0.88rem; color: #1e40af; line-height: 1.4; margin: 0; }
+    /* Vitrine dos Médicos */
+    .doctor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.25rem; margin-top: 1rem; }
+    .doctor-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .doctor-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+    .doctor-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; border: 3px solid #eff6ff; }
+    
+    /* Caixa de Chat */
+    .chat-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      height: 340px;
+      overflow-y: auto;
+      padding: 1.25rem;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .chat-msg { background: white; padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid var(--border); max-width: 80%; line-height: 1.4; font-size: 0.92rem; }
+    .chat-msg.self { align-self: flex-end; background: #dbeafe; border-color: #bfdbfe; }
+    
+    .room-notice { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; color: #166534; }
+    .room-notice h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; color: #14532d; }
+    .room-notice p { font-size: 0.88rem; line-height: 1.4; margin: 0; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal { background: white; border-radius: 16px; padding: 1.5rem; max-width: 450px; width: 90%; }
-    .schedule-item { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 0.75rem; border-radius: 8px; margin-top: 0.5rem; border: 1px solid var(--border); }
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: white; border-radius: 20px; padding: 1.75rem; max-width: 460px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+    .schedule-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 0.85rem; border-radius: 10px; margin-top: 0.5rem; border: 1px solid var(--border); }
   </style>
 
   <script type="module">
@@ -67,7 +167,7 @@
 
     let currentUser = null;
     let currentRoomId = null;
-    let currentActiveSlot = null; // Armazena a data/hora agendada da consulta atual
+    let currentActiveSlot = null;
 
     setPersistence(auth, browserLocalPersistence);
 
@@ -86,7 +186,7 @@
     });
 
     window.loginWithGoogle = async () => {
-      try { await signInWithPopup(auth, googleProvider); } catch (err) { alert("Erro: " + err.message); }
+      try { await signInWithPopup(auth, googleProvider); } catch (err) { alert("Erro ao autenticar: " + err.message); }
     };
 
     window.logout = () => signOut(auth);
@@ -96,7 +196,7 @@
       onValue(ref(rtdb, 'doctors'), (snapshot) => {
         container.innerHTML = "";
         if (!snapshot.exists()) {
-          container.innerHTML = "<p style='grid-column: 1/-1; color:#64748b;'>Nenhum médico voluntário no momento.</p>";
+          container.innerHTML = "<p style='grid-column: 1/-1; color:var(--text-muted); text-align:center;'>Nenhum médico voluntário disponível no momento.</p>";
           return;
         }
 
@@ -123,23 +223,23 @@
           let actionButtonHtml = "";
           if (hasActiveBooking) {
             actionButtonHtml = `
-              <div style="background:#dcfce7; color:#166534; font-weight:bold; padding:0.4rem; border-radius:6px; font-size:0.8rem; margin-bottom:0.5rem;">
-                Agendado para: ${activeSlotData.date} às ${activeSlotData.time}
+              <div style="background:#dcfce7; color:#166534; font-weight:700; padding:0.5rem; border-radius:8px; font-size:0.82rem; margin-bottom:0.6rem;">
+                📅 Agendado: ${activeSlotData.date} às ${activeSlotData.time}
               </div>
-              <button class="btn btn-success" onclick="tryOpenDoctorChat('${docKey}', '${docData.name}', '${activeSlotData.date}', '${activeSlotData.time}')">💬 Entrar na Consulta Privada</button>
+              <button class="btn btn-success" onclick="tryOpenDoctorChat('${docKey}', '${docData.name}', '${activeSlotData.date}', '${activeSlotData.time}')">💬 Entrar na Consulta</button>
             `;
           } else {
             actionButtonHtml = `
-              <button class="btn" style="background:#7c3aed;" onclick="openScheduleModal('${docKey}', '${docData.name}')">📅 Agendar Consulta</button>
+              <button class="btn" style="background:var(--accent);" onclick="openScheduleModal('${docKey}', '${docData.name}')">📅 Agendar Consulta</button>
             `;
           }
 
           div.innerHTML = `
             <img src="${docData.photo}" class="doctor-avatar">
-            <div style="font-weight:700;">${docData.name}</div>
-            <div style="color:var(--primary); font-size:0.85rem;">${docData.specialty}</div>
-            <div style="font-size:0.8rem; color:#64748b; margin-bottom:0.5rem;">CRM: ${docData.crm}</div>
-            <div style="font-size:0.8rem; font-weight:bold; color:${isOnline ? '#10b981' : '#94a3b8'}; margin-bottom:0.5rem;">
+            <div style="font-weight:800; font-size:1.05rem;">${docData.name}</div>
+            <div style="color:var(--primary); font-size:0.88rem; font-weight:600; margin-bottom:0.2rem;">${docData.specialty}</div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.6rem;">CRM: ${docData.crm}</div>
+            <div style="font-size:0.8rem; font-weight:700; color:${isOnline ? 'var(--secondary)' : '#94a3b8'}; margin-bottom:0.8rem;">
               ● ${isOnline ? 'ONLINE AGORA' : 'OFFLINE'}
             </div>
             ${actionButtonHtml}
@@ -157,7 +257,7 @@
       onValue(ref(rtdb, `doctors/${docKey}/schedules`), (snapshot) => {
         container.innerHTML = "";
         if (!snapshot.exists()) {
-          container.innerHTML = "<p style='color:#64748b; font-size:0.9rem;'>Sem horários disponíveis no momento.</p>";
+          container.innerHTML = "<p style='color:var(--text-muted); font-size:0.9rem;'>Sem horários disponíveis no momento.</p>";
           return;
         }
 
@@ -171,15 +271,15 @@
             const div = document.createElement('div');
             div.className = "schedule-item";
             div.innerHTML = `
-              <div>📅 ${slot.date} às ⏰ ${slot.time}</div>
-              <button class="btn btn-success" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="bookAndStartChat('${docKey}', '${slotKey}', '${docName}', '${slot.date}', '${slot.time}')">Confirmar & Agendar</button>
+              <div style="font-weight:600;">📅 ${slot.date} às ⏰ ${slot.time}</div>
+              <button class="btn btn-success" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="bookAndStartChat('${docKey}', '${slotKey}', '${docName}', '${slot.date}', '${slot.time}')">Confirmar</button>
             `;
             container.appendChild(div);
           }
         });
 
         if (!hasSlots) {
-          container.innerHTML = "<p style='color:#64748b; font-size:0.9rem;'>Todos os horários deste médico já foram preenchidos.</p>";
+          container.innerHTML = "<p style='color:var(--text-muted); font-size:0.9rem;'>Todos os horários deste médico já foram preenchidos.</p>";
         }
       });
     };
@@ -196,14 +296,13 @@
         });
 
         closeScheduleModal();
-        alert(`Atendimento agendado para ${date} às ${time}!`);
+        alert(`Atendimento agendado com sucesso para ${date} às ${time}!`);
         tryOpenDoctorChat(docKey, docName, date, time);
       } catch (err) {
         alert("Erro ao agendar: " + err.message);
       }
     };
 
-    // Valida se o horário já chegou antes de abrir ou liberar as mensagens
     function isTimeReached(scheduledDate, scheduledTime) {
       const now = new Date();
       const [year, month, day] = scheduledDate.split('-');
@@ -226,7 +325,7 @@
       const noticeBox = document.getElementById('room-notice-box');
       if (isPublicRoom) {
         noticeBox.classList.remove('hidden');
-        currentActiveSlot = null; // Salas públicas não têm trava de horário
+        currentActiveSlot = null;
       } else {
         noticeBox.classList.add('hidden');
       }
@@ -243,9 +342,8 @@
       const text = input.value.trim();
       if (!text || !currentRoomId || !currentUser) return;
 
-      // Trava de envio: Se for consulta privada e o horário ainda não chegou
       if (currentActiveSlot && !isTimeReached(currentActiveSlot.date, currentActiveSlot.time)) {
-        alert(`⏰ Acesso bloqueado: Sua consulta está agendada para ${currentActiveSlot.date} às ${currentActiveSlot.time}.\nPor favor, aguarde o horário correto para enviar mensagens.`);
+        alert(`⏰ Trava de Horário: Sua consulta está agendada para ${currentActiveSlot.date} às ${currentActiveSlot.time}.\nPor favor, aguarde o horário exato para conversar.`);
         return;
       }
 
@@ -263,7 +361,7 @@
       onValue(ref(rtdb, `rooms/${roomId}/messages`), (snapshot) => {
         container.innerHTML = "";
         if (!snapshot.exists()) {
-          container.innerHTML = "<p style='text-align:center; color:#64748b;'>Inicie a conversa no horário agendado...</p>";
+          container.innerHTML = "<p style='text-align:center; color:var(--text-muted);'>Escreva algo no chat...</p>";
           return;
         }
 
@@ -275,9 +373,9 @@
           const div = document.createElement('div');
           div.className = `chat-msg ${isSelf ? 'self' : ''}`;
           div.innerHTML = `
-            <div style="font-size:0.75rem; font-weight:bold; color:var(--primary);">${msg.senderName}</div>
+            <div style="font-size:0.75rem; font-weight:700; color:var(--primary); margin-bottom:0.1rem;">${msg.senderName}</div>
             <div>${msg.text}</div>
-            <div style="font-size:0.65rem; color:#64748b; text-align:right;">${time}</div>
+            <div style="font-size:0.65rem; color:var(--text-muted); text-align:right; margin-top:0.2rem;">${time}</div>
           `;
           container.appendChild(div);
         });
@@ -293,66 +391,90 @@
 </head>
 <body>
 
+  <!-- Header da Marca -->
   <header>
-    <div class="logo">♥ Rede Solidária de Apoio</div>
+    <div class="brand">
+      <div class="brand-icon">TAB</div>
+      <div class="brand-title">TAB <span>Acolhe</span></div>
+    </div>
     <div id="user-nav" class="hidden" style="display:flex; align-items:center; gap:1rem;">
-      <span id="user-name" style="font-weight:600;"></span>
-      <button onclick="logout()" style="background:none; border:none; color:#64748b; cursor:pointer; font-weight:600;">Sair</button>
+      <span id="user-name" style="font-weight:700; font-size:0.95rem;"></span>
+      <button onclick="logout()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:600;">Sair</button>
     </div>
   </header>
 
   <div class="container">
-    <div id="view-auth" class="card" style="text-align:center;">
-      <h2>Acolhimento e Suporte da Comunidade</h2>
-      <p style="margin-bottom:1.5rem; color:#64748b;">Acesse com a sua conta Google para agendar atendimentos ou participar dos grupos.</p>
-      <button onclick="loginWithGoogle()" class="btn" style="max-width:280px; margin:0 auto;">Entrar com o Google</button>
+    
+    <!-- Autenticação do Usuário / Paciente -->
+    <div id="view-auth" class="card" style="text-align:center; padding: 3rem 2rem;">
+      <div class="brand-icon" style="width:60px; height:60px; font-size:1.5rem; margin:0 auto 1.5rem auto;">TAB</div>
+      <h2 style="font-size:1.8rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">Comunidade TAB Acolhe</h2>
+      <p style="margin-bottom:2rem; color:var(--text-muted); max-width:450px; margin-left:auto; margin-right:auto; line-height:1.5;">
+        Um espaço seguro e gratuito focado em suporte, acolhimento e trocas de experiências sobre o Transtorno Afetivo Bipolar.
+      </p>
+      <button onclick="loginWithGoogle()" class="btn" style="max-width:300px; margin:0 auto;">
+        Entrar com o Google
+      </button>
     </div>
 
+    <!-- Painel do Usuário -->
     <div id="view-dashboard" class="card hidden">
+      
+      <!-- Boas-vindas -->
+      <div class="hero-banner">
+        <h2>💙 Você não está sozinho(a)</h2>
+        <p>Participe dos grupos comunitários de escuta ou agende uma orientação voluntária individual com médicos parceiros.</p>
+      </div>
+
+      <!-- Alerta Legal Importante -->
       <div class="disclaimer-banner">
         <h3>⚠️ AVISO IMPORTANTE SOBRE OS ATENDIMENTOS</h3>
-        <p>Esta plataforma tem fins <strong>estritamente de acolhimento e suporte voluntário</strong>. Os médicos e psiquiatras voluntários <strong>NÃO emitem receitas, diagnósticos formais ou prescrições de medicamentos</strong> por este canal. Em casos de urgência ou emergência de saúde mental, busque atendimento imediato no CAPS ou UPA de sua região.</p>
+        <p>Esta plataforma possui fins <strong>estritamente de acolhimento e escuta voluntária</strong>. Os profissionais <strong>NÃO prescrevem medicamentos, nem emitem laudos ou diagnósticos médicos</strong> por esta plataforma. Em caso de crises severas ou emergências de saúde mental, entre em contato imediatamente com o SAMU (192) ou compareça à UPA/CAPS da sua região.</p>
       </div>
 
-      <h2>Salas Gerais de Apoio</h2>
-      <div class="btn-grid" style="margin-bottom: 1.5rem;">
-        <button class="btn" onclick="openChatRoom('geral', '💬 Sala Geral de Apoio & Depoimentos')">💬 Sala Geral de Depoimentos</button>
-        <button class="btn" style="background:#7c3aed;" onclick="openChatRoom('casais', '👩‍❤️‍👨 Espaço Esposos e Esposas')">👩‍❤️‍👨 Espaço Casais</button>
+      <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:0.75rem;">💬 Salas Comunitárias de Apoio</h2>
+      <div class="btn-grid" style="margin-bottom: 2rem;">
+        <button class="btn" onclick="openChatRoom('geral', '💬 Sala Geral de Depoimentos')">💬 Sala Geral & Depoimentos</button>
+        <button class="btn" style="background:var(--accent);" onclick="openChatRoom('casais', '👩‍❤️‍👨 Espaço Esposos e Família')">👩‍❤️‍👨 Espaço Família e Casais</button>
       </div>
 
-      <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
+      <hr style="border:0; border-top:1px solid var(--border); margin:2rem 0;">
 
-      <h2>Médicos Voluntários Cadastrados</h2>
-      <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Agende um horário para liberar a sua consulta privada com o profissional:</p>
+      <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:0.25rem;">🩺 Médicos Voluntários Cadastrados</h2>
+      <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.25rem;">Agende um horário disponível para liberar sua conversa privada:</p>
+      
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
+    <!-- Tela do Chat -->
     <div id="view-chat" class="card hidden">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <h2 id="chat-title">Chat</h2>
-        <button onclick="backToDashboard()" class="btn" style="width:auto; padding:0.4rem 1rem; background:#64748b;">← Voltar para o Painel</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <h2 id="chat-title" style="font-size:1.3rem; font-weight:800; color:var(--primary);">Chat</h2>
+        <button onclick="backToDashboard()" class="btn" style="width:auto; padding:0.5rem 1.2rem; background:var(--text-muted);">← Voltar ao Painel</button>
       </div>
 
       <div id="room-notice-box" class="room-notice">
         <h4>📢 Espaço Comunitário de Acolhimento & Depoimentos</h4>
-        <p>Esta sala é um espaço aberto para trocar experiências, relatar depoimentos de vida e interagir livremente com outros membros. <strong>Os médicos voluntários não participam destas salas públicas.</strong> Para suporte profissional individual, agende uma consulta privada na página principal.</p>
+        <p>Esta sala é um espaço aberto para troca de experiências e relatos de vida entre membros. <strong>Os médicos voluntários não participam das salas públicas.</strong> Para suporte individual, agende um horário na página principal.</p>
       </div>
 
       <div id="chat-messages" class="chat-box"></div>
-      <form onsubmit="sendMessage(event)" style="display:flex; gap:0.5rem;">
-        <input type="text" id="chat-input" placeholder="Escreva sua mensagem..." style="flex:1; padding:0.8rem; border:1px solid var(--border); border-radius:8px;" required>
+      
+      <form onsubmit="sendMessage(event)" style="display:flex; gap:0.6rem;">
+        <input type="text" id="chat-input" placeholder="Escreva sua mensagem com carinho e respeito..." style="flex:1; padding:0.85rem; border:1px solid var(--border); border-radius:12px; font-size:0.95rem;" required>
         <button type="submit" class="btn" style="width:auto;">Enviar</button>
       </form>
     </div>
   </div>
 
+  <!-- Modal de Agendamento -->
   <div id="schedule-modal" class="modal-overlay hidden">
     <div class="modal">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <h3 style="color:var(--primary);">Horários de <span id="modal-doc-name"></span></h3>
-        <button onclick="closeScheduleModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        <h3 style="color:var(--primary); font-weight:800;">Horários de <span id="modal-doc-name"></span></h3>
+        <button onclick="closeScheduleModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted);">✕</button>
       </div>
-      <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">Selecione um horário disponível para liberar o botão de consulta privada:</p>
+      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1rem;">Escolha um horário livre para liberar seu atendimento privado:</p>
       <div id="modal-slots-list"></div>
     </div>
   </div>
