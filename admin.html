@@ -3,24 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Admin</title>
+  <title>Painel Admin - Gestão de Médicos</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; }
+    :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --danger: #ef4444; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: #0f172a; padding: 2rem; display: flex; justify-content: center; }
-    .card { background: var(--surface); max-width: 600px; width: 100%; padding: 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-    h2 { margin-bottom: 1rem; color: var(--primary); }
+    .card { background: var(--surface); max-width: 650px; width: 100%; padding: 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    h2, h3 { color: var(--primary); margin-bottom: 1rem; }
     .form-group { margin-bottom: 1rem; text-align: left; }
     label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; }
     input { width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
     .btn { background: #10b981; color: white; border: none; padding: 0.9rem; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer; font-size: 1rem; margin-top: 1rem; }
+    .btn-danger { background: var(--danger); padding: 0.4rem 0.8rem; font-size: 0.85rem; width: auto; margin-top: 0; }
     .hidden { display: none !important; }
+    .doc-item { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid var(--border); }
   </style>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCOe0Zk1K01zb0lnDAetfLMoBGp2psgMCk",
@@ -42,6 +44,7 @@
       if (document.getElementById('admin-pass').value === ADMIN_PASSWORD) {
         document.getElementById('view-auth').classList.add('hidden');
         document.getElementById('view-form').classList.remove('hidden');
+        loadDoctorsList();
       } else {
         alert("Palavra-passe incorreta!");
       }
@@ -55,7 +58,6 @@
       const crm = document.getElementById('doc-crm').value.trim();
       const photo = document.getElementById('doc-photo').value.trim();
 
-      // Sanitiza o e-mail para usar como ID seguro no Realtime Database (remove pontos e caracteres especiais)
       const emailKey = email.replace(/[^a-zA-Z0-9]/g, "_");
 
       set(ref(rtdb, 'doctors/' + emailKey), {
@@ -68,8 +70,43 @@
         isOnline: true
       });
 
-      alert("Médico cadastrado com sucesso e vinculado ao e-mail!");
+      alert("Médico cadastrado com sucesso!");
       document.getElementById('doctor-form').reset();
+    };
+
+    function loadDoctorsList() {
+      const container = document.getElementById('doctors-list');
+      onValue(ref(rtdb, 'doctors'), (snapshot) => {
+        container.innerHTML = "";
+        if (!snapshot.exists()) {
+          container.innerHTML = "<p style='color:#64748b;'>Nenhum médico cadastrado no momento.</p>";
+          return;
+        }
+
+        snapshot.forEach((childSnap) => {
+          const docData = childSnap.val();
+          const emailKey = childSnap.key;
+
+          const div = document.createElement('div');
+          div.className = "doc-item";
+          div.innerHTML = `
+            <div>
+              <strong>${docData.name}</strong> (${docData.specialty})
+              <div style="font-size:0.8rem; color:#64748b;">CRM: ${docData.crm} | E-mail: ${docData.email}</div>
+            </div>
+            <button class="btn btn-danger" onclick="deleteDoctor('${emailKey}', '${docData.name}')">Excluir Médico</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    window.deleteDoctor = (emailKey, docName) => {
+      if (confirm(`Tem certeza de que deseja remover o(a) Dr(a). ${docName} do sistema?`)) {
+        remove(ref(rtdb, 'doctors/' + emailKey))
+          .then(() => alert("Médico removido com sucesso!"))
+          .catch((err) => alert("Erro ao remover: " + err.message));
+      }
     };
   </script>
 </head>
@@ -88,7 +125,7 @@
     </div>
 
     <div id="view-form" class="hidden">
-      <h2>Cadastrar Novo Médico</h2>
+      <h2>⚙️ Cadastrar Novo Médico</h2>
       <form id="doctor-form" onsubmit="addDoctor(event)">
         <div class="form-group">
           <label>E-mail do Médico (Igual ao criado no Auth) *</label>
@@ -112,6 +149,12 @@
         </div>
         <button type="submit" class="btn">Publicar Médico e Vincular</button>
       </form>
+
+      <hr style="border:0; border-top:1px solid var(--border); margin:2rem 0;">
+
+      <h3>🗑️ Médicos Cadastrados no Sistema</h3>
+      <p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">Clique no botão abaixo para excluir qualquer profissional da plataforma:</p>
+      <div id="doctors-list"></div>
     </div>
   </div>
 
