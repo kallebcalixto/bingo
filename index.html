@@ -26,7 +26,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
     import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -47,6 +47,9 @@
     let currentUser = null;
     let currentRoomId = null;
 
+    // Força a persistência local da sessão no navegador
+    setPersistence(auth, browserLocalPersistence);
+
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
@@ -61,10 +64,16 @@
       }
     });
 
-    window.loginWithGoogle = () => signInWithPopup(auth, googleProvider);
+    window.loginWithGoogle = async () => {
+      try {
+        await signInWithPopup(auth, googleProvider);
+      } catch (err) {
+        alert("Erro na autenticação: " + err.message);
+      }
+    };
+
     window.logout = () => signOut(auth);
 
-    // Carrega apenas os médicos que foram cadastrados no Admin
     function loadDoctors() {
       const container = document.getElementById('doctors-list');
       onValue(ref(rtdb, 'doctors'), (snapshot) => {
@@ -98,7 +107,6 @@
     }
 
     window.startDoctorChat = (docKey, docName) => {
-      // Sala privada vinculando a chave do médico ao UID do paciente logado
       const privateRoomId = `private_${docKey}_${currentUser.uid}`;
       openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
     };
