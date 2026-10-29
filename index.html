@@ -24,7 +24,6 @@
     .chat-msg { background: white; padding: 0.6rem 0.9rem; border-radius: 8px; border: 1px solid var(--border); max-width: 80%; line-height: 1.4; }
     .chat-msg.self { align-self: flex-end; background: #dbeafe; }
     
-    /* Alerta Geral em Destaque Grande */
     .disclaimer-banner {
       background: #fef2f2;
       border: 2px solid #fca5a5;
@@ -34,31 +33,10 @@
       color: #991b1b;
       text-align: center;
     }
-    .disclaimer-banner h3 {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #b91c1c;
-      margin-bottom: 0.4rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .disclaimer-banner p {
-      font-size: 0.95rem;
-      color: #7f1d1d;
-      line-height: 1.5;
-      margin: 0;
-      font-weight: 500;
-    }
+    .disclaimer-banner h3 { font-size: 1.15rem; font-weight: 800; color: #b91c1c; margin-bottom: 0.4rem; text-transform: uppercase; }
+    .disclaimer-banner p { font-size: 0.95rem; color: #7f1d1d; line-height: 1.5; margin: 0; font-weight: 500; }
 
-    /* Banner da Sala Geral */
-    .room-notice {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.25rem;
-      color: #1e40af;
-    }
+    .room-notice { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; color: #1e40af; }
     .room-notice h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; color: #1e3a8a; }
     .room-notice p { font-size: 0.88rem; color: #1e40af; line-height: 1.4; margin: 0; }
 
@@ -89,6 +67,7 @@
 
     let currentUser = null;
     let currentRoomId = null;
+    let currentActiveSlot = null; // Armazena a data/hora agendada da consulta atual
 
     setPersistence(auth, browserLocalPersistence);
 
@@ -127,13 +106,13 @@
           const isOnline = docData.isOnline;
 
           let hasActiveBooking = false;
-          let activeSlotText = "";
+          let activeSlotData = null;
 
           if (docData.schedules) {
             Object.values(docData.schedules).forEach(slot => {
               if (slot.booked && slot.patientUid === currentUser.uid && slot.status !== 'finished') {
                 hasActiveBooking = true;
-                activeSlotText = `${slot.date} às ${slot.time}`;
+                activeSlotData = slot;
               }
             });
           }
@@ -145,9 +124,9 @@
           if (hasActiveBooking) {
             actionButtonHtml = `
               <div style="background:#dcfce7; color:#166534; font-weight:bold; padding:0.4rem; border-radius:6px; font-size:0.8rem; margin-bottom:0.5rem;">
-                Agendado para: ${activeSlotText}
+                Agendado para: ${activeSlotData.date} às ${activeSlotData.time}
               </div>
-              <button class="btn btn-success" onclick="openDoctorChat('${docKey}', '${docData.name}')">💬 Entrar na Consulta Privada</button>
+              <button class="btn btn-success" onclick="tryOpenDoctorChat('${docKey}', '${docData.name}', '${activeSlotData.date}', '${activeSlotData.time}')">💬 Entrar na Consulta Privada</button>
             `;
           } else {
             actionButtonHtml = `
@@ -217,14 +196,25 @@
         });
 
         closeScheduleModal();
-        alert(`Atendimento agendado para ${date} às ${time}! O botão de Consulta Privada está liberado.`);
-        openDoctorChat(docKey, docName);
+        alert(`Atendimento agendado para ${date} às ${time}!`);
+        tryOpenDoctorChat(docKey, docName, date, time);
       } catch (err) {
         alert("Erro ao agendar: " + err.message);
       }
     };
 
-    window.openDoctorChat = (docKey, docName) => {
+    // Valida se o horário já chegou antes de abrir ou liberar as mensagens
+    function isTimeReached(scheduledDate, scheduledTime) {
+      const now = new Date();
+      const [year, month, day] = scheduledDate.split('-');
+      const [hours, minutes] = scheduledTime.split(':');
+      
+      const scheduledDateTime = new Date(year, month - 1, day, hours, minutes);
+      return now >= scheduledDateTime;
+    }
+
+    window.tryOpenDoctorChat = (docKey, docName, scheduledDate, scheduledTime) => {
+      currentActiveSlot = { date: scheduledDate, time: scheduledTime };
       const privateRoomId = `private_${docKey}_${currentUser.uid}`;
       openChatRoom(privateRoomId, `Consulta Privada com Dr(a). ${docName}`, false);
     };
@@ -236,6 +226,7 @@
       const noticeBox = document.getElementById('room-notice-box');
       if (isPublicRoom) {
         noticeBox.classList.remove('hidden');
+        currentActiveSlot = null; // Salas públicas não têm trava de horário
       } else {
         noticeBox.classList.add('hidden');
       }
@@ -252,6 +243,12 @@
       const text = input.value.trim();
       if (!text || !currentRoomId || !currentUser) return;
 
+      // Trava de envio: Se for consulta privada e o horário ainda não chegou
+      if (currentActiveSlot && !isTimeReached(currentActiveSlot.date, currentActiveSlot.time)) {
+        alert(`⏰ Acesso bloqueado: Sua consulta está agendada para ${currentActiveSlot.date} às ${currentActiveSlot.time}.\nPor favor, aguarde o horário correto para enviar mensagens.`);
+        return;
+      }
+
       input.value = "";
       push(ref(rtdb, `rooms/${currentRoomId}/messages`), {
         text: text,
@@ -266,7 +263,7 @@
       onValue(ref(rtdb, `rooms/${roomId}/messages`), (snapshot) => {
         container.innerHTML = "";
         if (!snapshot.exists()) {
-          container.innerHTML = "<p style='text-align:center; color:#64748b;'>Seja o primeiro a enviar uma mensagem...</p>";
+          container.innerHTML = "<p style='text-align:center; color:#64748b;'>Inicie a conversa no horário agendado...</p>";
           return;
         }
 
@@ -312,8 +309,6 @@
     </div>
 
     <div id="view-dashboard" class="card hidden">
-      
-      <!-- AVISO LEGAL E DE AJUDA VOLUNTÁRIA BEM GRANDE -->
       <div class="disclaimer-banner">
         <h3>⚠️ AVISO IMPORTANTE SOBRE OS ATENDIMENTOS</h3>
         <p>Esta plataforma tem fins <strong>estritamente de acolhimento e suporte voluntário</strong>. Os médicos e psiquiatras voluntários <strong>NÃO emitem receitas, diagnósticos formais ou prescrições de medicamentos</strong> por este canal. Em casos de urgência ou emergência de saúde mental, busque atendimento imediato no CAPS ou UPA de sua região.</p>
@@ -328,7 +323,7 @@
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
       <h2>Médicos Voluntários Cadastrados</h2>
-      <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Agende um horário para liberar a sua consulta privada de suporte com o profissional:</p>
+      <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem;">Agende um horário para liberar a sua consulta privada com o profissional:</p>
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
