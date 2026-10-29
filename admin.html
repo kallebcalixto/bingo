@@ -49,14 +49,18 @@
 
     window.addDoctor = (e) => {
       e.preventDefault();
+      const email = document.getElementById('doc-email').value.trim().toLowerCase();
       const name = document.getElementById('doc-name').value.trim();
       const specialty = document.getElementById('doc-spec').value.trim();
       const crm = document.getElementById('doc-crm').value.trim();
       const photo = document.getElementById('doc-photo').value.trim();
 
-      const newDocRef = push(ref(rtdb, 'doctors'));
-      set(newDocRef, {
-        uid: newDocRef.key,
+      // Sanitiza o e-mail para usar como ID seguro no Realtime Database (remove pontos e caracteres especiais)
+      const emailKey = email.replace(/[^a-zA-Z0-9]/g, "_");
+
+      set(ref(rtdb, 'doctors/' + emailKey), {
+        email: email,
+        emailKey: emailKey,
         name: name,
         specialty: specialty,
         crm: crm,
@@ -64,7 +68,7 @@
         isOnline: true
       });
 
-      alert("Médico publicado com sucesso!");
+      alert("Médico cadastrado com sucesso e vinculado ao e-mail!");
       document.getElementById('doctor-form').reset();
     };
   </script>
@@ -87,22 +91,26 @@
       <h2>Cadastrar Novo Médico</h2>
       <form id="doctor-form" onsubmit="addDoctor(event)">
         <div class="form-group">
-          <label>Nome Completo</label>
+          <label>E-mail do Médico (Igual ao criado no Auth) *</label>
+          <input type="email" id="doc-email" required placeholder="medico@gmail.com">
+        </div>
+        <div class="form-group">
+          <label>Nome Completo do Médico *</label>
           <input type="text" id="doc-name" required placeholder="Dr. Carlos Silva">
         </div>
         <div class="form-group">
-          <label>Especialidade</label>
+          <label>Especialidade *</label>
           <input type="text" id="doc-spec" required placeholder="Psiquiatria">
         </div>
         <div class="form-group">
-          <label>CRM</label>
+          <label>CRM *</label>
           <input type="text" id="doc-crm" required placeholder="12345/PR">
         </div>
         <div class="form-group">
           <label>URL da Foto (Opcional)</label>
           <input type="url" id="doc-photo" placeholder="https://...">
         </div>
-        <button type="submit" class="btn">Publicar Médico</button>
+        <button type="submit" class="btn">Publicar Médico e Vincular</button>
       </form>
     </div>
   </div>
