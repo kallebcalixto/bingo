@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rede Solidária - Acolhimento</title>
+  <title>Rede Solidária - Acolhimento e Apoio</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; }
@@ -50,7 +50,7 @@
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
-        document.getElementById('user-name').textContent = user.displayName;
+        document.getElementById('user-name').textContent = user.displayName || "Usuário";
         document.getElementById('user-nav').classList.remove('hidden');
         showScreen(document.getElementById('view-dashboard'));
         loadDoctors();
@@ -64,12 +64,13 @@
     window.loginWithGoogle = () => signInWithPopup(auth, googleProvider);
     window.logout = () => signOut(auth);
 
+    // Carrega a vitrine dos médicos cadastrados por você no admin.html
     function loadDoctors() {
       const container = document.getElementById('doctors-list');
       onValue(ref(rtdb, 'doctors'), (snapshot) => {
         container.innerHTML = "";
         if (!snapshot.exists()) {
-          container.innerHTML = "<p style='grid-column: 1/-1;'>Nenhum médico voluntário no momento.</p>";
+          container.innerHTML = "<p style='grid-column: 1/-1; color:#64748b;'>Nenhum médico voluntário disponível no momento.</p>";
           return;
         }
 
@@ -89,7 +90,7 @@
               ● ${isOnline ? 'ONLINE AGORA' : 'OFFLINE'}
             </div>
             <button class="btn" style="padding:0.4rem; font-size:0.85rem;" onclick="startDoctorChat('${docKey}', '${docData.name}')">Iniciar Dúvida Privada</button>
-            <button class="btn" style="padding:0.4rem; font-size:0.85rem; background:#7c3aed; margin-top:0.3rem;" onclick="showSchedules('${docKey}', '${docData.name}')">📅 Horários</button>
+            <button class="btn" style="padding:0.4rem; font-size:0.85rem; background:#7c3aed; margin-top:0.3rem;" onclick="showSchedules('${docKey}', '${docData.name}')">📅 Ver Horários</button>
           `;
           container.appendChild(div);
         });
@@ -97,7 +98,7 @@
     }
 
     window.startDoctorChat = (docKey, docName) => {
-      // Cria um ID único combinando a chave do médico com o UID do paciente logado
+      // Sala privada direcionada ao médico cadastrado no admin
       const privateRoomId = `private_${docKey}_${currentUser.uid}`;
       openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
     };
@@ -177,33 +178,36 @@
 <body>
 
   <header>
-    <div class="logo">♥ Rede Solidária</div>
+    <div class="logo">♥ Rede Solidária de Apoio</div>
     <div id="user-nav" class="hidden" style="display:flex; align-items:center; gap:1rem;">
       <span id="user-name" style="font-weight:600;"></span>
-      <button onclick="logout()" style="background:none; border:none; color:#64748b; cursor:pointer;">Sair</button>
+      <button onclick="logout()" style="background:none; border:none; color:#64748b; cursor:pointer; font-weight:600;">Sair</button>
     </div>
   </header>
 
   <div class="container">
+    <!-- Tela de Login do Paciente/Usuário -->
     <div id="view-auth" class="card" style="text-align:center;">
-      <h2>Rede de Apoio</h2>
-      <p style="margin-bottom:1.5rem; color:#64748b;">Acolhimento e orientação profissional.</p>
-      <button onclick="loginWithGoogle()" class="btn" style="max-width:250px; margin:0 auto;">Entrar com o Google</button>
+      <h2>Acolhimento e Suporte da Comunidade</h2>
+      <p style="margin-bottom:1.5rem; color:#64748b;">Acesse com a sua conta Google para participar dos grupos ou tirar dúvidas com profissionais.</p>
+      <button onclick="loginWithGoogle()" class="btn" style="max-width:280px; margin:0 auto;">Entrar com o Google</button>
     </div>
 
+    <!-- Painel do Paciente -->
     <div id="view-dashboard" class="card hidden">
       <h2>Salas Gerais de Apoio</h2>
       <div class="btn-grid" style="margin-bottom: 1.5rem;">
-        <button class="btn" onclick="openChatRoom('geral', '💬 Sala Geral')">💬 Sala Geral</button>
-        <button class="btn" style="background:#7c3aed;" onclick="openChatRoom('casais', '👩‍❤️‍👨 Espaço Casais')">👩‍❤️‍👨 Espaço Casais</button>
+        <button class="btn" onclick="openChatRoom('geral', '💬 Sala Geral de Apoio')">💬 Sala Geral</button>
+        <button class="btn" style="background:#7c3aed;" onclick="openChatRoom('casais', '👩‍❤️‍👨 Espaço Esposos e Esposas')">👩‍❤️‍👨 Espaço Casais</button>
       </div>
 
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
-      <h2>Médicos Voluntários</h2>
+      <h2>Médicos Voluntários Cadastrados</h2>
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
+    <!-- Tela do Chat -->
     <div id="view-chat" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h2 id="chat-title">Chat</h2>
