@@ -64,7 +64,7 @@
     window.loginWithGoogle = () => signInWithPopup(auth, googleProvider);
     window.logout = () => signOut(auth);
 
-    // Carrega a vitrine dos médicos cadastrados por você no admin.html
+    // Carrega apenas os médicos que foram cadastrados no Admin
     function loadDoctors() {
       const container = document.getElementById('doctors-list');
       onValue(ref(rtdb, 'doctors'), (snapshot) => {
@@ -98,7 +98,7 @@
     }
 
     window.startDoctorChat = (docKey, docName) => {
-      // Sala privada direcionada ao médico cadastrado no admin
+      // Sala privada vinculando a chave do médico ao UID do paciente logado
       const privateRoomId = `private_${docKey}_${currentUser.uid}`;
       openChatRoom(privateRoomId, `Dúvida Privada com Dr(a). ${docName}`);
     };
@@ -186,14 +186,12 @@
   </header>
 
   <div class="container">
-    <!-- Tela de Login do Paciente/Usuário -->
     <div id="view-auth" class="card" style="text-align:center;">
       <h2>Acolhimento e Suporte da Comunidade</h2>
       <p style="margin-bottom:1.5rem; color:#64748b;">Acesse com a sua conta Google para participar dos grupos ou tirar dúvidas com profissionais.</p>
       <button onclick="loginWithGoogle()" class="btn" style="max-width:280px; margin:0 auto;">Entrar com o Google</button>
     </div>
 
-    <!-- Painel do Paciente -->
     <div id="view-dashboard" class="card hidden">
       <h2>Salas Gerais de Apoio</h2>
       <div class="btn-grid" style="margin-bottom: 1.5rem;">
@@ -207,7 +205,6 @@
       <div id="doctors-list" class="doctor-grid"></div>
     </div>
 
-    <!-- Tela do Chat -->
     <div id="view-chat" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h2 id="chat-title">Chat</h2>
