@@ -9,8 +9,8 @@
     :root { --primary: #2563eb; --secondary: #10b981; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --danger: #ef4444; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: #0f172a; padding: 2rem; display: flex; justify-content: center; }
-    .card { background: var(--surface); max-width: 600px; width: 100%; padding: 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-    h2 { margin-bottom: 0.5rem; color: var(--primary); }
+    .card { background: var(--surface); max-width: 750px; width: 100%; padding: 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    h2, h3, h4 { color: var(--primary); margin-bottom: 0.5rem; }
     .form-group { margin-bottom: 1.2rem; text-align: left; }
     label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; }
     input { width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
@@ -18,10 +18,17 @@
     .btn-success { background: var(--secondary); }
     .btn-danger { background: var(--danger); }
     .hidden { display: none !important; }
+    
     .status-box { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; }
     .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 6px; }
     .online { background: var(--secondary); }
     .offline { background: #94a3b8; }
+
+    .chat-box { border: 1px solid var(--border); border-radius: 8px; height: 260px; overflow-y: auto; padding: 1rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .chat-msg { background: white; padding: 0.5rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); max-width: 80%; }
+    .chat-msg.self { align-self: flex-end; background: #dbeafe; }
+    .patient-card { padding: 0.8rem; background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .patient-card:hover { background: #e2e8f0; }
   </style>
 
   <script type="module">
@@ -44,22 +51,26 @@
     const rtdb = getDatabase(app);
 
     let currentDoctor = null;
+    let activeRoomId = null;
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        const docRef = ref(rtdb, 'doctors/' + user.uid);
-        
+        const emailKey = user.email.toLowerCase().replace(/[^a-zA-Z0-9]/g, "_");
+        const docRef = ref(rtdb, 'doctors/' + emailKey);
+
         onValue(docRef, (snapshot) => {
           const data = snapshot.val();
           if (data) {
-            currentDoctor = { uid: user.uid, ...data };
+            currentDoctor = { key: emailKey, ...data };
           } else {
+            // Se ainda não tiver sido cadastrado via Admin, usa o nome do e-mail temporariamente
             const name = user.displayName || user.email.split('@')[0];
             currentDoctor = {
-              uid: user.uid,
+              key: emailKey,
+              email: user.email,
               name: name,
-              specialty: "Médico / Voluntário",
-              crm: "CRM Cadastrado",
+              specialty: "Médico Voluntário",
+              crm: "Pendente",
               isOnline: true,
               photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff`
             };
@@ -70,7 +81,8 @@
           document.getElementById('view-panel').classList.remove('hidden');
           document.getElementById('doc-welcome-name').textContent = currentDoctor.name;
           updateStatusUI(currentDoctor.isOnline);
-          loadSchedules(user.uid);
+          loadSchedules(emailKey);
+          loadPatientMessages(emailKey);
         });
       } else {
         document.getElementById('view-auth').classList.remove('hidden');
@@ -85,14 +97,14 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        alert("Erro ao entrar: Verifique o e-mail e a palavra-passe.");
+        alert("Erro no login: Verifique se o e-mail e a palavra-passe estão corretos.");
       }
     };
 
     window.toggleStatus = () => {
       if (!currentDoctor) return;
       const newStatus = !currentDoctor.isOnline;
-      update(ref(rtdb, 'doctors/' + currentDoctor.uid), { isOnline: newStatus });
+      update(ref(rtdb, 'doctors/' + currentDoctor.key), { isOnline: newStatus });
     };
 
     function updateStatusUI(isOnline) {
@@ -102,35 +114,33 @@
 
       if (isOnline) {
         dot.className = "status-dot online";
-        text.textContent = "ONLINE (Visível no site)";
-        btn.textContent = "Ficar OFFLINE";
+        text.textContent = "ONLINE (Disponível no site)";
+        btn.textContent = "Mudar para OFFLINE";
         btn.className = "btn btn-danger";
       } else {
         dot.className = "status-dot offline";
         text.textContent = "OFFLINE (Inativo)";
-        btn.textContent = "Ficar ONLINE";
+        btn.textContent = "Mudar para ONLINE";
         btn.className = "btn btn-success";
       }
     }
 
+    // Gerenciamento de Horários
     window.addSchedule = (e) => {
       e.preventDefault();
       const date = document.getElementById('slot-date').value;
       const time = document.getElementById('slot-time').value;
 
-      const scheduleRef = ref(rtdb, `doctors/${currentDoctor.uid}/schedules`);
-      push(scheduleRef, { date, time });
+      push(ref(rtdb, `doctors/${currentDoctor.key}/schedules`), { date, time });
       document.getElementById('schedule-form').reset();
     };
 
-    function loadSchedules(uid) {
+    function loadSchedules(emailKey) {
       const container = document.getElementById('slots-list');
-      const scheduleRef = ref(rtdb, `doctors/${uid}/schedules`);
-
-      onValue(scheduleRef, (snapshot) => {
+      onValue(ref(rtdb, `doctors/${emailKey}/schedules`), (snapshot) => {
         container.innerHTML = "";
         if (!snapshot.exists()) {
-          container.innerHTML = "<p style='color:#64748b;'>Nenhum horário cadastrado.</p>";
+          container.innerHTML = "<p style='color:#64748b;'>Nenhum horário cadastrado ainda.</p>";
           return;
         }
 
@@ -138,7 +148,7 @@
           const item = childSnap.val();
           const key = childSnap.key;
           const div = document.createElement('div');
-          div.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:0.75rem; border-radius:8px; margin-top:0.5rem; border:1px solid #e2e8f0;";
+          div.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:0.6rem 0.8rem; border-radius:8px; margin-top:0.4rem; border:1px solid #e2e8f0;";
           div.innerHTML = `
             <div>📅 ${item.date} às ⏰ ${item.time}</div>
             <button onclick="deleteSchedule('${key}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Excluir</button>
@@ -149,7 +159,96 @@
     }
 
     window.deleteSchedule = (key) => {
-      remove(ref(rtdb, `doctors/${currentDoctor.uid}/schedules/${key}`));
+      remove(ref(rtdb, `doctors/${currentDoctor.key}/schedules/${key}`));
+    };
+
+    // Monitora e exibe em tempo real os pacientes que enviaram mensagens
+    function loadPatientMessages(emailKey) {
+      const container = document.getElementById('patient-list');
+      onValue(ref(rtdb, 'rooms'), (snapshot) => {
+        container.innerHTML = "";
+        if (!snapshot.exists()) {
+          container.innerHTML = "<p style='color:#64748b;'>Nenhuma mensagem de paciente recebida ainda.</p>";
+          return;
+        }
+
+        let totalChats = 0;
+        snapshot.forEach((roomSnap) => {
+          const roomId = roomSnap.key;
+
+          // Filtra apenas salas direcionadas para este médico
+          if (roomId.includes(emailKey)) {
+            totalChats++;
+            const messages = roomSnap.child('messages').val();
+            let lastMsg = "Nova dúvida recebida";
+            let patientName = "Paciente";
+
+            if (messages) {
+              const msgKeys = Object.keys(messages);
+              const lastObj = messages[msgKeys[msgKeys.length - 1]];
+              lastMsg = lastObj.text;
+              patientName = lastObj.senderName || "Paciente";
+            }
+
+            const div = document.createElement('div');
+            div.className = "patient-card";
+            div.innerHTML = `
+              <div>
+                <strong>💬 ${patientName}</strong>
+                <div style="font-size:0.85rem; color:#64748b; margin-top:0.2rem;">"${lastMsg}"</div>
+              </div>
+              <button class="btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="openPatientChat('${roomId}')">Responder</button>
+            `;
+            container.appendChild(div);
+          }
+        });
+
+        if (totalChats === 0) {
+          container.innerHTML = "<p style='color:#64748b;'>Nenhuma conversa iniciada por pacientes no momento.</p>";
+        }
+      });
+    }
+
+    window.openPatientChat = (roomId) => {
+      activeRoomId = roomId;
+      document.getElementById('chat-container').classList.remove('hidden');
+      
+      onValue(ref(rtdb, `rooms/${roomId}/messages`), (snapshot) => {
+        const container = document.getElementById('chat-messages');
+        container.innerHTML = "";
+        if (!snapshot.exists()) return;
+
+        snapshot.forEach((childSnap) => {
+          const msg = childSnap.val();
+          const isSelf = msg.senderId === currentDoctor.key;
+          const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          const div = document.createElement('div');
+          div.className = `chat-msg ${isSelf ? 'self' : ''}`;
+          div.innerHTML = `
+            <div style="font-size:0.75rem; font-weight:bold; color:var(--primary);">${msg.senderName}</div>
+            <div>${msg.text}</div>
+            <div style="font-size:0.65rem; color:#64748b; text-align:right;">${time}</div>
+          `;
+          container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+      });
+    };
+
+    window.replyMessage = (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text || !activeRoomId || !currentDoctor) return;
+
+      input.value = "";
+      push(ref(rtdb, `rooms/${activeRoomId}/messages`), {
+        text: text,
+        senderId: currentDoctor.key,
+        senderName: `Dr(a). ${currentDoctor.name}`,
+        timestamp: Date.now()
+      });
     };
 
     window.logout = () => signOut(auth);
@@ -160,24 +259,24 @@
   <div class="card">
     <div id="view-auth">
       <h2>Acesso do Médico</h2>
-      <p style="margin-bottom:1.5rem; color:#64748b;">Acesse com a conta criada no Firebase.</p>
+      <p style="margin-bottom:1.5rem; color:#64748b;">Insira o e-mail e a palavra-passe cadastrados no Firebase.</p>
       <form onsubmit="loginDoctor(event)">
         <div class="form-group">
-          <label>E-mail</label>
+          <label>E-mail Cadastrado</label>
           <input type="email" id="login-email" required placeholder="medico@email.com">
         </div>
         <div class="form-group">
           <label>Palavra-passe</label>
           <input type="password" id="login-password" required placeholder="******">
         </div>
-        <button type="submit" class="btn">Entrar</button>
+        <button type="submit" class="btn">Entrar na Área do Médico</button>
       </form>
     </div>
 
     <div id="view-panel" class="hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
         <h2>Olá, <span id="doc-welcome-name"></span></h2>
-        <button onclick="logout()" style="background:none; border:none; color:#64748b; cursor:pointer;">Sair</button>
+        <button onclick="logout()" style="background:none; border:none; color:#64748b; cursor:pointer; font-weight:600;">Sair</button>
       </div>
 
       <div class="status-box">
@@ -190,8 +289,8 @@
 
       <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
 
-      <h3>📅 Horários de Atendimento</h3>
-      <form id="schedule-form" onsubmit="addSchedule(event)" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1rem; margin-bottom:1.5rem;">
+      <h3>📅 Meus Horários Disponíveis</h3>
+      <form id="schedule-form" onsubmit="addSchedule(event)" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:0.5rem; margin-bottom:1rem;">
         <div>
           <label>Data</label>
           <input type="date" id="slot-date" required>
@@ -203,8 +302,22 @@
         <button type="submit" class="btn btn-success" style="grid-column: 1 / -1;">Adicionar Horário</button>
       </form>
 
-      <h4>Meus Horários Cadastrados:</h4>
-      <div id="slots-list" style="margin-top:0.5rem;"></div>
+      <div id="slots-list" style="margin-bottom:1.5rem;"></div>
+
+      <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
+
+      <h3>💬 Mensagens Recebidas dos Pacientes</h3>
+      <div id="patient-list" style="margin-top:0.5rem; margin-bottom:1rem;"></div>
+
+      <div id="chat-container" class="hidden">
+        <h4>Caixa de Resposta:</h4>
+        <div id="chat-messages" class="chat-box"></div>
+        <form onsubmit="replyMessage(event)" style="display:flex; gap:0.5rem;">
+          <input type="text" id="chat-input" placeholder="Digite sua resposta..." style="flex:1; padding:0.8rem; border:1px solid var(--border); border-radius:8px;" required>
+          <button type="submit" class="btn" style="width:auto;">Enviar Resposta</button>
+        </form>
+      </div>
+
     </div>
   </div>
 
