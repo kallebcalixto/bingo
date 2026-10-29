@@ -58,7 +58,6 @@
         const emailKey = user.email.toLowerCase().replace(/[^a-zA-Z0-9]/g, "_");
         const docRef = ref(rtdb, 'doctors/' + emailKey);
 
-        // Verifica se a conta FOI CADASTRADA NO ADMIN previamente
         const snapshot = await get(docRef);
 
         if (snapshot.exists()) {
@@ -70,8 +69,7 @@
           loadSchedules(emailKey);
           loadPatientMessages(emailKey);
         } else {
-          // Se NÃO foi cadastrada no admin, nega o acesso e faz logout imediatamente
-          alert("Esta conta não possui cadastro como médico voluntário. Cadastre-a primeiro no Painel Admin.");
+          alert("Acesso recusado: Este e-mail não possui cadastro no Painel Admin.");
           signOut(auth);
         }
       } else {
@@ -87,7 +85,7 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        alert("Erro no login: E-mail ou senha incorretos.");
+        alert("Erro no login: Verifique e-mail e palavra-passe.");
       }
     };
 
@@ -101,7 +99,7 @@
 
     function updateStatusUI(isOnline) {
       const dot = document.getElementById('status-dot');
-      text = document.getElementById('status-text');
+      const text = document.getElementById('status-text');
       const btn = document.getElementById('btn-toggle');
 
       if (isOnline) {
@@ -117,7 +115,6 @@
       }
     }
 
-    // Horários
     window.addSchedule = (e) => {
       e.preventDefault();
       const date = document.getElementById('slot-date').value;
@@ -154,7 +151,6 @@
       remove(ref(rtdb, `doctors/${currentDoctor.key}/schedules/${key}`));
     };
 
-    // Mensagens de Pacientes
     function loadPatientMessages(emailKey) {
       const container = document.getElementById('patient-list');
       onValue(ref(rtdb, 'rooms'), (snapshot) => {
@@ -214,14 +210,15 @@
           const isSelf = msg.senderId === currentDoctor.key;
           const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-          const div = document.createElement('div');
-          div.className = `chat-msg ${isSelf ? 'self' : ''}`;
-          div.innerHTML = `
+          const div = document.className = `chat-msg ${isSelf ? 'self' : ''}`;
+          const elem = document.createElement('div');
+          elem.className = `chat-msg ${isSelf ? 'self' : ''}`;
+          elem.innerHTML = `
             <div style="font-size:0.75rem; font-weight:bold; color:var(--primary);">${msg.senderName}</div>
             <div>${msg.text}</div>
             <div style="font-size:0.65rem; color:#64748b; text-align:right;">${time}</div>
           `;
-          container.appendChild(div);
+          container.appendChild(elem);
         });
         container.scrollTop = container.scrollHeight;
       });
