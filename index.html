@@ -129,7 +129,7 @@
     .chat-box {
       border: 1px solid var(--border);
       border-radius: 16px;
-      height: 520px;
+      height: 480px;
       overflow-y: scroll;
       padding: 1.5rem;
       background: #f8fafc;
@@ -162,6 +162,28 @@
       border-color: #bfdbfe;
     }
 
+    /* CAMPO DE DIGITAÇÃO ESTILO FACEBOOK/FÓRUM (TEXTAREA EXPANSÍVEL COM SCROLL) */
+    .chat-input-area {
+      width: 100%;
+      min-height: 80px;
+      max-height: 180px;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      resize: vertical; /* Permite ao usuário puxar a caixa se quiser */
+      overflow-y: auto; /* Barra de rolagem interna quando a mensagem for longa */
+      background: #ffffff;
+      color: var(--text);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .chat-input-area:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
     .btn-audio {
       background: #e2e8f0;
       border: none;
@@ -187,46 +209,17 @@
     .modal { background: white; border-radius: 20px; padding: 1.75rem; max-width: 460px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
     .schedule-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 0.85rem; border-radius: 10px; margin-top: 0.5rem; border: 1px solid var(--border); }
 
-    /* =========================================================
-       REGRAS EXCLUSIVAS PARA DISPOSITIVOS MÓVEIS (CELULARES)
-       ========================================================= */
+    /* REGRAS EXCLUSIVAS PARA CELULARES */
     @media (max-width: 768px) {
-      header {
-        padding: 0.8rem 1rem;
-      }
-      .brand-title {
-        font-size: 1.15rem;
-      }
-      .container {
-        margin: 0.5rem auto;
-        padding: 0 0.5rem; /* Expande o container quase até as bordas */
-      }
-      .card {
-        border-radius: 14px;
-        padding: 1rem 0.8rem; /* Reduz espaço desperdiçado nas laterais */
-        margin-bottom: 1rem;
-      }
-      .btn-grid {
-        grid-template-columns: 1fr; /* Botões empilhados confortavelmente */
-      }
-      .chat-box {
-        height: 580px; /* Mais alto no celular */
-        padding: 0.75rem 0.5rem;
-      }
-      .chat-msg {
-        max-width: 96% !important; /* Estilo Facebook: Ocupa toda a largura da tela do celular */
-        padding: 0.85rem;
-        font-size: 0.95rem;
-      }
-      .hero-banner {
-        padding: 1rem 0.75rem;
-      }
-      .hero-banner h2 {
-        font-size: 1.2rem;
-      }
-      .disclaimer-banner {
-        padding: 1rem 0.75rem;
-      }
+      header { padding: 0.8rem 1rem; }
+      .brand-title { font-size: 1.15rem; }
+      .container { margin: 0.5rem auto; padding: 0 0.5rem; }
+      .card { border-radius: 14px; padding: 1rem 0.8rem; margin-bottom: 1rem; }
+      .btn-grid { grid-template-columns: 1fr; }
+      .chat-box { height: 460px; padding: 0.75rem 0.5rem; }
+      .chat-msg { max-width: 96% !important; padding: 0.85rem; font-size: 0.95rem; }
+      .hero-banner, .disclaimer-banner { padding: 1rem 0.75rem; }
+      .chat-form-container { flex-direction: column; }
     }
   </style>
 
@@ -582,9 +575,10 @@
 
       <div id="chat-messages" class="chat-box"></div>
       
-      <form onsubmit="sendMessage(event)" style="display:flex; gap:0.6rem;">
-        <input type="text" id="chat-input" placeholder="Escreva seu relato ou mensagem para a comunidade..." style="flex:1; padding:0.9rem 1rem; border:1px solid var(--border); border-radius:12px; font-size:0.95rem;" required>
-        <button type="submit" class="btn" style="width:auto; padding:0.9rem 1.6rem;">Publicar</button>
+      <!-- FORMULÁRIO COM TEXTAREA ESTILO FACEBOOK -->
+      <form onsubmit="sendMessage(event)" class="chat-form-container" style="display:flex; gap:0.6rem; align-items:flex-end;">
+        <textarea id="chat-input" class="chat-input-area" placeholder="Escreva seu relato ou mensagem para a comunidade (rolagem interna ativada)..." required></textarea>
+        <button type="submit" class="btn" style="width:auto; padding:0.9rem 1.6rem; align-self:stretch;">Publicar</button>
       </form>
     </div>
   </div>
