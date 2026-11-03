@@ -162,7 +162,6 @@
       border-color: #bfdbfe;
     }
 
-    /* BARRA DE AÇÕES DA MENSAGEM */
     .msg-actions {
       display: flex;
       align-items: center;
@@ -185,7 +184,6 @@
     }
     .btn-reply:hover { text-decoration: underline; }
 
-    /* MENSAGENS REPOUSADAS/RESPOSTAS (ESTILO FACEBOOK) */
     .replies-container {
       margin-top: 0.75rem;
       margin-left: 1rem;
@@ -205,18 +203,18 @@
 
     .reply-form {
       display: flex;
+      flex-direction: column;
       gap: 0.5rem;
       margin-top: 0.6rem;
     }
     .reply-input {
-      flex: 1;
+      width: 100%;
       padding: 0.5rem 0.75rem;
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 0.85rem;
     }
 
-    /* CAMPO DE DIGITAÇÃO PRINCIPAL */
     .chat-input-area {
       width: 100%;
       min-height: 80px;
@@ -236,6 +234,23 @@
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .anonymous-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .anonymous-checkbox input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
     }
 
     .btn-audio {
@@ -262,7 +277,6 @@
     .modal { background: white; border-radius: 20px; padding: 1.75rem; max-width: 460px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
     .schedule-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 0.85rem; border-radius: 10px; margin-top: 0.5rem; border: 1px solid var(--border); }
 
-    /* MÓVEL */
     @media (max-width: 768px) {
       header { padding: 0.8rem 1rem; }
       .brand-title { font-size: 1.15rem; }
@@ -502,10 +516,11 @@
 
     window.backToDashboard = () => showScreen(document.getElementById('view-dashboard'));
 
-    // ENVIAR DEPOIMENTO PRINCIPAL
+    // ENVIAR DEPOIMENTO PRINCIPAL (COM SUPORTE A ANÔNIMO)
     window.sendMessage = (e) => {
       e.preventDefault();
       const input = document.getElementById('chat-input');
+      const isAnon = document.getElementById('check-anonymous').checked;
       const text = input.value.trim();
       if (!text || !currentRoomId || !currentUser) return;
 
@@ -514,33 +529,39 @@
         return;
       }
 
+      const displayName = isAnon ? "👤 Anônimo" : (currentUser.displayName || "Usuário");
+
       input.value = "";
+      document.getElementById('check-anonymous').checked = false; // reseta checkbox
+
       push(ref(rtdb, `rooms/${currentRoomId}/messages`), {
         text: text,
         senderId: currentUser.uid,
-        senderName: currentUser.displayName || "Usuário",
+        senderName: displayName,
         timestamp: Date.now()
       });
     };
 
-    // MOSTRAR/OCULTAR CAIXA DE RESPOSTA
     window.toggleReplyForm = (msgKey) => {
       const form = document.getElementById(`reply-form-${msgKey}`);
       if (form) form.classList.toggle('hidden');
     };
 
-    // ENVIAR UMA RESPOSTA PARA UMA MENSAGEM ESPECÍFICA
+    // ENVIAR RESPOSTA (COM SUPORTE A ANÔNIMO)
     window.sendReply = (e, msgKey) => {
       e.preventDefault();
       const input = document.getElementById(`reply-input-${msgKey}`);
+      const isAnon = document.getElementById(`reply-check-anon-${msgKey}`).checked;
       const text = input.value.trim();
       if (!text || !currentRoomId || !currentUser) return;
+
+      const displayName = isAnon ? "👤 Anônimo" : (currentUser.displayName || "Usuário");
 
       input.value = "";
       push(ref(rtdb, `rooms/${currentRoomId}/messages/${msgKey}/replies`), {
         text: text,
         senderId: currentUser.uid,
-        senderName: currentUser.displayName || "Usuário",
+        senderName: displayName,
         timestamp: Date.now()
       });
     };
@@ -563,7 +584,6 @@
           const safeText = msg.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
           const safeName = msg.senderName.replace(/'/g, "\\'");
 
-          // Monta as respostas se existirem
           let repliesHtml = "";
           if (msg.replies) {
             Object.values(msg.replies).forEach(reply => {
@@ -594,15 +614,18 @@
               <span style="font-size:0.68rem; color:var(--text-muted); margin-left:auto;">${time}</span>
             </div>
 
-            <!-- Caixa de respostas inseridas -->
             <div class="replies-container">
               ${repliesHtml}
             </div>
 
-            <!-- Form de resposta rápida (oculto por padrão) -->
             <form id="reply-form-${msgKey}" class="reply-form hidden" onsubmit="sendReply(event, '${msgKey}')">
-              <input type="text" id="reply-input-${msgKey}" class="reply-input" placeholder="Escreva uma resposta carinhosa..." required>
-              <button type="submit" class="btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.8rem;">Enviar</button>
+              <input type="text" id="reply-input-${msgKey}" class="reply-input" placeholder="Escreva uma resposta..." required>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label class="anonymous-checkbox" style="font-size:0.78rem;">
+                  <input type="checkbox" id="reply-check-anon-${msgKey}"> Responder como Anônimo
+                </label>
+                <button type="submit" class="btn" style="width:auto; padding:0.4rem 0.8rem; font-size:0.8rem;">Enviar</button>
+              </div>
             </form>
           `;
           container.appendChild(div);
@@ -682,9 +705,16 @@
 
       <div id="chat-messages" class="chat-box"></div>
       
-      <form onsubmit="sendMessage(event)" class="chat-form-container" style="display:flex; gap:0.6rem; align-items:flex-end;">
+      <!-- FORMULÁRIO COM SELEÇÃO DE ANÔNIMO -->
+      <form onsubmit="sendMessage(event)" style="display:flex; flex-direction:column; gap:0.6rem;">
         <textarea id="chat-input" class="chat-input-area" placeholder="Escreva seu relato ou mensagem para a comunidade..." required></textarea>
-        <button type="submit" class="btn" style="width:auto; padding:0.9rem 1.6rem; align-self:stretch;">Publicar</button>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="anonymous-checkbox">
+            <input type="checkbox" id="check-anonymous"> Postar como Anônimo
+          </label>
+          <button type="submit" class="btn" style="width:auto; padding:0.75rem 1.5rem;">Publicar</button>
+        </div>
       </form>
     </div>
   </div>
